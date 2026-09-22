@@ -1,0 +1,42 @@
+{
+  "name": "@unclaimedsol/wallet-sdk",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "description": "Analysis-only Unclaimed API preview client and offline reference integration",
+  "type": "module",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "openapi/analysis.yaml",
+    "README.md",
+    "docs",
+    "PRIOR_WORK.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "generate:check": "node scripts/generate.mjs --check",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "npm run generate:check && npm run typecheck && npm run build && node --import tsx --test test/*.test.ts",
+    "reference": "npm run build && node examples/reference/server.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.15",
+    "ajv": "8.18.0",
+    "ajv-formats": "3.0.1",
+    "openapi-typescript": "7.13.0",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "yaml": "2.8.2",
+    "esbuild": "0.27.7"
+  }
+}
