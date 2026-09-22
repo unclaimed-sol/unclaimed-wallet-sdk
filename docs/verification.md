@@ -4,7 +4,7 @@ September 22, 2026, Node 22.22.2:
 
 - Generated schema types and conditional validators are reproducible; copied
   schema SHA-256 matches the mounted platform contract exactly.
-- SDK typecheck/build and 32 offline SDK/reference tests pass: explicit headers
+- SDK typecheck/build and 33 offline SDK/reference tests pass: explicit headers
   and keys, same-key lost-response replay, typed refusals/retry metadata, opaque
   continuation, invalid/oversized bodies, partial/executable response rejection,
   BigInt alternative accounting, escaped display, loopback Host/Origin/CSRF gates,

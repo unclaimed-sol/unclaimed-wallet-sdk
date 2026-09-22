@@ -95,7 +95,10 @@ export function createUnclaimedClient(options: ClientOptions) {
     throw new UnclaimedInputError(
       "Use an HTTPS platform origin, or HTTP literal loopback for local tests.",
     );
-  if (!options.apiKey || !/^[\x21-\x7e]+$/.test(options.apiKey))
+  if (
+    typeof options.apiKey !== "string" ||
+    !/^[\x21-\x7e]+$/.test(options.apiKey)
+  )
     throw new UnclaimedInputError("A server-side API key is required.");
   const timeoutMs = options.timeoutMs ?? 35_000;
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 120_000)
@@ -107,7 +110,11 @@ export function createUnclaimedClient(options: ClientOptions) {
     input: CheckWalletRequest,
     request: RequestOptions,
   ): Promise<CheckWalletResponse> {
-    if (!request || !/^[!-~]{1,128}$/.test(request.idempotencyKey))
+    if (
+      !request ||
+      typeof request.idempotencyKey !== "string" ||
+      !/^[!-~]{1,128}$/.test(request.idempotencyKey)
+    )
       throw new UnclaimedInputError(
         "An explicit printable idempotency key of 1–128 characters is required.",
       );

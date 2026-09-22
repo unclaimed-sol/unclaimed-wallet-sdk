@@ -332,3 +332,16 @@ function typeAssertions(
   void [max, airdrops, session];
 }
 void typeAssertions;
+
+// JavaScript consumers must not bypass the explicit-key contract by coercion.
+test("rejects missing and non-string keys at runtime", async () => {
+  const sdk = client(async () => {
+    throw Error("must not send");
+  });
+  for (const idempotencyKey of [undefined, null, 123, {}, ["a"]]) {
+    await assert.rejects(
+      sdk.checkWallet(input, { idempotencyKey } as any),
+      UnclaimedInputError,
+    );
+  }
+});
