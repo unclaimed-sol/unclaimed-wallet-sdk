@@ -36,7 +36,7 @@ were inspected during the run.
 | Lose failure publication acknowledgement | `platform_unavailable` first; same-key retry recovered `platform_failure_recorded`; only then did the explicit new-attempt control use a new key. |
 | Expire snapshot before next page | `snapshot_expired`; loaded page retained and explicit restart offered. Even after editing wallet and page size, restart used original wallet/page size/safe mode, omitted cursor, generated a new key and cleared old pages. |
 | Remove fixture cursor before next page | `cursor_mismatch`, no retry or next-page control; previous results and form settings retained. A final two-call browser recheck verified that nonretryable errors have no misleading wait text. |
-| Inspect every state | Execution unavailable; no build/sign/record UI, wallet connection or fabricated execution. The server-boundary observer checked every browser response for the generated bearer, internal secret and platform origin; none were exposed. Browser requests had no Authorization header. |
+| Inspect every state | Execution unavailable; no build/sign/record UI, wallet connection or fabricated execution. The initial server-boundary observer checked captured response bodies for the generated bearer, internal secret and platform origin. Review later identified a synchronous-response coverage gap; see the follow-up below. Browser requests had no Authorization header. |
 
 The main mounted-platform browser sequence made 13 SDK calls: six complete
 metering rows, four failed rows and three replay rows. Failed/replayed rows had
@@ -71,3 +71,25 @@ loopback-only. Provider compatibility, durable hosting/access/retry storage,
 session/build/receipt/record work, npm release, licensing and public hosting
 remain separate increments or approvals. This evidence proves no live adoption,
 production readiness or recovered value.
+
+## Review follow-up
+
+Retry controls now stay disabled for the server-directed wait, then enable a
+deliberate click without submitting automatically. Without JavaScript, a
+read-only reload after waiting enables the control. In the in-app browser, an
+eight-second synthetic refusal showed disabled Retry, then enabled it without
+a reload; the fixture still had only one call until the deliberate click, which
+succeeded. SDK checks now pass 41 tests.
+
+Private harness review corrected an observer-ordering gap: synchronous responses
+were not reliably captured by the initial appended listener. The observer now
+installs before reference dispatch and inspects body, response headers (including
+direct writeHead headers), request headers and target without printing values.
+Ten focused harness regressions pass within 95 platform tests. A new real-browser
+first-page request passed the strengthened observer and confirmed early release
+no longer blocks enrichment. Reports omit raw targets and readiness omits URLs;
+credential comparison failures use fixed diagnostics. Unexpected EOF fails, and
+explicit quit is an operator stop, never an automated acceptance result.
+
+The earlier full Postgres/SDK acceptance counts are historical for this follow-up;
+no persistence, SDK wire contract, generated output or execution behavior changed.

@@ -18,7 +18,7 @@ for (const failed of [false, true]) {
       document: {
         addEventListener: (name:string,handler:typeof handlers[string])=>{handlers[name]=handler;},
         querySelector: (selector:string)=>selector==="main" ? main : status,
-        querySelectorAll: (selector:string)=>selector.includes(":disabled") ? (button.disabled ? [] : [button]) : (button.dataset.loadingDisabled ? [button] : []),
+        querySelectorAll: (selector:string)=>selector === "[data-retry-delay]" ? [] : selector.includes(":disabled") ? (button.disabled ? [] : [button]) : (button.dataset.loadingDisabled ? [button] : []),
       },
       window: {location:{reload:()=>{reloads++;}},addEventListener:(name:string,handler:typeof handlers[string])=>{handlers[name]=handler;}},
       FormData: class { constructor() {return new Map([["csrf","fixture"],["action","retry"]]);}},
@@ -48,3 +48,21 @@ for (const failed of [false, true]) {
     assert.equal(status.textContent,"");
   });
 }
+
+test("retry wait enables a deliberate click without sending a request", async () => {
+  let timer!: () => void;
+  let delay = 0;
+  const button = {disabled:true,dataset:{retryDelay:"3000"}};
+  const source = await readFile(new URL("../examples/reference/loading.js",import.meta.url),"utf8");
+  runInNewContext(source, {
+    document:{querySelectorAll:()=>[button],querySelector:()=>({}),addEventListener() {}},
+    window:{addEventListener() {}},
+    setTimeout:(callback:()=>void,ms:number)=>{timer=callback;delay=ms;},
+    fetch:()=>{throw Error("No automatic request allowed");},
+  });
+  assert.equal(delay,3000);
+  assert.equal(button.disabled,true);
+  timer();
+  assert.equal(button.disabled,false);
+  assert.equal(button.dataset.retryDelay,undefined);
+});

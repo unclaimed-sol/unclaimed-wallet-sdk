@@ -221,3 +221,15 @@ for (const code of ["snapshot_expired", "cursor_mismatch"] as const) {
     }
   });
 }
+
+test("retry controls wait without disabling restart or other actions", () => {
+  for (const retryAction of ["same_key", "new_key"]) {
+    const waiting = render({csrf:"fixture", error:{message:"fixture",retryAction},retryAt:Date.now()+60_000},"fixture");
+    assert.match(waiting, /button disabled data-retry-delay="\d+">/);
+    const ready = render({csrf:"fixture",error:{message:"fixture",retryAction},retryAt:0},"fixture");
+    assert.ok(!ready.includes("data-retry-delay"));
+  }
+  const expired = render({csrf:"fixture",error:{message:"fixture",retryAction:"restart_snapshot"},retryAt:Date.now()+60_000},"fixture");
+  assert.ok(!expired.includes("data-retry-delay"));
+  assert.ok(expired.includes("Restart expired snapshot"));
+});

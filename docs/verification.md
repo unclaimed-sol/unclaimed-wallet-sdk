@@ -41,3 +41,8 @@ acknowledgements after actual database commits, for both failure and success.
 Same-key replay recovers the committed result with one admission and no duplicate
 invoiceability. Cross-repository HTTP scenarios exercise the SDK's distinction
 and deliberate new attempts. No request-ID heuristic or automatic retries added.
+
+Review follow-up: 41 SDK tests and 95 platform tests pass; see the browser record
+for retry-delay interaction evidence and corrected harness observation coverage.
+The earlier 92 Postgres and 17 SDK acceptance checks were not repeated for these
+UI/test-harness-only review changes.

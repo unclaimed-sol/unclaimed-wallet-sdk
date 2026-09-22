@@ -1,5 +1,14 @@
 // Progressive same-origin form submission; CSRF and keys remain server-owned.
 let submitting = false;
+// The server remains authoritative. Waiting only enables a deliberate click;
+// no timer submits or changes an idempotency key.
+for (const button of document.querySelectorAll("[data-retry-delay]")) {
+  setTimeout(() => {
+    delete button.dataset.retryDelay;
+    if (!submitting) button.disabled = false;
+    else button.dataset.loadingDisabled = "true";
+  }, Number(button.dataset.retryDelay));
+}
 const status = document.querySelector('[role="status"]');
 document.addEventListener("submit", async (event) => {
   event.preventDefault();
