@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 d14112ba5c6229bece9b582ef0114ac3bbbb5d1a6e5fc96105cb3cf38e61d867). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 893a77f377cc875875d5cd5efae7d5d638f1cece4f054f931d1c77abe445a188). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -283,7 +283,7 @@ export interface components {
             requestId: string;
             error: {
                 /** @enum {string} */
-                code: "unauthorized" | "key_revoked" | "mode_not_permitted" | "mode_not_available" | "idempotency_key_reused" | "request_in_progress" | "snapshot_expired" | "request_too_large" | "invalid_wallet" | "cursor_mismatch" | "airdrops_not_available" | "wallet_too_large" | "module_limit_exceeded" | "rate_limited" | "internal_error" | "invalid_idempotency_key" | "platform_unavailable" | "invalid_request" | "incomplete" | "upstream_unavailable" | "deadline_exceeded";
+                code: "unauthorized" | "key_revoked" | "mode_not_permitted" | "mode_not_available" | "idempotency_key_reused" | "request_in_progress" | "snapshot_expired" | "request_too_large" | "invalid_wallet" | "cursor_mismatch" | "airdrops_not_available" | "wallet_too_large" | "module_limit_exceeded" | "rate_limited" | "internal_error" | "invalid_idempotency_key" | "platform_unavailable" | "platform_failure_recorded" | "invalid_request" | "incomplete" | "upstream_unavailable" | "deadline_exceeded";
                 message: string;
                 retryable: boolean;
                 /** @description Never contains upstream URLs, credentials, raw RPC messages, or provider names. */
@@ -454,9 +454,13 @@ export interface operations {
             /**
              * @description `incomplete` (Preview: a required lookup on this page failed after
              *     bounded retry; retry with the same cursor), `upstream_unavailable`,
-             *     or `platform_unavailable` (retryable persistence/service failure).
-             *     Retry platform failures with the same Idempotency-Key and request:
+             *     `platform_unavailable` (persistence outcome uncertain), or
+             *     `platform_failure_recorded` (confirmed stored terminal failure).
+             *     Retry `platform_unavailable` with the same Idempotency-Key and request:
              *     an uncertain commit may already have a durable response to replay.
+             *     For `platform_failure_recorded`, a deliberate new attempt uses a new
+             *     key and the same cursor/settings; the old key replays the failure.
+             *     Respect Retry-After when supplied. Never infer durability from requestId.
              *     The error response itself does not publish an invoiceable page.
              */
             503: {

@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "d14112ba5c6229bece9b582ef0114ac3bbbb5d1a6e5fc96105cb3cf38e61d867",
+    "893a77f377cc875875d5cd5efae7d5d638f1cece4f054f931d1c77abe445a188",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {
@@ -130,6 +130,7 @@ for (const [code, status, retryable, action] of [
   ["idempotency_key_reused", 409, false, "none"],
   ["request_in_progress", 409, true, "same_key"],
   ["platform_unavailable", 503, true, "same_key"],
+  ["platform_failure_recorded", 503, true, "new_key"],
   ["snapshot_expired", 410, false, "restart_snapshot"],
   ["cursor_mismatch", 422, false, "none"],
   ["incomplete", 503, true, "new_key"],

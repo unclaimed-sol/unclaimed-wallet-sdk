@@ -98,12 +98,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "503":
-          description: |
+          description: >
             `incomplete` (Preview: a required lookup on this page failed after
+
             bounded retry; retry with the same cursor), `upstream_unavailable`,
-            or `platform_unavailable` (retryable persistence/service failure).
-            Retry platform failures with the same Idempotency-Key and request:
+
+            `platform_unavailable` (persistence outcome uncertain), or
+
+            `platform_failure_recorded` (confirmed stored terminal failure).
+
+            Retry `platform_unavailable` with the same Idempotency-Key and
+            request:
+
             an uncertain commit may already have a durable response to replay.
+
+            For `platform_failure_recorded`, a deliberate new attempt uses a new
+
+            key and the same cursor/settings; the old key replays the failure.
+
+            Respect Retry-After when supplied. Never infer durability from
+            requestId.
+
             The error response itself does not publish an invoiceable page.
           content:
             application/json:
@@ -974,6 +989,7 @@ components:
                 - internal_error
                 - invalid_idempotency_key
                 - platform_unavailable
+                - platform_failure_recorded
                 - invalid_request
                 - incomplete
                 - upstream_unavailable

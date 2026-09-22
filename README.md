@@ -58,6 +58,7 @@ may change. `nextWalletPage` carries settings and the opaque cursor forward.
 |---|---|
 | Transport failure, timeout, aborted call, unreadable/malformed response | Outcome unknown: unchanged request and **same key** |
 | `request_in_progress`, `platform_unavailable` | **Same key**; a durable response may already exist |
+| `platform_failure_recorded` (confirmed stored failure) | **New key** for a deliberate attempt; the old key replays the failure |
 | Parsed retryable terminal failure, e.g. `incomplete`, `deadline_exceeded`, rate limit | Wait for `retryAfterMs`, then **new key**, preserving the cursor |
 | `snapshot_expired` | Start again without a cursor and with a new key |
 | Other nonretryable refusals | Correct the cause; do not blindly retry |
@@ -67,7 +68,9 @@ may change. `nextWalletPage` carries settings and the opaque cursor forward.
 `UnclaimedProtocolError` mark unknown outcomes. `UnclaimedInputError` identifies
 local configuration/key errors. With no Retry-After, use a bounded backoff;
 the reference waits at least one second and requires a button click per retry.
-Do not turn an unknown outcome into a new attempt with a new key.
+Do not turn an unknown outcome into a new attempt with a new key. Never infer
+publication durability from a repeated `requestId`. The reference uses the
+explicit recorded-failure code to offer a new attempt.
 
 ## Estimates and protections
 

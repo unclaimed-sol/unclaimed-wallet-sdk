@@ -92,6 +92,7 @@ test("loopback reference: server-only key, CSRF, host/origin gates and explicit 
 
 for (const [code, sameKey] of [
   ["platform_unavailable", true],
+  ["platform_failure_recorded", false],
   ["incomplete", false],
 ] as const) {
   test(`reference ${code}: explicit retry preserves page and uses correct key`, async () => {

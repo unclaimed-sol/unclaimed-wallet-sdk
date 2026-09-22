@@ -4,14 +4,14 @@ September 22, 2026, Node 22.22.2:
 
 - Generated schema types and conditional validators are reproducible; copied
   schema SHA-256 matches the mounted platform contract exactly.
-- SDK typecheck/build and 33 offline SDK/reference tests pass: explicit headers
+- SDK typecheck/build and 35 offline SDK/reference tests pass: explicit headers
   and keys, same-key lost-response replay, typed refusals/retry metadata, opaque
   continuation, invalid/oversized bodies, partial/executable response rejection,
   BigInt alternative accounting, escaped display, loopback Host/Origin/CSRF gates,
   server-only keys and explicit same/new-key retries through the reference.
-- Against platform remote main `03b8a4168d3bc3974dbf10997b1ec339df4c0d14` with a
-  test-only acceptance runner: 85 existing offline tests and 89 isolated
-  Postgres 17 tests pass. Fourteen cross-repository SDK scenarios pass through
+- Against platform review commit `9f046e4700ae5df083385c97518850eb6c029dbc` with a
+  test-only acceptance runner: 85 existing offline tests and 92 isolated
+  Postgres 17 tests pass. Seventeen cross-repository SDK scenarios pass through
   the actual mounted Express route and engine HTTP client, with synthetic
   loopback engine responses. Database publication/replay and metering are real
   local SQL. Success, lost responses, exact replay, key conflicts, max refusal,
@@ -32,3 +32,11 @@ No live-provider compatibility, deployment, payment collection, transaction
 execution, external adoption or verified recovery is claimed. Public release
 and live pilot gates remain separate. The reference is an in-memory local tool,
 not a production hosting/security/retry-storage template.
+
+Recorded-failure regression coverage includes new-key guidance and the reference
+retry button for `platform_failure_recorded`, retaining all same-key checks for
+`platform_unavailable`. Real Postgres tests inject rollback and lost COMMIT
+acknowledgements after actual database commits, for both failure and success.
+Same-key replay recovers the committed result with one admission and no duplicate
+invoiceability. Cross-repository HTTP scenarios exercise the SDK's distinction
+and deliberate new attempts. No request-ID heuristic or automatic retries added.

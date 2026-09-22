@@ -12,7 +12,8 @@ methods exist. Null sessions and executionSupported=false must remain enforced.
 
 API keys belong only on the server. Pagination and retries are explicit caller
 actions. Preserve keys for unknown outcomes, request_in_progress and
-platform_unavailable. Other parsed retryable terminal failures require a new key
+platform_unavailable. Confirmed platform_failure_recorded permits a new key;
+never infer durability from repeated request IDs. Other parsed retryable terminal failures require a new key
 for a deliberate attempt. Preserve cursor/settings. Do not add automatic retries.
 Never sum page summaries; deduplicate item IDs and alternative groups across
 one snapshot, giving cleanup precedence over excess recovery. Keep amounts exact.

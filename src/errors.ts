@@ -16,6 +16,8 @@ export class UnclaimedApiError extends Error {
     this.code = envelope.error.code;
     this.requestId = envelope.requestId;
     this.retryable = envelope.error.retryable;
+    // Only the distinct confirmed terminal code permits a new attempt.
+    // requestId is identity, never proof of publication durability.
     this.retryAction =
       this.code === "snapshot_expired"
         ? "restart_snapshot"
