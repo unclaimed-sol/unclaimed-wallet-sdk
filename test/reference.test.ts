@@ -32,6 +32,7 @@ test("loopback reference: server-only key, CSRF, host/origin gates and explicit 
   const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   try {
     const start = await fetch(origin);
+    assert.equal(start.headers.get("referrer-policy"), "same-origin");
     let html = await start.text();
     const cookie = start.headers.get("set-cookie")!.split(";")[0]!;
     const csrf = html.match(/name="csrf" value="([a-f0-9]+)"/)![1]!;
@@ -47,6 +48,11 @@ test("loopback reference: server-only key, CSRF, host/origin gates and explicit 
         redirect: "manual",
       });
     assert.equal((await post({ csrf: "wrong", action: "start" })).status, 403);
+    assert.equal((await post({ csrf, action: "start" }, { origin: "null" })).status, 403);
+    const script = await fetch(origin + "/loading.js");
+    assert.equal(script.status, 200);
+    assert.match(script.headers.get("content-type")!, /javascript/);
+    assert.ok(start.headers.get("content-security-policy")!.includes("connect-src 'self'"));
     assert.equal(
       (
         await post(
@@ -148,6 +154,11 @@ for (const [code, sameKey] of [
       assert.ok(!html.includes(privateKey));
       assert.ok(html.includes(code));
       assert.equal(keys.length, 1);
+      if (sameKey) {
+        assert.equal((await post({ action: "start", wallet: fixtureWallet, limit: "2" })).status, 409);
+        assert.equal(keys.length, 1, "an unresolved attempt cannot be discarded");
+        assert.match(html, /button disabled>Start new analysis/);
+      }
       assert.ok(!html.includes("Request next page"));
       assert.equal((await post({ action: "retry" })).status, 303);
       assert.equal(keys[0] === keys[1], sameKey);
@@ -160,6 +171,53 @@ for (const [code, sameKey] of [
     } finally {
       server.closeAllConnections();
       await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
+}
+
+for (const code of ["snapshot_expired", "cursor_mismatch"] as const) {
+  test(`reference continuation ${code}: retains settings and only offers a valid action`, async () => {
+    const calls: { key: string; input: Record<string, unknown> }[] = [];
+    const server = createReferenceServer({ mode: "platform", clientOptions: {
+      baseUrl: "http://127.0.0.1", apiKey: "offline-fixture-only",
+      fetch: async (_url: unknown, init: RequestInit = {}) => {
+        calls.push({ key: new Headers(init.headers).get("idempotency-key")!, input: JSON.parse(String(init.body)) });
+        return calls.length === 2 ? Response.json({ requestId: "fixture-error", error: {code, message: "fixture", retryable: false} }, { status: code === "snapshot_expired" ? 410 : 422 }) : Response.json(fixturePages()[0]);
+      },
+    }});
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    try {
+      const first = await fetch(origin), html = await first.text();
+      const cookie = first.headers.get("set-cookie")!.split(";")[0]!;
+      const csrf = html.match(/name="csrf" value="([a-f0-9]+)"/)![1]!;
+      const post = (data: Record<string, string>) => fetch(origin, {method:"POST", headers:{cookie, origin, "content-type":"application/x-www-form-urlencoded"}, body:new URLSearchParams({csrf,...data}), redirect:"manual"});
+      await post({action:"start",wallet:fixtureWallet,limit:"1"});
+      await post({action:"next"});
+      const error = await (await fetch(origin,{headers:{cookie}})).text();
+      assert.ok(error.includes(code));
+      assert.ok(error.includes("Estimates across 1 loaded page"));
+      assert.ok(!error.includes("Request next page"));
+      assert.ok(!error.includes("seconds before retrying"));
+      assert.equal((await post({action:"retry"})).status,400);
+      if (code === "snapshot_expired") {
+        assert.ok(error.includes("Restart expired snapshot with the same settings"));
+        assert.equal((await post({action:"restart",wallet:"11111111111111111111111111111112",limit:"2"})).status,303);
+        assert.deepEqual(calls[2]!.input,calls[0]!.input);
+        assert.notEqual(calls[2]!.key,calls[1]!.key);
+        assert.ok(calls[1]!.input.cursor);
+        assert.equal(calls[2]!.input.cursor,undefined);
+        const restarted = await (await fetch(origin,{headers:{cookie}})).text();
+        assert.ok(restarted.includes("Estimates across 1 loaded page"));
+        assert.ok(!restarted.includes("Estimates across 2 loaded pages"));
+      } else {
+        assert.equal((await post({action:"restart"})).status,400);
+        assert.equal(calls.length,2);
+      }
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>(resolve=>server.close(()=>resolve()));
     }
   });
 }

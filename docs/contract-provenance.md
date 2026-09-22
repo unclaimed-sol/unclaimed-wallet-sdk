@@ -4,6 +4,8 @@ The sole input is the platform's `openapi/analysis.yaml`, copied byte-for-byte
 from platform review commit `9f046e4700ae5df083385c97518850eb6c029dbc`, verified
 September 22, 2026. Source SHA-256:
 `893a77f377cc875875d5cd5efae7d5d638f1cece4f054f931d1c77abe445a188`.
+Reverified byte-for-byte against merged platform main
+`0b53e082c06456549e99b09fffeb35899f36a2e4` on September 22, 2026.
 The platform repository is private; this public copy is the integrator contract.
 
 `openapi-typescript` 7.13.0 generates types with optional defaulted request

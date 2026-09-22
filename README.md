@@ -68,6 +68,9 @@ may change. `nextWalletPage` carries settings and the opaque cursor forward.
 `UnclaimedProtocolError` mark unknown outcomes. `UnclaimedInputError` identifies
 local configuration/key errors. With no Retry-After, use a bounded backoff;
 the reference waits at least one second and requires a button click per retry.
+An unresolved attempt blocks starting over until same-key reconciliation. Expired
+snapshots have an explicit restart that preserves the original settings and drops
+only the cursor.
 Do not turn an unknown outcome into a new attempt with a new key. Never infer
 publication durability from a repeated `requestId`. The reference uses the
 explicit recorded-failure code to offer a new attempt.
@@ -94,6 +97,9 @@ provider calls or deployment. The example binds literal loopback, enforces
 Host/Origin and form CSRF checks, and limits itself to ten one-hour in-memory
 sessions. A restart loses retained request keys: do not reuse this example as a
 production retry store. Browser HTML contains no bearer or internal API URL.
+Forms display a loading status and block duplicate submissions. A browser-side
+response loss requires a read-only reload to inspect retained server state, never
+an automatic retry. Native form submission still works without JavaScript.
 There is no public proxy route. Public hosting requires separate authentication,
 rate controls, durable retry/session storage and rollout approval.
 
