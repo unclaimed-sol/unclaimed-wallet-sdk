@@ -11,7 +11,7 @@ properties preserved. AJV 8.18.0 generates conditional runtime validators;
 esbuild bundles their helpers. Generator dependencies and transitive versions
 are locked. Generated comments include the schema digest. The generated
 validator includes MIT-licensed AJV and fast-deep-equal helpers; their notices
-are retained in the output and [third-party notices](../THIRD_PARTY_NOTICES.md).
+are retained in [third-party notices](../THIRD_PARTY_NOTICES.md).
 
 Only `POST /api/v1/check-wallet` is mounted. Accepted typed requests are safe
 mode with airdrops disabled. Every opportunity has `executionSupported: false`,
