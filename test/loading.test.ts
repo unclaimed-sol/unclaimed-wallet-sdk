@@ -55,7 +55,7 @@ test("retry wait enables a deliberate click without sending a request", async ()
   const button = {disabled:true,dataset:{retryDelay:"3000"}};
   const source = await readFile(new URL("../examples/reference/loading.js",import.meta.url),"utf8");
   runInNewContext(source, {
-    document:{querySelectorAll:()=>[button],querySelector:()=>({}),addEventListener() {}},
+    document:{querySelectorAll:(selector:string)=>selector === "[data-retry-delay]" ? [button] : [],querySelector:()=>({}),addEventListener() {}},
     window:{addEventListener() {}},
     setTimeout:(callback:()=>void,ms:number)=>{timer=callback;delay=ms;},
     fetch:()=>{throw Error("No automatic request allowed");},
