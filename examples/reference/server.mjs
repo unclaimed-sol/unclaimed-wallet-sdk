@@ -20,13 +20,15 @@ export function createReferenceServer({
     throw Error("Invalid reference mode.");
   const sessions = new Map();
   const css = readFile(new URL("./style.css", import.meta.url));
+  const loading = readFile(new URL("./loading.js", import.meta.url));
   const handle = async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader("Referrer-Policy", "no-referrer");
+    // Keep same-origin form POST Origin intact while suppressing external referrers.
+    res.setHeader("Referrer-Policy", "same-origin");
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'none'; style-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      "default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
     );
     // Loopback-only listener plus exact Host/Origin checks; no public scan proxy.
     const expected = `127.0.0.1:${req.socket.localPort}`;
@@ -35,6 +37,11 @@ export function createReferenceServer({
       (req.headers.origin && req.headers.origin !== `http://${expected}`)
     ) {
       res.writeHead(403).end("Forbidden.");
+      return;
+    }
+    if (req.url === "/loading.js" && req.method === "GET") {
+      res.setHeader("Content-Type", "text/javascript");
+      res.end(await loading);
       return;
     }
     if (req.url === "/style.css" && req.method === "GET") {
@@ -112,6 +119,10 @@ export function createReferenceServer({
         }
         const action = form.get("action");
         if (action === "start") {
+          if (state.error?.retryAction === "same_key") {
+            res.writeHead(409).end("Reconcile the pending attempt before starting again.");
+            return;
+          }
           const wallet = form.get("wallet"),
             limit = Number(form.get("limit"));
           if (
@@ -138,6 +149,13 @@ export function createReferenceServer({
             input: { wallet, limit, mode: "safe" },
             idempotencyKey: randomUUID(),
           };
+        } else if (action === "restart" && state.pending && state.error?.retryAction === "restart_snapshot") {
+          const { cursor: _cursor, ...input } = state.pending.input;
+          state.pending = { input, idempotencyKey: randomUUID() };
+          state.wallet = input.wallet;
+          state.limit = input.limit;
+          state.pages = [];
+          state.error = null;
         } else if (action === "next" && !state.error && state.pages.length) {
           const input = nextWalletPage(state.pending.input, state.pages.at(-1));
           if (!input) {
