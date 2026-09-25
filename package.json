@@ -2,7 +2,7 @@
   "name": "@unclaimedsol/wallet-sdk",
   "version": "0.1.0-preview.1",
   "private": true,
-  "description": "Analysis-only Unclaimed API preview client and offline reference integration",
+  "description": "Unclaimed API execution preview client and offline reference integration",
   "type": "module",
   "engines": {
     "node": ">=22 <25"

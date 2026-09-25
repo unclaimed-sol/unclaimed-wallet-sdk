@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "893a77f377cc875875d5cd5efae7d5d638f1cece4f054f931d1c77abe445a188",
+    "0e18daa15475b07b16f28962b15406b9e94e0bc37640c6d6e32bdef7f21eaf4f",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {
@@ -98,7 +98,7 @@ test("pagination keeps settings opaque, permits limit changes and stops explicit
   const second = await sdk.checkWallet(next, { idempotencyKey: "page-2" });
   assert.equal(nextWalletPage(next, second), null);
   assert.equal(second.data.executionSession, null);
-  assert.deepEqual(Object.keys(sdk), ["checkWallet"]);
+  assert.deepEqual(Object.keys(sdk), ["checkWallet", "build", "recordExecution"]);
 });
 test("lost response preserves exact caller key and body for explicit replay", async () => {
   const fetch = fixtureFetch();
@@ -325,9 +325,9 @@ function typeAssertions(
   sdk.build({});
   // @ts-expect-error no recording
   sdk.recordExecution({});
-  const session: null = response.data.executionSession;
+  const session = response.data.executionSession;
   for (const item of response.data.items) {
-    const supported: false = item.opportunity.executionSupported;
+    const supported: boolean = item.opportunity.executionSupported;
     void supported;
   }
   void [max, airdrops, session];

@@ -1,9 +1,9 @@
-# Unclaimed Wallet SDK · analysis preview
+# Unclaimed Wallet SDK · execution preview
 
-A TypeScript client and local reference integration for the mounted Unclaimed
-API safe-mode analysis contract. **Execution is unavailable.** There are no
-build, sign, submit, record, mint-analysis or payment methods. This is source for
-review, not an npm release, deployed demo or live-provider readiness claim.
+A TypeScript client for safe-mode analysis and explicitly enabled execution.
+Build and receipt recording are supported; signing and submission belong to the
+integrating application. This is source for review, not an npm release, deployed
+demo or live-provider readiness claim.
 The package remains `private: true` to prevent accidental npm publication.
 
 Requires Node 22–24. From this checkout:
@@ -116,3 +116,49 @@ platform also has a separate real-Postgres SDK acceptance runner; see
 [verification](docs/verification.md). No test here uses live providers.
 
 See the [prior-work disclosure](PRIOR_WORK.md) and [publication checklist](docs/publication.md).
+
+## Execution preview quick start (not yet deployed)
+
+The operator must supply a verified HTTPS origin and an approved demo key. Keep
+the key on your server. Execution is disabled by default and requires the engine's
+separately authorized signature-purpose cutover. Local tests do not establish an
+external demo or permission to sign/broadcast real transactions.
+
+```ts
+const page = await client.checkWallet({ wallet }, { idempotencyKey: analysisKey });
+const session = page.data.executionSession;
+if (!session) throw new Error('Execution is unavailable');
+// Explicit user selection after showing protection, fee and burn-consent text.
+const built = await client.build({ wallet, items: selected.map(item => ({
+  id: item.id, action: item.opportunity.action,
+})) }, session.token, { idempotencyKey: buildKey });
+// Display authoritativeOpportunity, plan costs/funding, and refreshed consent.
+// Your wallet integration reviews and signs the exact returned message.
+// Persist receipt, transaction ID, signed bytes, signature and exact height
+// BEFORE your submission adapter submits anything.
+const record = await client.recordExecution({ wallet, transactions: submitted },
+  built.executionReceipt!.token);
+```
+
+`examples/reference/execution.mjs` provides application orchestration with
+explicit `review`, `sign`, `submit` and `save` callbacks. The SDK itself does none
+of those operations. The private acceptance runner supplies a local test key and
+a synthetic submission ledger. Never use that deterministic test key with funds.
+A production adapter must validate the wallet-signed message and signatures,
+check the exact block-height expiry and reconcile every prior submission before
+any resend. Retain signed-work evidence on errors; a transport failure does not
+prove that a transaction failed. SDK methods never retry automatically.
+
+Build retries preserve the original idempotency key and body when the outcome is
+unknown. A confirmed `platform_failure_recorded` permits a deliberate new-key
+attempt. The same session item cannot silently create a second published build.
+Record retries use the same receipt and reported signatures (`same_receipt` on
+retryable API refusals). A 202 is pending reconciliation. `abandoned_unknown`
+is unverified expiry, carries no recovered value and never proves chain absence.
+A later valid signature can supersede it. No API cashback or partner credit is
+created. Empty-account execution retains the disclosed risk of burning later
+deposits; excess withdrawal preserves current tokens and the reviewed fee policy.
+
+An external milestone requires someone outside this development session to use
+the demo key and these instructions against the deployed origin successfully.
+No such milestone has been claimed.

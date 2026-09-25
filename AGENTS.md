@@ -1,14 +1,16 @@
 # Wallet SDK repository instructions
 
-This public repository holds the analysis-only SDK, approved mounted OpenAPI
+This public repository holds the analysis and opt-in execution SDK, approved mounted OpenAPI
 copy, generated types and local reference integration. Never copy private engine
 or platform implementation, secrets, provider URLs or customer records here.
 
 `openapi/analysis.yaml` is the sole generation input. Provenance is in
 `docs/contract-provenance.md`. Run `npm run generate` after an approved schema
 update and commit types and runtime validators together. Do not hand-edit them.
-Do not generate from the future preview draft. No build, sign, submit or record
-methods exist. Null sessions and executionSupported=false must remain enforced.
+Do not generate from the future preview draft. Build and record methods are generated from the implemented mounted contract.
+The SDK never signs or submits. Execution requires a real session and explicit
+item availability; disabled deployments still return null sessions and false
+executionSupported. Preserve exact bytes/heights in the integration journal.
 
 API keys belong only on the server. Pagination and retries are explicit caller
 actions. Preserve keys for unknown outcomes, request_in_progress and

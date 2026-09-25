@@ -9,11 +9,7 @@ const standalone = require("ajv/dist/standalone").default;
 const root = new URL("../", import.meta.url);
 const source = await readFile(new URL("openapi/analysis.yaml", root), "utf8");
 const spec = parse(source);
-if (
-  Object.keys(spec.paths).join() !== "/check-wallet" ||
-  Object.keys(spec.paths["/check-wallet"]).join() !== "post"
-)
-  throw Error("Only mounted analysis is supported.");
+if (Object.keys(spec.paths).sort().join() !== '/build,/check-wallet,/executions/record') throw Error('Unexpected mounted operations.');
 const hash = createHash("sha256").update(source).digest("hex");
 const banner = `// Generated from openapi/analysis.yaml (SHA-256 ${hash}). Do not edit.\n`;
 const ajv = new Ajv({
@@ -27,6 +23,7 @@ for (const name of [
   "CheckWalletRequest",
   "CheckWalletResponse",
   "ErrorEnvelope",
+  "BuildRequest", "BuildResponse", "RecordRequest", "RecordResponse",
 ]) {
   ajv.addSchema({
     $id: name,
@@ -39,6 +36,8 @@ const validators = standalone(ajv, {
   validateRequest: "CheckWalletRequest",
   validateResponse: "CheckWalletResponse",
   validateError: "ErrorEnvelope",
+  validateBuild: "BuildResponse",
+  validateRecord: "RecordResponse",
 });
 // Bundle AJV's generated helpers; the SDK has no runtime dependencies.
 const { build } = await import("esbuild");

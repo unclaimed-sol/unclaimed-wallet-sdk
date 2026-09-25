@@ -1,5 +1,12 @@
 # Mounted contract provenance
 
+Current local execution schema SHA-256:
+`0e18daa15475b07b16f28962b15406b9e94e0bc37640c6d6e32bdef7f21eaf4f`.
+It includes opt-in check-wallet sessions, build and execution recording.
+The platform revision is recorded in the private authoritative handoff.
+
+## Historical analysis contract (September 22)
+
 The sole input is the platform's `openapi/analysis.yaml`, copied byte-for-byte
 from platform review commit `9f046e4700ae5df083385c97518850eb6c029dbc`, verified
 September 22, 2026. Source SHA-256:
@@ -27,3 +34,13 @@ persistence (`platform_unavailable`, same key). Request IDs are not durability
 signals. Pre-upgrade stored responses are not rewritten: coordinate platform/SDK
 rollout and allow the old 60-minute retention window to expire before relying on
 the distinction for old attempts. No deployment is implied by this update.
+
+## September 26 execution increment (local only)
+
+The mounted platform generator now includes the implemented opt-in build and
+record routes. It remains the sole SDK generation input, never the unmounted
+future draft. The current OpenAPI file and generated banners pin its exact hash.
+Earlier analysis-only revisions and their W3 evidence remain historical evidence,
+not execution acceptance. Public SDK pushes/package publication are not authorized
+for this increment. The private platform owns real Postgres and synthetic engine
+acceptance; no private implementation source is copied into this repository.
