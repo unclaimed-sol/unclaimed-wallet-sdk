@@ -48,6 +48,8 @@ const bundled = await build({
     sourcefile: "validate.js",
     loader: "js",
   },
+  // Keep dependency module names stable even when node_modules is a local symlink.
+  preserveSymlinks: true,
   bundle: true,
   write: false,
   format: "esm",

@@ -27,3 +27,7 @@ history for confidential material. Keep the package private until an npm release
 is separately authorized. No providers, production, deployment or transactions
 are needed for local tests. The private platform owns real-Postgres acceptance;
 record cross-repository work in its single authoritative engine handoff.
+
+SDK generation preserves dependency symlinks when bundling standalone validators,
+so emitted helper labels are independent of the dependency-cache checkout path.
+Keep generation freshness passing in ordinary and symlinked local installs.
