@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "0e18daa15475b07b16f28962b15406b9e94e0bc37640c6d6e32bdef7f21eaf4f",
+    "d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {
@@ -345,4 +345,24 @@ test("rejects missing and non-string keys at runtime", async () => {
       UnclaimedInputError,
     );
   }
+});
+
+test("build refuses missing and non-string keys before any transport", async () => {
+  let calls = 0;
+  const sdk = client(async () => { calls++; throw Error("must not send"); });
+  const body = { wallet: fixtureWallet, items: [{ id: "fixture", action: "burn_and_close" as const }] };
+  for (const request of [undefined, {}, ...[undefined, null, 123, {}, ["a"], "", "has space"].map(idempotencyKey => ({ idempotencyKey }))]) {
+    await assert.rejects(sdk.build(body, "fixture-session", request as any), UnclaimedInputError);
+  }
+  assert.equal(calls, 0);
+});
+
+test("mounted execution refusals remain actionable API errors", async () => {
+  const body = { wallet: fixtureWallet, items: [{ id: "fixture", action: "burn_and_close" as const }] };
+  for (const [code, status] of [["execution_in_progress", 409], ["invalid_request", 422], ["request_too_large", 413]] as const) {
+    const sdk = client(async () => refusal(code, false, status));
+    await assert.rejects(sdk.build(body, "fixture-session", { idempotencyKey: "fixture-build" }), (error: unknown) => error instanceof UnclaimedApiError && error.code === code && error.retryAction === "none");
+  }
+  const sdk = client(async () => refusal("invalid_signature", false, 422));
+  await assert.rejects(sdk.recordExecution({ wallet: fixtureWallet, transactions: [] }, "fixture-receipt"), (error: unknown) => error instanceof UnclaimedApiError && error.code === "invalid_signature" && error.retryAction === "none");
 });

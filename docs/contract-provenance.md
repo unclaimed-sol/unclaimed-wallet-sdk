@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`0e18daa15475b07b16f28962b15406b9e94e0bc37640c6d6e32bdef7f21eaf4f`.
+`d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 

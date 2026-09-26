@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 0e18daa15475b07b16f28962b15406b9e94e0bc37640c6d6e32bdef7f21eaf4f). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -31,8 +31,8 @@ export interface paths {
         put?: never;
         /**
          * Build unsigned transactions for selected items
-         * @description v1 section 15.3. Authenticated by the execution session from
-         *     `check-wallet`, not the API key. Preview narrowing: only
+         * @description v1 section 15.3. Authenticated by the API key and execution session from
+         *     `check-wallet`. Preview narrowing: only
          *     `burn_and_close` and `recover_excess_lamports`; `stage` is never
          *     accepted; no partner claim token; no sale receipt. Every item is
          *     freshly validated; an item whose reviewed balance changed returns
@@ -167,6 +167,14 @@ export interface components {
                 };
             } & unknown;
             billing: components["schemas"]["Billing"];
+        };
+        ExecutionSession: {
+            /** @description Non-secret identifier. */
+            id: string;
+            /** @description Bearer capability for `/build`. Keep out of URLs, logs, and telemetry. */
+            token: string;
+            /** Format: date-time */
+            expiresAt: string;
         };
         /** @description Integer base units as a decimal string. Never a JSON number. */
         IntegerString: string;
@@ -310,14 +318,6 @@ export interface components {
             /** @enum {boolean} */
             estimated: true;
         };
-        ExecutionSession: {
-            /** @description Non-secret identifier. */
-            id: string;
-            /** @description Bearer capability for `/build`. Keep out of URLs */
-            token: string;
-            /** Format: date-time */
-            expiresAt: string;
-        };
         /**
          * @description Preview: `mode` is always `metered_preview`. `chargedUsd` is the list
          *     price recorded for this complete response and is invoiceable by manual
@@ -362,7 +362,7 @@ export interface components {
             /** @enum {string} */
             apiVersion: "v1-preview";
             analysisRulesetVersion: string;
-            /** @description Ruleset applied by this fresh build. May narrow */
+            /** @description Ruleset applied by this fresh build. May narrow, never loosen, the analyzed action. */
             rulesetVersion: string;
             /** Format: date-time */
             builtAt: string;
@@ -498,7 +498,7 @@ export interface components {
         RecordResponse: {
             requestId: string;
             receiptId: string;
-            /** @description True on 200 */
+            /** @description True on 200; false on 202. */
             terminal: boolean;
             transactions: {
                 id: string;
@@ -731,7 +731,10 @@ export interface operations {
     build: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description Required, 1–128 printable non-space ASCII characters. Same customer, key and canonical body replays the stored response without another admission or invoiceable outcome. A separate non-admitted, noninvoiceable replay usage row is recorded. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -751,7 +754,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
-            /** @description Missing, malformed, or invalid execution session. */
+            /** @description unauthorized: missing or invalid customer API key. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -769,7 +772,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description `active_build_pending`: an overlapping build generation in this session must be recorded or reconciled first. */
+            /** @description execution_in_progress: selected items already have a build; reconcile it first. request_in_progress and idempotency_key_reused retain their usual meanings. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -787,7 +790,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description More than 20 items, or `build_plan_too_large`. */
+            /** @description request_too_large: HTTP request body exceeds the route limit. */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -796,7 +799,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description `mutually_exclusive_items`: two items share an `alternativeGroupId`. */
+            /** @description invalid_request: invalid selections, more than 20 items, or overlapping account actions. session_mismatch or item_not_in_session: selection is outside the session. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -877,7 +880,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description `signature_message_mismatch`: the signature does not bind to the stored message bytes for that transaction. */
+            /** @description invalid_signature: signature does not verify against the exact stored message. receipt_mismatch: transaction or signature conflicts with the receipt. */
             422: {
                 headers: {
                     [name: string]: unknown;

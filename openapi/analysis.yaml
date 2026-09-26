@@ -133,8 +133,8 @@ paths:
       operationId: build
       summary: Build unsigned transactions for selected items
       description: |
-        v1 section 15.3. Authenticated by the execution session from
-        `check-wallet`, not the API key. Preview narrowing: only
+        v1 section 15.3. Authenticated by the API key and execution session from
+        `check-wallet`. Preview narrowing: only
         `burn_and_close` and `recover_excess_lamports`; `stage` is never
         accepted; no partner claim token; no sale receipt. Every item is
         freshly validated; an item whose reviewed balance changed returns
@@ -161,7 +161,7 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
-          description: Missing, malformed, or invalid execution session.
+          description: "unauthorized: missing or invalid customer API key."
           content:
             application/json:
               schema:
@@ -173,8 +173,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "409":
-          description: "`active_build_pending`: an overlapping build generation in this
-            session must be recorded or reconciled first."
+          description: "execution_in_progress: selected items already have a build;
+            reconcile it first. request_in_progress and idempotency_key_reused
+            retain their usual meanings."
           content:
             application/json:
               schema:
@@ -186,14 +187,15 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "413":
-          description: More than 20 items, or `build_plan_too_large`.
+          description: "request_too_large: HTTP request body exceeds the route limit."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "422":
-          description: "`mutually_exclusive_items`: two items share an
-            `alternativeGroupId`."
+          description: "invalid_request: invalid selections, more than 20 items, or
+            overlapping account actions. session_mismatch or
+            item_not_in_session: selection is outside the session."
           content:
             application/json:
               schema:
@@ -208,6 +210,8 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "504":
           $ref: "#/components/responses/Timeout"
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
   /executions/record:
     post:
       tags:
@@ -267,8 +271,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "422":
-          description: "`signature_message_mismatch`: the signature does not bind to the
-            stored message bytes for that transaction."
+          description: "invalid_signature: signature does not verify against the exact
+            stored message. receipt_mismatch: transaction or signature conflicts
+            with the receipt."
           content:
             application/json:
               schema:
@@ -288,7 +293,8 @@ components:
     apiKey:
       type: http
       scheme: bearer
-      description: Customer API key. Never sent to `/build` or `/executions/record`.
+      description: Customer API key. Sent to /check-wallet and /build; never sent to
+        /executions/record.
     executionSession:
       type: apiKey
       in: header
@@ -405,6 +411,24 @@ components:
             - airdrops
             - executionSession
             - limits
+          allOf:
+            - if:
+                properties:
+                  items:
+                    contains:
+                      properties:
+                        opportunity:
+                          properties:
+                            executionSupported:
+                              const: true
+                          required:
+                            - executionSupported
+                      required:
+                        - opportunity
+              then:
+                properties:
+                  executionSession:
+                    $ref: "#/components/schemas/ExecutionSession"
           properties:
             wallet:
               $ref: "#/components/schemas/Base58"
@@ -516,26 +540,25 @@ components:
                   type: integer
                   enum:
                     - 200
-          allOf:
-            - if:
-                properties:
-                  items:
-                    contains:
-                      properties:
-                        opportunity:
-                          properties:
-                            executionSupported:
-                              const: true
-                          required:
-                            - executionSupported
-                      required:
-                        - opportunity
-              then:
-                properties:
-                  executionSession:
-                    $ref: "#/components/schemas/ExecutionSession"
         billing:
           $ref: "#/components/schemas/Billing"
+    ExecutionSession:
+      type: object
+      required:
+        - id
+        - token
+        - expiresAt
+      properties:
+        id:
+          type: string
+          description: Non-secret identifier.
+        token:
+          type: string
+          description: Bearer capability for `/build`. Keep out of URLs, logs, and
+            telemetry.
+        expiresAt:
+          type: string
+          format: date-time
     IntegerString:
       type: string
       pattern: ^[0-9]+$
@@ -1107,24 +1130,6 @@ components:
           type: boolean
           enum:
             - true
-    ExecutionSession:
-      type: object
-      required:
-        - id
-        - token
-        - expiresAt
-      properties:
-        id:
-          type: string
-          description: Non-secret identifier.
-        token:
-          type: string
-          description: Bearer capability for `/build`. Keep out of URLs
-          logs: null
-          and telemetry.: null
-        expiresAt:
-          type: string
-          format: date-time
     Billing:
       type: object
       description: |
@@ -1272,9 +1277,8 @@ components:
           type: string
         rulesetVersion:
           type: string
-          description: Ruleset applied by this fresh build. May narrow
-          never loosen: null
-          the analyzed action.: null
+          description: Ruleset applied by this fresh build. May narrow, never loosen, the
+            analyzed action.
         builtAt:
           type: string
           format: date-time
@@ -1620,8 +1624,7 @@ components:
           type: string
         terminal:
           type: boolean
-          description: True on 200
-          false on 202.: null
+          description: True on 200; false on 202.
         transactions:
           type: array
           items:

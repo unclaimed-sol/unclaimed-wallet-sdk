@@ -41,3 +41,12 @@ private operational details. Ordinary integrators only need the public SDK READM
 The project LICENSE and package license field are absent. Choosing a project
 license remains an owner decision for review; third-party notices do not supply
 a license for the SDK itself. This documentation does not make that choice.
+
+## Unreleased review corrections
+
+The current review branch now rejects missing/non-string build idempotency keys
+and regenerates the mounted contract with corrected build headers/authentication,
+actual refusal codes and intact descriptions. These corrections are not in the
+published `0.1.0-preview.1` tarball identified above. A future publication requires
+a new version, fresh artifact review and separate authorization; do not republish
+the existing version.

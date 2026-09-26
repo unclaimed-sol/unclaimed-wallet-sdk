@@ -201,7 +201,8 @@ export function createUnclaimedClient(options: ClientOptions) {
       );
     if (
       path === "/build" &&
-      (!request || !/^[!-~]{1,128}$/.test(request.idempotencyKey))
+      (!request || typeof request.idempotencyKey !== "string" ||
+        !/^[!-~]{1,128}$/.test(request.idempotencyKey))
     )
       throw new UnclaimedInputError(
         "Retain an explicit build idempotency key.",

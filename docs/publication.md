@@ -38,7 +38,8 @@ The package has no runtime npm dependencies and ships generated client code,
 schema, documentation and third-party notices. The reference application stays
 in the GitHub checkout. API credentials, activation and execution remain separate.
 
-For future versions, publish only the inspected tarball after these checks pass. Existing package
+For future versions, obtain separate owner authorization before publishing,
+then publish only the inspected tarball after these checks pass. Existing package
 versions must not be overwritten. If npm authentication or scope permission is
 unavailable, retain the reviewed tarball and complete local sign-in; never put an
 npm token in this repository or in a conversation. No new project license grant
