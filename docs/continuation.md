@@ -37,3 +37,7 @@ For maintainers with private product-repository access, the single cross-reposit
 progress/Colosseum handoff lives at `docs/unclaimed-api-continuation.md` in the
 private engine repository. This public document intentionally does not duplicate
 private operational details. Ordinary integrators only need the public SDK README.
+
+The project LICENSE and package license field are absent. Choosing a project
+license remains an owner decision for review; third-party notices do not supply
+a license for the SDK itself. This documentation does not make that choice.

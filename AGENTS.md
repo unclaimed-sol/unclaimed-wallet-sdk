@@ -23,8 +23,8 @@ one snapshot, giving cleanup precedence over excess recovery. Keep amounts exact
 Read README.md, PRIOR_WORK.md and docs/publication.md before publication. Run
 `npm test`, the product RPC secret scanner against a clean publication export,
 a whole-tree general secret scan including Markdown, and review the outgoing
-history for confidential material. Keep the package private until an npm release
-is separately authorized. No providers, production, deployment or transactions
+history for confidential material. The preview is published; further npm releases
+require separate authorization. See docs/continuation.md for current status. No providers, production, deployment or transactions
 are needed for local tests. The private platform owns real-Postgres acceptance;
 record cross-repository work in its single authoritative engine handoff.
 
