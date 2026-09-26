@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 893a77f377cc875875d5cd5efae7d5d638f1cece4f054f931d1c77abe445a188). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -11,9 +11,63 @@ export interface paths {
         put?: never;
         /**
          * Analyze one wallet page
-         * @description Analyze a frozen wallet page in safe mode. Required lookup failures return an incomplete error without a partial or invoiceable page. At most 400 raw token accounts; each page accepts limit 1–200 (default 20). First-page excess results may overlap cleanup; alternative groups must not be added together. Idempotency is mandatory, including retries. Execution is unavailable.
+         * @description Analyze a frozen wallet page in safe mode. Required lookup failures return an incomplete error without a partial or invoiceable page. At most 400 raw token accounts; each page accepts limit 1–200 (default 20). First-page excess results may overlap cleanup; alternative groups must not be added together. Idempotency is mandatory, including retries. Execution availability is explicit per item and session.
          */
         post: operations["checkWallet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build unsigned transactions for selected items
+         * @description v1 section 15.3. Authenticated by the API key and execution session from
+         *     `check-wallet`. Preview narrowing: only
+         *     `burn_and_close` and `recover_excess_lamports`; `stage` is never
+         *     accepted; no partner claim token; no sale receipt. Every item is
+         *     freshly validated; an item whose reviewed balance changed returns
+         *     `changed` with no bytes. Preview downgrade: `burn_and_close` uses the
+         *     existing on-chain instruction and burns whatever balance is present at
+         *     execution; the `consent` text on the item must be displayed.
+         */
+        post: operations["build"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/executions/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report signatures for verification and recording
+         * @description v1 section 15.5. Authenticated by the execution receipt from `build`.
+         *     The backend verifies each signature against the stored exact message
+         *     bytes and expected signer, fetches the transaction, reconciles every
+         *     receipt item against post-transaction account state, and records
+         *     verified recovery. Preview: no partner credit is applied; the
+         *     canonical signature-purpose reservation still records `api_execution`
+         *     so the same signature can never later earn website cashback. Idempotent
+         *     by signature and receipt hash.
+         */
+        post: operations["recordExecution"];
         delete?: never;
         options?: never;
         head?: never;
@@ -94,14 +148,14 @@ export interface components {
                     walletModulesIncluded: boolean;
                     /**
                      * Format: date-time
-                     * @description Shared snapshot and cursor expiry. No execution session is issued.
+                     * @description Shared snapshot and cursor expiry. Session lifetime is shared when enabled.
                      */
                     expiresAt: string;
                 };
                 items: components["schemas"]["WalletItem"][];
                 airdrops: null;
-                /** @description Always null in the current analysis-only increment; sessions and builders are outside this stage. */
-                executionSession: null;
+                /** @description Issued only when execution preview is enabled. Shares snapshot expiry. */
+                executionSession: null | components["schemas"]["ExecutionSession"];
                 limits: {
                     /**
                      * @description Preview cap, enforced before enrichment.
@@ -111,8 +165,16 @@ export interface components {
                     /** @enum {integer} */
                     pageLimitMax: 200;
                 };
-            };
+            } & unknown;
             billing: components["schemas"]["Billing"];
+        };
+        ExecutionSession: {
+            /** @description Non-secret identifier. */
+            id: string;
+            /** @description Bearer capability for `/build`. Keep out of URLs, logs, and telemetry. */
+            token: string;
+            /** Format: date-time */
+            expiresAt: string;
         };
         /** @description Integer base units as a decimal string. Never a JSON number. */
         IntegerString: string;
@@ -184,11 +246,8 @@ export interface components {
             action: "burn_and_close";
             /** @enum {boolean} */
             destructive: true;
-            /**
-             * @description Execution is unavailable in this analysis-only stage.
-             * @constant
-             */
-            executionSupported: false;
+            /** @description True only when the execution preview is enabled and this action is supported. */
+            executionSupported: boolean;
             /** @description Exact text the integration must show before signing. States the reviewed balance and that execution burns whatever balance is present when the transaction runs; for `assumed_worthless` items also that no price was available. */
             consent: string;
             /** @description The balance the user is reviewing. Zero for empty-account close. */
@@ -231,11 +290,8 @@ export interface components {
             action: "recover_excess_lamports";
             /** @enum {boolean} */
             destructive: false;
-            /**
-             * @description Execution is unavailable in this analysis-only stage.
-             * @constant
-             */
-            executionSupported: false;
+            /** @description True only when the execution preview is enabled and this action is supported. */
+            executionSupported: boolean;
             valueComponents: (components["schemas"]["ValueComponent"] & {
                 /** @constant */
                 source?: "excess_lamports";
@@ -283,7 +339,7 @@ export interface components {
             requestId: string;
             error: {
                 /** @enum {string} */
-                code: "unauthorized" | "key_revoked" | "mode_not_permitted" | "mode_not_available" | "idempotency_key_reused" | "request_in_progress" | "snapshot_expired" | "request_too_large" | "invalid_wallet" | "cursor_mismatch" | "airdrops_not_available" | "wallet_too_large" | "module_limit_exceeded" | "rate_limited" | "internal_error" | "invalid_idempotency_key" | "platform_unavailable" | "platform_failure_recorded" | "invalid_request" | "incomplete" | "upstream_unavailable" | "deadline_exceeded";
+                code: "unauthorized" | "key_revoked" | "mode_not_permitted" | "mode_not_available" | "idempotency_key_reused" | "request_in_progress" | "snapshot_expired" | "request_too_large" | "invalid_wallet" | "cursor_mismatch" | "airdrops_not_available" | "wallet_too_large" | "module_limit_exceeded" | "rate_limited" | "internal_error" | "invalid_idempotency_key" | "platform_unavailable" | "platform_failure_recorded" | "invalid_request" | "incomplete" | "upstream_unavailable" | "deadline_exceeded" | "session_mismatch" | "session_expired" | "item_not_in_session" | "execution_in_progress" | "invalid_receipt" | "receipt_mismatch" | "receipt_expired" | "invalid_signature" | "credit_admission_paused";
                 message: string;
                 retryable: boolean;
                 /** @description Never contains upstream URLs, credentials, raw RPC messages, or provider names. */
@@ -291,6 +347,204 @@ export interface components {
                     [key: string]: unknown;
                 };
             };
+        };
+        BuildRequest: {
+            wallet: components["schemas"]["Base58"];
+            items: {
+                id: string;
+                /** @enum {string} */
+                action: "burn_and_close" | "recover_excess_lamports";
+            }[];
+        };
+        BuildResponse: {
+            requestId: string;
+            analysisRequestId: string;
+            /** @enum {string} */
+            apiVersion: "v1-preview";
+            analysisRulesetVersion: string;
+            /** @description Ruleset applied by this fresh build. May narrow, never loosen, the analyzed action. */
+            rulesetVersion: string;
+            /** Format: date-time */
+            builtAt: string;
+            transactions: {
+                id: string;
+                itemIds: string[];
+                /** @enum {string} */
+                format: "solana_legacy_base64";
+                /** @enum {string} */
+                submission: "direct_solana";
+                /** @description Base64. Unsigned. Contains placeholder signature slots. */
+                unsignedTransaction: string;
+                lastValidBlockHeight: components["schemas"]["IntegerString"];
+                estimatedNetworkFee: components["schemas"]["Amount"];
+            }[];
+            items: (components["schemas"]["BuiltItem"] | components["schemas"]["NotBuiltItem"])[];
+            plan: {
+                transactionCount: number;
+                /** @description Equal to `transactionCount` for every preview action. */
+                estimatedTotalTransactionCount: number;
+                currentStageCosts: components["schemas"]["PlanCosts"];
+                costs: components["schemas"]["PlanCosts"];
+                estimatedNetValueUsd: string | null;
+                valuation: null | components["schemas"]["Valuation"];
+            };
+            /** @description Null only when no transaction was built. */
+            executionReceipt: null | {
+                token: string;
+                /**
+                 * Format: date-time
+                 * @description Seven days after build.
+                 */
+                expiresAt: string;
+                /**
+                 * @description Preview: always false.
+                 * @enum {boolean}
+                 */
+                partnerAttribution: false;
+            };
+            warnings: string[];
+        };
+        /** @description An item that produced bytes. Fresh authoritative amounts are mandatory so the integration reviews build-time values, not analysis-time estimates. */
+        BuiltItem: {
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "built";
+            authoritativeOpportunity: components["schemas"]["AuthoritativeBurnAndClose"] | components["schemas"]["AuthoritativeRecoverExcessLamports"];
+        };
+        AuthoritativeBurnAndClose: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "burn_and_close";
+            /** @enum {boolean} */
+            reviewRequired: true;
+            /** @description Refreshed at build time with the fresh reviewed balance. */
+            consent: string;
+            /** @description The balance re-read at build; the value stored against the receipt for the section 6 measurement. */
+            reviewedBalanceBaseUnits: components["schemas"]["IntegerString"];
+            valueComponents: components["schemas"]["ValueComponent"][];
+            costs: components["schemas"]["ItemCosts"];
+            estimatedNetValueUsd: string | null;
+        };
+        ItemCosts: {
+            /** @enum {string} */
+            scope: "item_attributable";
+            oneTimeSetup: components["schemas"]["Amount"];
+        };
+        AuthoritativeRecoverExcessLamports: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            action: "recover_excess_lamports";
+            reviewRequired: boolean;
+            valueComponents: components["schemas"]["ValueComponent"][];
+            costs: components["schemas"]["ItemCosts"];
+            estimatedNetValueUsd: string | null;
+        };
+        NotBuiltItem: {
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "changed" | "rejected";
+            /** @enum {string} */
+            reason: "balance_changed" | "account_closed" | "authority_changed" | "frozen" | "protected_by_current_ruleset" | "unsupported_in_preview" | "over_wire_limit";
+            /** @description Present for `balance_changed` where safe to disclose. */
+            currentBalanceBaseUnits?: components["schemas"]["IntegerString"];
+        };
+        PlanCosts: {
+            /** @enum {string} */
+            scope: "current_stage_total" | "plan_total";
+            oneTimeSetup: components["schemas"]["Amount"];
+            estimatedNetworkFee: components["schemas"]["Amount"];
+            nativeFundingRequired: components["schemas"]["Amount"];
+        };
+        Valuation: {
+            /** @enum {string} */
+            currency: "USD";
+            /** Format: date-time */
+            calculatedAt: string;
+            inputs: {
+                asset: string;
+                mint?: components["schemas"]["Base58"];
+                /** @enum {string} */
+                pricingMethod: "market_quote" | "fixed_parity";
+                unitPriceUsd: components["schemas"]["DecimalUsd"];
+                /** Format: date-time */
+                pricedAt: string;
+                maximumAgeSeconds: number;
+            }[];
+        };
+        RecordRequest: {
+            wallet: components["schemas"]["Base58"];
+            transactions: ({
+                id: string;
+                /** @enum {string} */
+                status: "submitted";
+                /** @description Base58 transaction signature. */
+                signature: string;
+            } | {
+                id: string;
+                /** @enum {string} */
+                status: "not_signed";
+            })[];
+        };
+        RecordResponse: {
+            requestId: string;
+            receiptId: string;
+            /** @description True on 200; false on 202. */
+            terminal: boolean;
+            transactions: {
+                id: string;
+                signature?: string | null;
+                /** @enum {string} */
+                outcome: "verified_success" | "verified_failure" | "pending" | "unknown" | "duplicate" | "not_signed_pending_expiry" | "abandoned_unknown";
+                landedSlot?: number | null;
+            }[];
+            items: {
+                id: string;
+                transactionId: string;
+                /** @enum {string} */
+                outcome: "verified_applied" | "verified_not_applied" | "verified_failed" | "pending" | "unknown" | "abandoned_unknown";
+                /**
+                 * @description Which purpose holds the canonical reservation for this
+                 *     item's signature, or null while no signature exists
+                 *     (`not_signed`, `not_signed_pending_expiry`,
+                 *     `abandoned_unknown`) or no reservation has been made yet.
+                 *     `api_execution` is the normal preview value and creates no
+                 *     credit. `website_cashback` or `partner_credit` means that
+                 *     program reserved the signature before this record arrived;
+                 *     the execution outcome is still verified and recorded here,
+                 *     and no second credit is applied. Independent of `outcome`.
+                 * @enum {string|null}
+                 */
+                creditPurpose: "api_execution" | "website_cashback" | "partner_credit" | null;
+                /**
+                 * @description `reserved` means the purpose holder claimed the signature;
+                 *     `held` means a legacy claim without ledger evidence that is
+                 *     awaiting Admin reconciliation; `published` means the holder
+                 *     committed its ledger entry. Neither `reserved` nor `held`
+                 *     is proof of payment. Null whenever `creditPurpose` is null.
+                 * @enum {string|null}
+                 */
+                creditState: "reserved" | "held" | "published" | null;
+                /** @description Present only for `verified_applied`. Net to the wallet after the service fee, derived from on-chain state, never from client input. */
+                recovered?: components["schemas"]["Amount"];
+                serviceFee?: components["schemas"]["Amount"];
+                /**
+                 * @description Preview: the amount the landed `burn_and_close` actually
+                 *     burned, from the transaction. Compared server-side with the
+                 *     reviewed balance to measure the section 6 downgrade. Present
+                 *     only for `verified_applied` burn-and-close items.
+                 */
+                burnedBaseUnits?: components["schemas"]["IntegerString"];
+            }[];
         };
     };
     responses: {
@@ -408,7 +662,7 @@ export interface operations {
                 };
             };
             409: components["responses"]["IdempotencyConflict"];
-            /** @description snapshot_expired: the shared 60-minute snapshot and cursor lifetime expired; start a new first page. No execution session is issued. */
+            /** @description snapshot_expired: the shared 60-minute snapshot and cursor lifetime expired; start a new first page. Session lifetime is shared when enabled. */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -472,6 +726,179 @@ export interface operations {
                 };
             };
             504: components["responses"]["Timeout"];
+        };
+    };
+    build: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Required, 1–128 printable non-space ASCII characters. Same customer, key and canonical body replays the stored response without another admission or invoiceable outcome. A separate non-admitted, noninvoiceable replay usage row is recorded. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BuildRequest"];
+            };
+        };
+        responses: {
+            /** @description Every requested item received a validation decision. Not every item necessarily produced bytes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description unauthorized: missing or invalid customer API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Wallet, item, or action outside the session authorization. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description execution_in_progress: selected items already have a build; reconcile it first. request_in_progress and idempotency_key_reused retain their usual meanings. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Session expired; run `check-wallet` again. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description request_too_large: HTTP request body exceeds the route limit. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description invalid_request: invalid selections, more than 20 items, or overlapping account actions. session_mismatch or item_not_in_session: selection is outside the session. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            429: components["responses"]["RateLimited"];
+            /** @description Fresh on-chain validation could not complete safely. No bytes. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            504: components["responses"]["Timeout"];
+        };
+    };
+    recordExecution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordRequest"];
+            };
+        };
+        responses: {
+            /** @description Every receipt item has a terminal outcome, or the report duplicates one already terminal. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordResponse"];
+                };
+            };
+            /** @description At least one item is still `pending`, `unknown`, or `not_signed_pending_expiry`. Retry later with the same body. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description Missing, malformed, or invalid execution receipt. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Wallet or transaction ID does not belong to this receipt. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Receipt expired before any record was started. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description invalid_signature: signature does not verify against the exact stored message. receipt_mismatch: transaction or signature conflicts with the receipt. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            429: components["responses"]["RateLimited"];
+            /** @description `upstream_unavailable`: status reconciliation could not complete, or `credit_admission_paused` during the signature-purpose migration. Retry. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
 }

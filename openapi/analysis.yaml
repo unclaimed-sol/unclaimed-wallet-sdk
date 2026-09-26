@@ -3,13 +3,11 @@ openapi: 3.1.0
 info:
   title: Unclaimed API
   version: 0.1.0-preview
-  summary: Mounted safe-mode wallet analysis preview
-  description: "Contract for the implemented POST /api/v1/check-wallet route.
-    Analysis only: every opportunity has executionSupported: false and
-    executionSession is null. No build, record, usage, payment or transaction
-    execution capability is offered. This artifact does not establish deployment
-    or live-provider readiness. The separate preview.yaml retains the future
-    design."
+  summary: Mounted safe-mode wallet analysis and execution preview
+  description: Implemented safe analysis and opt-in execution preview. Build and
+    record routes require EXECUTION_PREVIEW_ENABLED; it defaults off. Execution
+    still requires separately authorized migration and deployment. No payments,
+    usage endpoint, max-mode dust burns or gasless execution.
 servers:
   - url: /api/v1
     description: Relative to the operator-provided platform origin; no deployment is
@@ -19,6 +17,8 @@ security:
 tags:
   - name: analysis
     description: Metered wallet analysis.
+  - name: execution
+    description: Unbilled, session-scoped transaction construction and recording.
 paths:
   /check-wallet:
     post:
@@ -31,7 +31,7 @@ paths:
         most 400 raw token accounts; each page accepts limit 1–200 (default 20).
         First-page excess results may overlap cleanup; alternative groups must
         not be added together. Idempotency is mandatory, including retries.
-        Execution is unavailable.
+        Execution availability is explicit per item and session.
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
         - $ref: "#/components/parameters/SdkVersion"
@@ -64,8 +64,8 @@ paths:
           $ref: "#/components/responses/IdempotencyConflict"
         "410":
           description: "snapshot_expired: the shared 60-minute snapshot and cursor
-            lifetime expired; start a new first page. No execution session is
-            issued."
+            lifetime expired; start a new first page. Session lifetime is shared
+            when enabled."
           content:
             application/json:
               schema:
@@ -126,12 +126,185 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "504":
           $ref: "#/components/responses/Timeout"
+  /build:
+    post:
+      tags:
+        - execution
+      operationId: build
+      summary: Build unsigned transactions for selected items
+      description: |
+        v1 section 15.3. Authenticated by the API key and execution session from
+        `check-wallet`. Preview narrowing: only
+        `burn_and_close` and `recover_excess_lamports`; `stage` is never
+        accepted; no partner claim token; no sale receipt. Every item is
+        freshly validated; an item whose reviewed balance changed returns
+        `changed` with no bytes. Preview downgrade: `burn_and_close` uses the
+        existing on-chain instruction and burns whatever balance is present at
+        execution; the `consent` text on the item must be displayed.
+      security:
+        - apiKey: []
+          executionSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuildRequest"
+      responses:
+        "200":
+          description: Every requested item received a validation decision. Not every item
+            necessarily produced bytes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: "unauthorized: missing or invalid customer API key."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Wallet, item, or action outside the session authorization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: "execution_in_progress: selected items already have a build;
+            reconcile it first. request_in_progress and idempotency_key_reused
+            retain their usual meanings."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "410":
+          description: Session expired; run `check-wallet` again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "413":
+          description: "request_too_large: HTTP request body exceeds the route limit."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "422":
+          description: "invalid_request: invalid selections, more than 20 items, or
+            overlapping account actions. session_mismatch or
+            item_not_in_session: selection is outside the session."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          description: Fresh on-chain validation could not complete safely. No bytes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "504":
+          $ref: "#/components/responses/Timeout"
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+  /executions/record:
+    post:
+      tags:
+        - execution
+      operationId: recordExecution
+      summary: Report signatures for verification and recording
+      description: |
+        v1 section 15.5. Authenticated by the execution receipt from `build`.
+        The backend verifies each signature against the stored exact message
+        bytes and expected signer, fetches the transaction, reconciles every
+        receipt item against post-transaction account state, and records
+        verified recovery. Preview: no partner credit is applied; the
+        canonical signature-purpose reservation still records `api_execution`
+        so the same signature can never later earn website cashback. Idempotent
+        by signature and receipt hash.
+      security:
+        - executionReceipt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordRequest"
+      responses:
+        "200":
+          description: Every receipt item has a terminal outcome, or the report duplicates
+            one already terminal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordResponse"
+        "202":
+          description: At least one item is still `pending`, `unknown`, or
+            `not_signed_pending_expiry`. Retry later with the same body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Missing, malformed, or invalid execution receipt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Wallet or transaction ID does not belong to this receipt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "410":
+          description: Receipt expired before any record was started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "422":
+          description: "invalid_signature: signature does not verify against the exact
+            stored message. receipt_mismatch: transaction or signature conflicts
+            with the receipt."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          description: "`upstream_unavailable`: status reconciliation could not complete,
+            or `credit_admission_paused` during the signature-purpose migration.
+            Retry."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
 components:
   securitySchemes:
     apiKey:
       type: http
       scheme: bearer
-      description: Customer API key. Never sent to `/build` or `/executions/record`.
+      description: Customer API key. Sent to /check-wallet and /build; never sent to
+        /executions/record.
+    executionSession:
+      type: apiKey
+      in: header
+      name: X-Unclaimed-Execution-Session
+      description: Opaque bearer session token from `check-wallet`.
+    executionReceipt:
+      type: apiKey
+      in: header
+      name: X-Unclaimed-Execution-Receipt
+      description: Opaque receipt token from `build`.
   parameters:
     IdempotencyKey:
       name: Idempotency-Key
@@ -238,6 +411,24 @@ components:
             - airdrops
             - executionSession
             - limits
+          allOf:
+            - if:
+                properties:
+                  items:
+                    contains:
+                      properties:
+                        opportunity:
+                          properties:
+                            executionSupported:
+                              const: true
+                          required:
+                            - executionSupported
+                      required:
+                        - opportunity
+              then:
+                properties:
+                  executionSession:
+                    $ref: "#/components/schemas/ExecutionSession"
           properties:
             wallet:
               $ref: "#/components/schemas/Base58"
@@ -320,7 +511,8 @@ components:
                 expiresAt:
                   type: string
                   format: date-time
-                  description: Shared snapshot and cursor expiry. No execution session is issued.
+                  description: Shared snapshot and cursor expiry. Session lifetime is shared when
+                    enabled.
             items:
               type: array
               items:
@@ -328,9 +520,11 @@ components:
             airdrops:
               type: "null"
             executionSession:
-              type: "null"
-              description: Always null in the current analysis-only increment; sessions and
-                builders are outside this stage.
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/ExecutionSession"
+              description: Issued only when execution preview is enabled. Shares snapshot
+                expiry.
             limits:
               type: object
               required:
@@ -348,6 +542,23 @@ components:
                     - 200
         billing:
           $ref: "#/components/schemas/Billing"
+    ExecutionSession:
+      type: object
+      required:
+        - id
+        - token
+        - expiresAt
+      properties:
+        id:
+          type: string
+          description: Non-secret identifier.
+        token:
+          type: string
+          description: Bearer capability for `/build`. Keep out of URLs, logs, and
+            telemetry.
+        expiresAt:
+          type: string
+          format: date-time
     IntegerString:
       type: string
       pattern: ^[0-9]+$
@@ -760,8 +971,8 @@ components:
             - true
         executionSupported:
           type: boolean
-          const: false
-          description: Execution is unavailable in this analysis-only stage.
+          description: True only when the execution preview is enabled and this action is
+            supported.
         consent:
           type: string
           minLength: 1
@@ -868,8 +1079,8 @@ components:
             - false
         executionSupported:
           type: boolean
-          const: false
-          description: Execution is unavailable in this analysis-only stage.
+          description: True only when the execution preview is enabled and this action is
+            supported.
         valueComponents:
           type: array
           minItems: 1
@@ -994,6 +1205,15 @@ components:
                 - incomplete
                 - upstream_unavailable
                 - deadline_exceeded
+                - session_mismatch
+                - session_expired
+                - item_not_in_session
+                - execution_in_progress
+                - invalid_receipt
+                - receipt_mismatch
+                - receipt_expired
+                - invalid_signature
+                - credit_admission_paused
             message:
               type: string
             retryable:
@@ -1003,6 +1223,508 @@ components:
               additionalProperties: true
               description: Never contains upstream URLs, credentials, raw RPC messages, or
                 provider names.
+    BuildRequest:
+      type: object
+      required:
+        - wallet
+        - items
+      properties:
+        wallet:
+          $ref: "#/components/schemas/Base58"
+        items:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: object
+            required:
+              - id
+              - action
+            properties:
+              id:
+                type: string
+              action:
+                type: string
+                enum:
+                  - burn_and_close
+                  - recover_excess_lamports
+            additionalProperties: false
+      additionalProperties: false
+    BuildResponse:
+      type: object
+      required:
+        - requestId
+        - analysisRequestId
+        - apiVersion
+        - analysisRulesetVersion
+        - rulesetVersion
+        - builtAt
+        - transactions
+        - items
+        - plan
+        - executionReceipt
+        - warnings
+      properties:
+        requestId:
+          type: string
+        analysisRequestId:
+          type: string
+        apiVersion:
+          type: string
+          enum:
+            - v1-preview
+        analysisRulesetVersion:
+          type: string
+        rulesetVersion:
+          type: string
+          description: Ruleset applied by this fresh build. May narrow, never loosen, the
+            analyzed action.
+        builtAt:
+          type: string
+          format: date-time
+        transactions:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            required:
+              - id
+              - itemIds
+              - format
+              - submission
+              - unsignedTransaction
+              - lastValidBlockHeight
+              - estimatedNetworkFee
+            properties:
+              id:
+                type: string
+              itemIds:
+                type: array
+                items:
+                  type: string
+              format:
+                type: string
+                enum:
+                  - solana_legacy_base64
+              submission:
+                type: string
+                enum:
+                  - direct_solana
+              unsignedTransaction:
+                type: string
+                description: Base64. Unsigned. Contains placeholder signature slots.
+              lastValidBlockHeight:
+                $ref: "#/components/schemas/IntegerString"
+              estimatedNetworkFee:
+                $ref: "#/components/schemas/Amount"
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/BuiltItem"
+              - $ref: "#/components/schemas/NotBuiltItem"
+            discriminator:
+              propertyName: status
+              mapping:
+                built: "#/components/schemas/BuiltItem"
+                changed: "#/components/schemas/NotBuiltItem"
+                rejected: "#/components/schemas/NotBuiltItem"
+        plan:
+          type: object
+          required:
+            - transactionCount
+            - estimatedTotalTransactionCount
+            - currentStageCosts
+            - costs
+            - estimatedNetValueUsd
+            - valuation
+          properties:
+            transactionCount:
+              type: integer
+            estimatedTotalTransactionCount:
+              type: integer
+              description: Equal to `transactionCount` for every preview action.
+            currentStageCosts:
+              $ref: "#/components/schemas/PlanCosts"
+            costs:
+              $ref: "#/components/schemas/PlanCosts"
+            estimatedNetValueUsd:
+              type:
+                - string
+                - "null"
+            valuation:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/Valuation"
+        executionReceipt:
+          oneOf:
+            - type: "null"
+            - type: object
+              required:
+                - token
+                - expiresAt
+                - partnerAttribution
+              properties:
+                token:
+                  type: string
+                expiresAt:
+                  type: string
+                  format: date-time
+                  description: Seven days after build.
+                partnerAttribution:
+                  type: boolean
+                  enum:
+                    - false
+                  description: "Preview: always false."
+          description: Null only when no transaction was built.
+        warnings:
+          type: array
+          items:
+            type: string
+    BuiltItem:
+      type: object
+      description: An item that produced bytes. Fresh authoritative amounts are
+        mandatory so the integration reviews build-time values, not
+        analysis-time estimates.
+      required:
+        - id
+        - status
+        - authoritativeOpportunity
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - built
+        authoritativeOpportunity:
+          oneOf:
+            - $ref: "#/components/schemas/AuthoritativeBurnAndClose"
+            - $ref: "#/components/schemas/AuthoritativeRecoverExcessLamports"
+          discriminator:
+            propertyName: action
+            mapping:
+              burn_and_close: "#/components/schemas/AuthoritativeBurnAndClose"
+              recover_excess_lamports: "#/components/schemas/AuthoritativeRecoverExcessLamports"
+    AuthoritativeBurnAndClose:
+      type: object
+      required:
+        - action
+        - reviewRequired
+        - consent
+        - reviewedBalanceBaseUnits
+        - valueComponents
+        - costs
+        - estimatedNetValueUsd
+      properties:
+        action:
+          type: string
+          enum:
+            - burn_and_close
+        reviewRequired:
+          type: boolean
+          enum:
+            - true
+        consent:
+          type: string
+          minLength: 1
+          description: Refreshed at build time with the fresh reviewed balance.
+        reviewedBalanceBaseUnits:
+          $ref: "#/components/schemas/IntegerString"
+          description: The balance re-read at build; the value stored against the receipt
+            for the section 6 measurement.
+        valueComponents:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ValueComponent"
+        costs:
+          $ref: "#/components/schemas/ItemCosts"
+        estimatedNetValueUsd:
+          type:
+            - string
+            - "null"
+    ItemCosts:
+      type: object
+      required:
+        - scope
+        - oneTimeSetup
+      properties:
+        scope:
+          type: string
+          enum:
+            - item_attributable
+        oneTimeSetup:
+          $ref: "#/components/schemas/Amount"
+    AuthoritativeRecoverExcessLamports:
+      type: object
+      required:
+        - action
+        - reviewRequired
+        - valueComponents
+        - costs
+        - estimatedNetValueUsd
+      properties:
+        action:
+          type: string
+          enum:
+            - recover_excess_lamports
+        reviewRequired:
+          type: boolean
+        valueComponents:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ValueComponent"
+        costs:
+          $ref: "#/components/schemas/ItemCosts"
+        estimatedNetValueUsd:
+          type:
+            - string
+            - "null"
+    NotBuiltItem:
+      type: object
+      required:
+        - id
+        - status
+        - reason
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - changed
+            - rejected
+        reason:
+          type: string
+          enum:
+            - balance_changed
+            - account_closed
+            - authority_changed
+            - frozen
+            - protected_by_current_ruleset
+            - unsupported_in_preview
+            - over_wire_limit
+        currentBalanceBaseUnits:
+          $ref: "#/components/schemas/IntegerString"
+          description: Present for `balance_changed` where safe to disclose.
+    PlanCosts:
+      type: object
+      required:
+        - scope
+        - oneTimeSetup
+        - estimatedNetworkFee
+        - nativeFundingRequired
+      properties:
+        scope:
+          type: string
+          enum:
+            - current_stage_total
+            - plan_total
+        oneTimeSetup:
+          $ref: "#/components/schemas/Amount"
+        estimatedNetworkFee:
+          $ref: "#/components/schemas/Amount"
+        nativeFundingRequired:
+          $ref: "#/components/schemas/Amount"
+    Valuation:
+      type: object
+      required:
+        - currency
+        - calculatedAt
+        - inputs
+      properties:
+        currency:
+          type: string
+          enum:
+            - USD
+        calculatedAt:
+          type: string
+          format: date-time
+        inputs:
+          type: array
+          items:
+            type: object
+            required:
+              - asset
+              - pricingMethod
+              - unitPriceUsd
+              - pricedAt
+              - maximumAgeSeconds
+            properties:
+              asset:
+                type: string
+              mint:
+                $ref: "#/components/schemas/Base58"
+              pricingMethod:
+                type: string
+                enum:
+                  - market_quote
+                  - fixed_parity
+              unitPriceUsd:
+                $ref: "#/components/schemas/DecimalUsd"
+              pricedAt:
+                type: string
+                format: date-time
+              maximumAgeSeconds:
+                type: integer
+    RecordRequest:
+      type: object
+      required:
+        - wallet
+        - transactions
+      properties:
+        wallet:
+          $ref: "#/components/schemas/Base58"
+        transactions:
+          type: array
+          minItems: 1
+          items:
+            oneOf:
+              - type: object
+                required:
+                  - id
+                  - status
+                  - signature
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                      - submitted
+                  signature:
+                    type: string
+                    description: Base58 transaction signature.
+              - type: object
+                required:
+                  - id
+                  - status
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                      - not_signed
+      additionalProperties: false
+    RecordResponse:
+      type: object
+      required:
+        - requestId
+        - receiptId
+        - terminal
+        - transactions
+        - items
+      properties:
+        requestId:
+          type: string
+        receiptId:
+          type: string
+        terminal:
+          type: boolean
+          description: True on 200; false on 202.
+        transactions:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - outcome
+            properties:
+              id:
+                type: string
+              signature:
+                type:
+                  - string
+                  - "null"
+              outcome:
+                type: string
+                enum:
+                  - verified_success
+                  - verified_failure
+                  - pending
+                  - unknown
+                  - duplicate
+                  - not_signed_pending_expiry
+                  - abandoned_unknown
+              landedSlot:
+                type:
+                  - integer
+                  - "null"
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - transactionId
+              - outcome
+              - creditPurpose
+              - creditState
+            properties:
+              id:
+                type: string
+              transactionId:
+                type: string
+              outcome:
+                type: string
+                enum:
+                  - verified_applied
+                  - verified_not_applied
+                  - verified_failed
+                  - pending
+                  - unknown
+                  - abandoned_unknown
+              creditPurpose:
+                type:
+                  - string
+                  - "null"
+                enum:
+                  - api_execution
+                  - website_cashback
+                  - partner_credit
+                  - null
+                description: |
+                  Which purpose holds the canonical reservation for this
+                  item's signature, or null while no signature exists
+                  (`not_signed`, `not_signed_pending_expiry`,
+                  `abandoned_unknown`) or no reservation has been made yet.
+                  `api_execution` is the normal preview value and creates no
+                  credit. `website_cashback` or `partner_credit` means that
+                  program reserved the signature before this record arrived;
+                  the execution outcome is still verified and recorded here,
+                  and no second credit is applied. Independent of `outcome`.
+              creditState:
+                type:
+                  - string
+                  - "null"
+                enum:
+                  - reserved
+                  - held
+                  - published
+                  - null
+                description: |
+                  `reserved` means the purpose holder claimed the signature;
+                  `held` means a legacy claim without ledger evidence that is
+                  awaiting Admin reconciliation; `published` means the holder
+                  committed its ledger entry. Neither `reserved` nor `held`
+                  is proof of payment. Null whenever `creditPurpose` is null.
+              recovered:
+                $ref: "#/components/schemas/Amount"
+                description: Present only for `verified_applied`. Net to the wallet after the
+                  service fee, derived from on-chain state, never from client
+                  input.
+              serviceFee:
+                $ref: "#/components/schemas/Amount"
+              burnedBaseUnits:
+                $ref: "#/components/schemas/IntegerString"
+                description: |
+                  Preview: the amount the landed `burn_and_close` actually
+                  burned, from the transaction. Compared server-side with the
+                  reviewed balance to measure the section 6 downgrade. Present
+                  only for `verified_applied` burn-and-close items.
   responses:
     BadRequest:
       description: Malformed JSON or unsupported request shape.

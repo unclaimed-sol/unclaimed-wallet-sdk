@@ -1,7 +1,7 @@
 # Prior-work disclosure
 
-Dated September 22, 2026. This repository is an analysis-only Unclaimed API
-preview increment. The consumer product and recovery infrastructure predate
+Dated September 22, 2026; updated September 26. This repository is an Unclaimed
+API preview increment with analysis and optional build/record client methods. The consumer product and recovery infrastructure predate
 this repository and are not presented as newly built here.
 
 Unclaimed SOL launched in **January 2025** (founder-provided date). Prior work
@@ -25,9 +25,11 @@ the approved mounted schema is copied here with its exact provenance. Private
 engine/platform implementation code is not copied into this repository.
 
 This increment provides generated analysis types, an analysis client, explicit
-pagination/idempotency/error handling, and a local reference integration. The
+pagination/idempotency/error handling, optional build/record methods, and a local
+reference integration. The
 reference defaults to synthetic fixtures. It demonstrates no live adoption,
 real wallet recovery, transaction execution, payment collection or partner
-revenue. Execution remains unavailable. No customer identities or confidential
+revenue. SDK methods never sign or submit; the current partner rollout keeps
+execution builds disabled. No customer identities or confidential
 figures are included. The founder must carry this disclosure into the submission
 form and distinguish prior consumer traction from new API adoption.
