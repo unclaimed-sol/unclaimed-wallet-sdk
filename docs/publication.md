@@ -22,3 +22,19 @@ Before pushing this tree or changing public documentation:
 5. Keep fixture/test evidence distinct from live adoption or readiness. Founder
    submission form, evidence sheet, competitor claims, videos, external link
    verification and any named customer consent remain separate deliverables.
+
+## September 26 public npm preview
+
+The owner authorized public npm publication as `@unclaimedsol/wallet-sdk`.
+Version `0.1.0-preview.1` is a preview, published with the explicit `latest` tag
+so the documented plain npm install resolves it once publication succeeds.
+Authorization and local package preparation do not establish registry availability.
+The package has no runtime npm dependencies and ships generated client code,
+schema, documentation and third-party notices. The reference application stays
+in the GitHub checkout. API credentials, activation and execution remain separate.
+
+Publish only the inspected tarball after the checks above pass. Existing package
+versions must not be overwritten. If npm authentication or scope permission is
+unavailable, retain the reviewed tarball and complete local sign-in; never put an
+npm token in this repository or in a conversation. No new project license grant
+is made by this packaging change; retained third-party notices apply to their code.

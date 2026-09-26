@@ -1,8 +1,7 @@
 {
   "name": "@unclaimedsol/wallet-sdk",
   "version": "0.1.0-preview.1",
-  "private": true,
-  "description": "Unclaimed API execution preview client and offline reference integration",
+  "description": "Server-side TypeScript client for the Unclaimed API preview",
   "type": "module",
   "engines": {
     "node": ">=22 <25"
@@ -38,5 +37,18 @@
     "typescript": "5.9.3",
     "yaml": "2.8.2",
     "esbuild": "0.27.7"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unclaimed-sol/unclaimed-wallet-sdk.git"
+  },
+  "homepage": "https://github.com/unclaimed-sol/unclaimed-wallet-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/unclaimed-sol/unclaimed-wallet-sdk/issues"
   }
 }

@@ -1,12 +1,20 @@
 # Unclaimed Wallet SDK · execution preview
 
+See [release status and continuation](docs/continuation.md) for the published version
+and verified source/artifact identity.
+
 A TypeScript client for safe-mode analysis and explicitly enabled execution.
 Build and receipt recording are supported; signing and submission belong to the
-integrating application. This is source for review, not an npm release, deployed
-demo or live-provider readiness claim.
-The package remains `private: true` to prevent accidental npm publication.
+integrating application. This is a preview SDK. API access requires separately
+provisioned server-side credentials; installing the package does not enable
+access or execution. The current partner rollout keeps builds disabled.
 
-Requires Node 22–24. From this checkout:
+```sh
+npm install @unclaimedsol/wallet-sdk
+```
+
+Requires Node 22–24. To develop or run the offline reference, use the GitHub
+checkout (the npm package contains the SDK, not the reference application):
 
 ```sh
 npm ci
@@ -21,13 +29,12 @@ requests or wallet connection are needed. Restarting clears local sessions.
 
 ## Server-side use
 
-After `npm run build`, import the local build (or link this package in your
-server project). Set `UNCLAIMED_API_ORIGIN` and `UNCLAIMED_API_KEY` only in the
+Import the installed package in your server project. Set `UNCLAIMED_API_ORIGIN` and `UNCLAIMED_API_KEY` only in the
 server process environment using your existing secret mechanism. No `.env`
 file is loaded automatically. Never put a key in browser code or a URL.
 
 ```ts
-import { createUnclaimedClient, nextWalletPage } from './dist/index.js';
+import { createUnclaimedClient, nextWalletPage } from '@unclaimedsol/wallet-sdk';
 
 const client = createUnclaimedClient({
   baseUrl: process.env.UNCLAIMED_API_ORIGIN!, // operator-provided HTTPS origin
@@ -117,12 +124,12 @@ platform also has a separate real-Postgres SDK acceptance runner; see
 
 See the [prior-work disclosure](PRIOR_WORK.md) and [publication checklist](docs/publication.md).
 
-## Execution preview quick start (not yet deployed)
+## Optional execution integration
 
-The operator must supply a verified HTTPS origin and an approved demo key. Keep
-the key on your server. Execution is disabled by default and requires the engine's
-separately authorized signature-purpose cutover. Local tests do not establish an
-external demo or permission to sign/broadcast real transactions.
+The operator must supply a verified HTTPS origin and an approved API key. Keep
+the key on your server. Execution must be enabled separately by the operator;
+method availability in this package does not mean it is enabled for your key.
+Local tests do not establish live access or permission to sign/broadcast transactions.
 
 ```ts
 const page = await client.checkWallet({ wallet }, { idempotencyKey: analysisKey });
