@@ -1,5 +1,10 @@
 import type { ErrorCode, ErrorEnvelope } from "./types.js";
-export type RetryAction = "same_key" | "new_key" | "restart_snapshot" | "none";
+export type RetryAction =
+  | "same_key"
+  | "new_key"
+  | "restart_snapshot"
+  | "same_receipt"
+  | "none";
 export class UnclaimedApiError extends Error {
   readonly name = "UnclaimedApiError";
   readonly code: ErrorCode;
@@ -10,6 +15,7 @@ export class UnclaimedApiError extends Error {
     readonly status: number,
     envelope: ErrorEnvelope,
     readonly retryAfterMs: number | null,
+    operation: "analysis" | "record" = "analysis",
   ) {
     // Never retain arbitrary server message/details, bearer, request body or URL.
     super(`Unclaimed analysis refused (${envelope.error.code}).`);
@@ -19,14 +25,17 @@ export class UnclaimedApiError extends Error {
     // Only the distinct confirmed terminal code permits a new attempt.
     // requestId is identity, never proof of publication durability.
     this.retryAction =
-      this.code === "snapshot_expired"
-        ? "restart_snapshot"
-        : this.code === "platform_unavailable" ||
-            this.code === "request_in_progress"
-          ? "same_key"
-          : this.retryable
-            ? "new_key"
-            : "none";
+      operation === "record" &&
+      (this.retryable || this.code === "platform_unavailable")
+        ? "same_receipt"
+        : this.code === "snapshot_expired" || this.code === "session_expired"
+          ? "restart_snapshot"
+          : this.code === "platform_unavailable" ||
+              this.code === "request_in_progress"
+            ? "same_key"
+            : this.retryable
+              ? "new_key"
+              : "none";
   }
 }
 export class UnclaimedTransportError extends Error {

@@ -2,8 +2,17 @@ import type {
   CheckWalletRequest,
   CheckWalletResponse,
   ErrorEnvelope,
+  BuildRequest,
+  BuildResponse,
+  RecordRequest,
+  RecordResponse,
 } from "./types.js";
-import { validateResponse, validateError } from "./generated/validate.js";
+import {
+  validateResponse,
+  validateError,
+  validateBuild,
+  validateRecord,
+} from "./generated/validate.js";
 import {
   UnclaimedApiError,
   UnclaimedInputError,
@@ -176,7 +185,126 @@ export function createUnclaimedClient(options: ClientOptions) {
       throw new UnclaimedTransportError();
     }
   }
-  return Object.freeze({ checkWallet });
+  async function executionRequest(
+    path: string,
+    input: unknown,
+    token: string,
+    request?: RequestOptions,
+  ): Promise<unknown> {
+    if (
+      typeof token !== "string" ||
+      token.length > 512 ||
+      !/^[A-Za-z0-9_.-]+$/.test(token)
+    )
+      throw new UnclaimedInputError(
+        "A valid execution capability is required.",
+      );
+    if (
+      path === "/build" &&
+      (!request || typeof request.idempotencyKey !== "string" ||
+        !/^[!-~]{1,128}$/.test(request.idempotencyKey))
+    )
+      throw new UnclaimedInputError(
+        "Retain an explicit build idempotency key.",
+      );
+    const signal = AbortSignal.any([
+      AbortSignal.timeout(timeoutMs),
+      ...(request?.signal ? [request.signal] : []),
+    ]);
+    try {
+      const response = await fetcher(new URL("/api/v1" + path, origin).href, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Unclaimed-SDK-Version": SDK_VERSION,
+          ...(path === "/build"
+            ? {
+                Authorization: `Bearer ${apiKey}`,
+                "Idempotency-Key": request!.idempotencyKey,
+                "X-Unclaimed-Execution-Session": token,
+              }
+            : { "X-Unclaimed-Execution-Receipt": token }),
+        },
+        body: JSON.stringify(input),
+        signal,
+        redirect: "error",
+        cache: "no-store",
+        credentials: "omit",
+      });
+      const payload = await json(response);
+      if (
+        response.status !== 200 &&
+        !(path !== "/build" && response.status === 202)
+      ) {
+        if (!validateError(payload)) throw new UnclaimedProtocolError();
+        throw new UnclaimedApiError(
+          response.status,
+          payload as ErrorEnvelope,
+          retryAfter(response.headers.get("retry-after")),
+          path === "/build" ? "analysis" : "record",
+        );
+      }
+      if (
+        path === "/build" ? !validateBuild(payload) : !validateRecord(payload)
+      )
+        throw new UnclaimedProtocolError();
+      if (
+        path !== "/build" &&
+        (payload as RecordResponse).terminal !== (response.status === 200)
+      )
+        throw new UnclaimedProtocolError();
+      return payload;
+    } catch (error) {
+      if (
+        error instanceof UnclaimedApiError ||
+        error instanceof UnclaimedProtocolError
+      )
+        throw error;
+      throw new UnclaimedTransportError();
+    }
+  }
+  async function build(
+    input: BuildRequest,
+    executionSession: string,
+    request: RequestOptions,
+  ): Promise<BuildResponse> {
+    const result = (await executionRequest(
+      "/build",
+      input,
+      executionSession,
+      request,
+    )) as BuildResponse;
+    const expected = new Set(input.items.map((i) => i.id));
+    if (
+      result.items.length !== expected.size ||
+      result.items.some((i) => !expected.delete(i.id))
+    )
+      throw new UnclaimedProtocolError();
+    const built = new Set(
+      result.items.filter((i) => i.status === "built").map((i) => i.id),
+    );
+    for (const tx of result.transactions)
+      for (const id of tx.itemIds)
+        if (!built.delete(id)) throw new UnclaimedProtocolError();
+    if (
+      built.size ||
+      (result.transactions.length === 0) !== (result.executionReceipt === null)
+    )
+      throw new UnclaimedProtocolError();
+    return result;
+  }
+  async function recordExecution(
+    input: RecordRequest,
+    executionReceipt: string,
+  ): Promise<RecordResponse> {
+    return (await executionRequest(
+      "/executions/record",
+      input,
+      executionReceipt,
+    )) as RecordResponse;
+  }
+  return Object.freeze({ checkWallet, build, recordExecution });
 }
 /** Preserve snapshot-bound settings and the opaque cursor. Caller chooses when to request it. */
 export function nextWalletPage(
