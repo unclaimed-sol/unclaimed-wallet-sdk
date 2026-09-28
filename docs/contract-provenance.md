@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`d170c70f3760bab3b29cd130937f3f0476fae482d3eb6d0f7d42464532134a89`.
+`044cf93f25da85764e85018602c0de2440af20d42a468b72dc3b967845426ef3`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 
@@ -54,3 +54,10 @@ is byte-for-byte synchronized, and both SDK outputs are regenerated. JSON Schema
 conditionals enforce this rule at runtime; the generated TypeScript shape alone
 cannot express it. No separate SDK semantic rule or platform recorder change is
 needed: the recorder already strips those fields from other outcomes.
+
+The subsequent platform review correction documents record lease contention
+(`409 request_in_progress` with `Retry-After`), build session authentication and
+upstream/deadline failures, and closes record transaction variants over extra
+properties. The mounted input and both generated outputs remain synchronized;
+the verified-only value rule is preserved. This is contract synchronization,
+not a package release or deployment.

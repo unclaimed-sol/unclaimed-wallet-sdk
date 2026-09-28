@@ -129,6 +129,28 @@ test("a caller-directed record retry retains the exact receipt and transaction d
   assert.deepEqual(requests[0], requests[1]);
 });
 
+test("record lease contention exposes Retry-After and preserves a caller-directed duplicate replay", async () => {
+  const requests: { body: BodyInit | null | undefined; receipt: string | null }[] = [];
+  const input = {wallet,transactions:[{id:"tx",status:"submitted" as const,signature:"3".repeat(64)}]};
+  const duplicate = record("verified_applied");
+  duplicate.transactions[0]!.outcome = "duplicate";
+  duplicate.transactions[0]!.signature = input.transactions[0]!.signature;
+  Object.assign(duplicate.items[0]!, { recovered: amount, serviceFee: amount, burnedBaseUnits: "0" });
+  const sdk = client(async (_url, init) => {
+    requests.push({body:init?.body,receipt:new Headers(init?.headers).get("x-unclaimed-execution-receipt")});
+    if (requests.length === 1) return Response.json({requestId:"busy",error:{code:"request_in_progress",message:privateDetail,retryable:true}}, {status:409,headers:{"Retry-After":"1"}});
+    return Response.json(duplicate);
+  });
+  await assert.rejects(sdk.recordExecution(input, receipt), error => {
+    assert.ok(error instanceof UnclaimedApiError);
+    assert.equal(error.status,409);assert.equal(error.retryAction,"same_receipt");assert.equal(error.retryAfterMs,1000);
+    assertSanitized(error);return true;
+  });
+  assert.equal(requests.length,1);
+  assert.deepEqual(await sdk.recordExecution(input, receipt),duplicate);
+  assert.deepEqual(requests[0],requests[1]);
+});
+
 test("generated record validation permits value only for verified_applied items", async () => {
   for (const outcome of ["verified_not_applied", "verified_failed", "pending", "unknown", "abandoned_unknown"] as const) {
     const valid = record(outcome);

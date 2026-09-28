@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 d170c70f3760bab3b29cd130937f3f0476fae482d3eb6d0f7d42464532134a89). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 044cf93f25da85764e85018602c0de2440af20d42a468b72dc3b967845426ef3). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -754,7 +754,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
-            /** @description unauthorized: missing or invalid customer API key. */
+            /** @description unauthorized: missing or invalid customer API key or execution session token. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -809,7 +809,7 @@ export interface operations {
                 };
             };
             429: components["responses"]["RateLimited"];
-            /** @description Fresh on-chain validation could not complete safely. No bytes. */
+            /** @description upstream_unavailable: engine unavailable or fresh build evidence invalid. platform_failure_recorded: confirmed terminal storage failure. platform_unavailable: persistence outcome uncertain; reconcile with the same key. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -818,7 +818,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            504: components["responses"]["Timeout"];
+            /** @description deadline_exceeded: fresh build exceeded its remaining engine budget. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     recordExecution: {
@@ -865,6 +873,17 @@ export interface operations {
             /** @description Wallet or transaction ID does not belong to this receipt. */
             403: {
                 headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description request_in_progress: another record call holds this receipt lease. Retry with the same receipt and unchanged transaction data after Retry-After. */
+            409: {
+                headers: {
+                    /** @description Seconds to wait before retrying (currently 1). */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
