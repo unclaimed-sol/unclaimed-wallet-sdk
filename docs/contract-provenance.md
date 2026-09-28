@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`044cf93f25da85764e85018602c0de2440af20d42a468b72dc3b967845426ef3`.
+`a9b9fff2a33edfc42423310ffee933e53f3d7d6d4e794325781aeee27e7fd2ae`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 
@@ -61,3 +61,7 @@ upstream/deadline failures, and closes record transaction variants over extra
 properties. The mounted input and both generated outputs remain synchronized;
 the verified-only value rule is preserved. This is contract synchronization,
 not a package release or deployment.
+
+The final review pass caps record requests at 20 transactions and distinguishes
+record verification failures from uncertain persistence. The mounted contract
+and both generated outputs remain synchronized.

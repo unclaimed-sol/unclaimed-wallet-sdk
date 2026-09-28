@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 044cf93f25da85764e85018602c0de2440af20d42a468b72dc3b967845426ef3). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 a9b9fff2a33edfc42423310ffee933e53f3d7d6d4e794325781aeee27e7fd2ae). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -909,7 +909,7 @@ export interface operations {
                 };
             };
             429: components["responses"]["RateLimited"];
-            /** @description `upstream_unavailable`: status reconciliation could not complete, or `credit_admission_paused` during the signature-purpose migration. Retry. */
+            /** @description upstream_unavailable: verification or status reconciliation could not complete. credit_admission_paused: signature-purpose admission is paused. platform_unavailable: storage failed or its outcome is uncertain. Retry with the same receipt and transaction data. */
             503: {
                 headers: {
                     [name: string]: unknown;

@@ -304,9 +304,10 @@ paths:
         "429":
           $ref: "#/components/responses/RateLimited"
         "503":
-          description: "`upstream_unavailable`: status reconciliation could not complete,
-            or `credit_admission_paused` during the signature-purpose migration.
-            Retry."
+          description: "upstream_unavailable: verification or status reconciliation could
+            not complete. credit_admission_paused: signature-purpose admission
+            is paused. platform_unavailable: storage failed or its outcome is
+            uncertain. Retry with the same receipt and transaction data."
           content:
             application/json:
               schema:
@@ -1633,6 +1634,7 @@ components:
                     enum:
                       - not_signed
                 additionalProperties: false
+          maxItems: 20
       additionalProperties: false
     RecordResponse:
       type: object
