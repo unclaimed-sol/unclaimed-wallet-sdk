@@ -1621,6 +1621,7 @@ components:
                   signature:
                     type: string
                     description: Base58 transaction signature.
+                    pattern: ^[1-9A-HJ-NP-Za-km-z]{64,88}$
                 additionalProperties: false
               - type: object
                 required:

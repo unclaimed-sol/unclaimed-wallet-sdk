@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`a9b9fff2a33edfc42423310ffee933e53f3d7d6d4e794325781aeee27e7fd2ae`.
+`90cf9d9f1d1382cf42d90471163e0d37b96290d8a8bee9def3195763a7cf9ef8`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 
@@ -65,3 +65,7 @@ not a package release or deployment.
 The final review pass caps record requests at 20 transactions and distinguishes
 record verification failures from uncertain persistence. The mounted contract
 and both generated outputs remain synchronized.
+
+The mounted submitted-signature schema now matches the service’s Base58
+alphabet and 64–88-character bounds. The SDK copy and generated outputs were
+regenerated together; this is an unreleased contract synchronization.
