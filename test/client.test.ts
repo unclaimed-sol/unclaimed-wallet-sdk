@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f",
+    "d170c70f3760bab3b29cd130937f3f0476fae482d3eb6d0f7d42464532134a89",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {

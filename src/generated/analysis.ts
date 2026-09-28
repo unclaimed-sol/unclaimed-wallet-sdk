@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 d170c70f3760bab3b29cd130937f3f0476fae482d3eb6d0f7d42464532134a89). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -507,7 +507,7 @@ export interface components {
                 outcome: "verified_success" | "verified_failure" | "pending" | "unknown" | "duplicate" | "not_signed_pending_expiry" | "abandoned_unknown";
                 landedSlot?: number | null;
             }[];
-            items: {
+            items: ({
                 id: string;
                 transactionId: string;
                 /** @enum {string} */
@@ -544,7 +544,7 @@ export interface components {
                  *     only for `verified_applied` burn-and-close items.
                  */
                 burnedBaseUnits?: components["schemas"]["IntegerString"];
-            }[];
+            } & unknown)[];
         };
     };
     responses: {

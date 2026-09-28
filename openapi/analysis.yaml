@@ -1663,6 +1663,22 @@ components:
               - outcome
               - creditPurpose
               - creditState
+            allOf:
+              - if:
+                  properties:
+                    outcome:
+                      const: verified_applied
+                  required:
+                    - outcome
+                else:
+                  not:
+                    anyOf:
+                      - required:
+                          - recovered
+                      - required:
+                          - serviceFee
+                      - required:
+                          - burnedBaseUnits
             properties:
               id:
                 type: string

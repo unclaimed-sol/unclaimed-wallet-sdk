@@ -43,7 +43,19 @@ function retryAfter(value: string | null): number | null {
   const time = Date.parse(value);
   return Number.isFinite(time) ? Math.max(0, time - Date.now()) : null;
 }
-async function json(response: Response): Promise<unknown> {
+function serialize(input: unknown, operation: "Analysis" | "Build" | "Record"): string {
+  try {
+    const body = JSON.stringify(input);
+    if (typeof body === "string") return body;
+  } catch {
+    // Serialization is local: never expose caller data or imply a sent request.
+  }
+  throw new UnclaimedInputError(`${operation} input must be JSON serializable.`);
+}
+async function json(
+  response: Response,
+  operation: "analysis" | "build" | "record" = "analysis",
+): Promise<unknown> {
   if (
     !response.headers
       .get("content-type")
@@ -52,7 +64,7 @@ async function json(response: Response): Promise<unknown> {
     !response.body
   ) {
     await response.body?.cancel().catch(() => {});
-    throw new UnclaimedProtocolError();
+    throw new UnclaimedProtocolError(operation);
   }
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -62,7 +74,7 @@ async function json(response: Response): Promise<unknown> {
       const chunk = await reader.read();
       if (chunk.done) break;
       bytes += chunk.value.length;
-      if (bytes > MAX_RESPONSE_BYTES) throw new UnclaimedProtocolError();
+      if (bytes > MAX_RESPONSE_BYTES) throw new UnclaimedProtocolError(operation);
       chunks.push(chunk.value);
     }
   } finally {
@@ -78,7 +90,7 @@ async function json(response: Response): Promise<unknown> {
   try {
     return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(buffer));
   } catch {
-    throw new UnclaimedProtocolError();
+    throw new UnclaimedProtocolError(operation);
   }
 }
 /** Exactly one HTTP request per invocation. No hidden retries or page purchases. */
@@ -127,14 +139,7 @@ export function createUnclaimedClient(options: ClientOptions) {
       throw new UnclaimedInputError(
         "An explicit printable idempotency key of 1–128 characters is required.",
       );
-    let body: string;
-    try {
-      body = JSON.stringify(input);
-    } catch {
-      throw new UnclaimedInputError(
-        "Analysis input must be JSON serializable.",
-      );
-    }
+    const body = serialize(input, "Analysis");
     const signal = AbortSignal.any([
       AbortSignal.timeout(timeoutMs),
       ...(request.signal ? [request.signal] : []),
@@ -207,6 +212,8 @@ export function createUnclaimedClient(options: ClientOptions) {
       throw new UnclaimedInputError(
         "Retain an explicit build idempotency key.",
       );
+    const operation = path === "/build" ? "build" : "record";
+    const body = serialize(input, operation === "build" ? "Build" : "Record");
     const signal = AbortSignal.any([
       AbortSignal.timeout(timeoutMs),
       ...(request?.signal ? [request.signal] : []),
@@ -226,34 +233,34 @@ export function createUnclaimedClient(options: ClientOptions) {
               }
             : { "X-Unclaimed-Execution-Receipt": token }),
         },
-        body: JSON.stringify(input),
+        body,
         signal,
         redirect: "error",
         cache: "no-store",
         credentials: "omit",
       });
-      const payload = await json(response);
+      const payload = await json(response, operation);
       if (
         response.status !== 200 &&
         !(path !== "/build" && response.status === 202)
       ) {
-        if (!validateError(payload)) throw new UnclaimedProtocolError();
+        if (!validateError(payload)) throw new UnclaimedProtocolError(operation);
         throw new UnclaimedApiError(
           response.status,
           payload as ErrorEnvelope,
           retryAfter(response.headers.get("retry-after")),
-          path === "/build" ? "analysis" : "record",
+          operation,
         );
       }
       if (
         path === "/build" ? !validateBuild(payload) : !validateRecord(payload)
       )
-        throw new UnclaimedProtocolError();
+        throw new UnclaimedProtocolError(operation);
       if (
         path !== "/build" &&
         (payload as RecordResponse).terminal !== (response.status === 200)
       )
-        throw new UnclaimedProtocolError();
+        throw new UnclaimedProtocolError(operation);
       return payload;
     } catch (error) {
       if (
@@ -261,7 +268,7 @@ export function createUnclaimedClient(options: ClientOptions) {
         error instanceof UnclaimedProtocolError
       )
         throw error;
-      throw new UnclaimedTransportError();
+      throw new UnclaimedTransportError(operation);
     }
   }
   async function build(
@@ -280,18 +287,18 @@ export function createUnclaimedClient(options: ClientOptions) {
       result.items.length !== expected.size ||
       result.items.some((i) => !expected.delete(i.id))
     )
-      throw new UnclaimedProtocolError();
+      throw new UnclaimedProtocolError("build");
     const built = new Set(
       result.items.filter((i) => i.status === "built").map((i) => i.id),
     );
     for (const tx of result.transactions)
       for (const id of tx.itemIds)
-        if (!built.delete(id)) throw new UnclaimedProtocolError();
+        if (!built.delete(id)) throw new UnclaimedProtocolError("build");
     if (
       built.size ||
       (result.transactions.length === 0) !== (result.executionReceipt === null)
     )
-      throw new UnclaimedProtocolError();
+      throw new UnclaimedProtocolError("build");
     return result;
   }
   async function recordExecution(

@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f`.
+`d170c70f3760bab3b29cd130937f3f0476fae482d3eb6d0f7d42464532134a89`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 
@@ -45,3 +45,12 @@ not execution acceptance. The owner has separately authorized public npm
 publication of the preview SDK. This does not authorize API deployment, live
 access or execution. The private platform owns real Postgres and synthetic engine
 acceptance; no private implementation source is copied into this repository.
+
+## September 28 record outcome correction
+
+The platform-owned record schema now prohibits `recovered`, `serviceFee` and
+`burnedBaseUnits` unless the item outcome is `verified_applied`. The mounted copy
+is byte-for-byte synchronized, and both SDK outputs are regenerated. JSON Schema
+conditionals enforce this rule at runtime; the generated TypeScript shape alone
+cannot express it. No separate SDK semantic rule or platform recorder change is
+needed: the recorder already strips those fields from other outcomes.

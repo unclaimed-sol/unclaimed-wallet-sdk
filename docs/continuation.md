@@ -44,9 +44,27 @@ a license for the SDK itself. This documentation does not make that choice.
 
 ## Unreleased review corrections
 
-The current review branch now rejects missing/non-string build idempotency keys
-and regenerates the mounted contract with corrected build headers/authentication,
-actual refusal codes and intact descriptions. These corrections are not in the
-published `0.1.0-preview.1` tarball identified above. A future publication requires
-a new version, fresh artifact review and separate authorization; do not republish
-the existing version.
+Merged PR #3 already rejects missing/non-string build idempotency keys and
+regenerates the mounted contract with corrected build headers/authentication,
+actual refusal codes and intact descriptions. Those corrections are not in the
+published `0.1.0-preview.1` tarball identified above.
+
+The September 28 independent published-package assessment reproduced three
+remaining issues on main: execution serialization errors were classified as
+transport failures, unknown recording outcomes advised an idempotency-key retry,
+and the record schema admitted recovery fields on unverified outcomes. The
+follow-up fixes classify serialization locally, use `same_receipt` for record
+transport/protocol failures, and regenerate the platform-owned outcome constraint.
+Recovery, fee and burned-amount fields now require `verified_applied`. The
+existing missing-key fix passed the assessment unchanged and was not duplicated.
+
+Validation: all 56 SDK tests (including generation, typecheck and build), the
+independent harness's 88 behavior checks and six finding assertions, and its
+strict TypeScript sample pass offline. The original assessment stays unchanged;
+these results use a separate copy against current source. No test establishes
+live API access or recovery. The private handoff records platform/Postgres and
+synthetic execution acceptance and exact revisions.
+
+A future publication requires a new version, fresh artifact review and separate
+authorization; do not republish the existing version. No publication, deployment
+or activation is part of these corrections.

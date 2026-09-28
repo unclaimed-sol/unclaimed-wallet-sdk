@@ -73,7 +73,7 @@ may change. `nextWalletPage` carries settings and the opaque cursor forward.
 `UnclaimedApiError` exposes generated `code`, `status`, `requestId`, `retryable`,
 `retryAfterMs` and `retryAction`. `UnclaimedTransportError` and
 `UnclaimedProtocolError` mark unknown outcomes. `UnclaimedInputError` identifies
-local configuration/key errors. With no Retry-After, use a bounded backoff;
+local configuration/key or JSON serialization errors before sending. With no Retry-After, use a bounded backoff;
 the reference waits at least one second and requires a button click per retry.
 An unresolved attempt blocks starting over until same-key reconciliation. Expired
 snapshots have an explicit restart that preserves the original settings and drops
@@ -160,7 +160,9 @@ Build retries preserve the original idempotency key and body when the outcome is
 unknown. A confirmed `platform_failure_recorded` permits a deliberate new-key
 attempt. The same session item cannot silently create a second published build.
 Record retries use the same receipt and reported signatures (`same_receipt` on
-retryable API refusals). A 202 is pending reconciliation. `abandoned_unknown`
+retryable API refusals, transport failures and malformed responses). Retain the
+unchanged reported transaction data; recording uses no idempotency key.
+A 202 is pending reconciliation. `abandoned_unknown`
 is unverified expiry, carries no recovered value and never proves chain absence.
 A later valid signature can supersede it. No API cashback or partner credit is
 created. Empty-account execution retains the disclosed risk of burning later
