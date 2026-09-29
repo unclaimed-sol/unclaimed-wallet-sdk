@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 90cf9d9f1d1382cf42d90471163e0d37b96290d8a8bee9def3195763a7cf9ef8). Do not edit.
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
@@ -6209,7 +6209,7 @@ function validate47(data, { instancePath = "", parentData, parentDataProperty, r
 }
 validate47.evaluated = { "props": { "requestId": true, "analysisRequestId": true, "apiVersion": true, "analysisRulesetVersion": true, "rulesetVersion": true, "builtAt": true, "transactions": true, "items": true, "plan": true, "executionReceipt": true, "warnings": true }, "dynamicProps": false, "dynamicItems": false };
 var validateRecord = validate78;
-var schema84 = { "type": "object", "required": ["requestId", "receiptId", "terminal", "transactions", "items"], "properties": { "requestId": { "type": "string" }, "receiptId": { "type": "string" }, "terminal": { "type": "boolean", "description": "True on 200; false on 202." }, "transactions": { "type": "array", "items": { "type": "object", "required": ["id", "outcome"], "properties": { "id": { "type": "string" }, "signature": { "type": ["string", "null"] }, "outcome": { "type": "string", "enum": ["verified_success", "verified_failure", "pending", "unknown", "duplicate", "not_signed_pending_expiry", "abandoned_unknown"] }, "landedSlot": { "type": ["integer", "null"] } } } }, "items": { "type": "array", "items": { "type": "object", "required": ["id", "transactionId", "outcome", "creditPurpose", "creditState"], "properties": { "id": { "type": "string" }, "transactionId": { "type": "string" }, "outcome": { "type": "string", "enum": ["verified_applied", "verified_not_applied", "verified_failed", "pending", "unknown", "abandoned_unknown"] }, "creditPurpose": { "type": ["string", "null"], "enum": ["api_execution", "website_cashback", "partner_credit", null], "description": "Which purpose holds the canonical reservation for this\nitem's signature, or null while no signature exists\n(`not_signed`, `not_signed_pending_expiry`,\n`abandoned_unknown`) or no reservation has been made yet.\n`api_execution` is the normal preview value and creates no\ncredit. `website_cashback` or `partner_credit` means that\nprogram reserved the signature before this record arrived;\nthe execution outcome is still verified and recorded here,\nand no second credit is applied. Independent of `outcome`.\n" }, "creditState": { "type": ["string", "null"], "enum": ["reserved", "held", "published", null], "description": "`reserved` means the purpose holder claimed the signature;\n`held` means a legacy claim without ledger evidence that is\nawaiting Admin reconciliation; `published` means the holder\ncommitted its ledger entry. Neither `reserved` nor `held`\nis proof of payment. Null whenever `creditPurpose` is null.\n" }, "recovered": { "$ref": "#/components/schemas/Amount", "description": "Present only for `verified_applied`. Net to the wallet after the service fee, derived from on-chain state, never from client input." }, "serviceFee": { "$ref": "#/components/schemas/Amount" }, "burnedBaseUnits": { "$ref": "#/components/schemas/IntegerString", "description": "Preview: the amount the landed `burn_and_close` actually\nburned, from the transaction. Compared server-side with the\nreviewed balance to measure the section 6 downgrade. Present\nonly for `verified_applied` burn-and-close items.\n" } } } } } };
+var schema84 = { "type": "object", "required": ["requestId", "receiptId", "terminal", "transactions", "items"], "properties": { "requestId": { "type": "string" }, "receiptId": { "type": "string" }, "terminal": { "type": "boolean", "description": "True on 200; false on 202." }, "transactions": { "type": "array", "items": { "type": "object", "required": ["id", "outcome"], "properties": { "id": { "type": "string" }, "signature": { "type": ["string", "null"] }, "outcome": { "type": "string", "enum": ["verified_success", "verified_failure", "pending", "unknown", "duplicate", "not_signed_pending_expiry", "abandoned_unknown"] }, "landedSlot": { "type": ["integer", "null"] } } } }, "items": { "type": "array", "items": { "type": "object", "required": ["id", "transactionId", "outcome", "creditPurpose", "creditState"], "allOf": [{ "if": { "properties": { "outcome": { "const": "verified_applied" } }, "required": ["outcome"] }, "else": { "not": { "anyOf": [{ "required": ["recovered"] }, { "required": ["serviceFee"] }, { "required": ["burnedBaseUnits"] }] } } }], "properties": { "id": { "type": "string" }, "transactionId": { "type": "string" }, "outcome": { "type": "string", "enum": ["verified_applied", "verified_not_applied", "verified_failed", "pending", "unknown", "abandoned_unknown"] }, "creditPurpose": { "type": ["string", "null"], "enum": ["api_execution", "website_cashback", "partner_credit", null], "description": "Which purpose holds the canonical reservation for this\nitem's signature, or null while no signature exists\n(`not_signed`, `not_signed_pending_expiry`,\n`abandoned_unknown`) or no reservation has been made yet.\n`api_execution` is the normal preview value and creates no\ncredit. `website_cashback` or `partner_credit` means that\nprogram reserved the signature before this record arrived;\nthe execution outcome is still verified and recorded here,\nand no second credit is applied. Independent of `outcome`.\n" }, "creditState": { "type": ["string", "null"], "enum": ["reserved", "held", "published", null], "description": "`reserved` means the purpose holder claimed the signature;\n`held` means a legacy claim without ledger evidence that is\nawaiting Admin reconciliation; `published` means the holder\ncommitted its ledger entry. Neither `reserved` nor `held`\nis proof of payment. Null whenever `creditPurpose` is null.\n" }, "recovered": { "$ref": "#/components/schemas/Amount", "description": "Present only for `verified_applied`. Net to the wallet after the service fee, derived from on-chain state, never from client input." }, "serviceFee": { "$ref": "#/components/schemas/Amount" }, "burnedBaseUnits": { "$ref": "#/components/schemas/IntegerString", "description": "Preview: the amount the landed `burn_and_close` actually\nburned, from the transaction. Compared server-side with the\nreviewed balance to measure the section 6 downgrade. Present\nonly for `verified_applied` burn-and-close items.\n" } } } } } };
 function validate80(data, { instancePath = "", parentData, parentDataProperty, rootData = data, dynamicAnchors = {} } = {}) {
   let vErrors = null;
   let errors = 0;
@@ -6466,112 +6466,245 @@ function validate79(data, { instancePath = "", parentData, parentDataProperty, r
                       for (let i1 = 0; i1 < len1; i1++) {
                         let data10 = data9[i1];
                         const _errs21 = errors;
+                        const _errs24 = errors;
+                        let valid5 = true;
+                        const _errs25 = errors;
+                        if (data10 && typeof data10 == "object" && !Array.isArray(data10)) {
+                          let missing2;
+                          if (data10.outcome === void 0 && (missing2 = "outcome")) {
+                            const err0 = {};
+                            if (vErrors === null) {
+                              vErrors = [err0];
+                            } else {
+                              vErrors.push(err0);
+                            }
+                            errors++;
+                          } else {
+                            if (data10.outcome !== void 0) {
+                              if ("verified_applied" !== data10.outcome) {
+                                const err1 = {};
+                                if (vErrors === null) {
+                                  vErrors = [err1];
+                                } else {
+                                  vErrors.push(err1);
+                                }
+                                errors++;
+                              }
+                            }
+                          }
+                        }
+                        var _valid0 = _errs25 === errors;
+                        errors = _errs24;
+                        if (vErrors !== null) {
+                          if (_errs24) {
+                            vErrors.length = _errs24;
+                          } else {
+                            vErrors = null;
+                          }
+                        }
+                        if (!_valid0) {
+                          const _errs27 = errors;
+                          const _errs28 = errors;
+                          const _errs29 = errors;
+                          const _errs30 = errors;
+                          let valid8 = false;
+                          const _errs31 = errors;
+                          if (data10 && typeof data10 == "object" && !Array.isArray(data10)) {
+                            let missing3;
+                            if (data10.recovered === void 0 && (missing3 = "recovered")) {
+                              const err2 = {};
+                              if (vErrors === null) {
+                                vErrors = [err2];
+                              } else {
+                                vErrors.push(err2);
+                              }
+                              errors++;
+                            }
+                          }
+                          var _valid1 = _errs31 === errors;
+                          valid8 = valid8 || _valid1;
+                          const _errs32 = errors;
+                          if (data10 && typeof data10 == "object" && !Array.isArray(data10)) {
+                            let missing4;
+                            if (data10.serviceFee === void 0 && (missing4 = "serviceFee")) {
+                              const err3 = {};
+                              if (vErrors === null) {
+                                vErrors = [err3];
+                              } else {
+                                vErrors.push(err3);
+                              }
+                              errors++;
+                            }
+                          }
+                          var _valid1 = _errs32 === errors;
+                          valid8 = valid8 || _valid1;
+                          const _errs33 = errors;
+                          if (data10 && typeof data10 == "object" && !Array.isArray(data10)) {
+                            let missing5;
+                            if (data10.burnedBaseUnits === void 0 && (missing5 = "burnedBaseUnits")) {
+                              const err4 = {};
+                              if (vErrors === null) {
+                                vErrors = [err4];
+                              } else {
+                                vErrors.push(err4);
+                              }
+                              errors++;
+                            }
+                          }
+                          var _valid1 = _errs33 === errors;
+                          valid8 = valid8 || _valid1;
+                          if (!valid8) {
+                            const err5 = {};
+                            if (vErrors === null) {
+                              vErrors = [err5];
+                            } else {
+                              vErrors.push(err5);
+                            }
+                            errors++;
+                          } else {
+                            errors = _errs30;
+                            if (vErrors !== null) {
+                              if (_errs30) {
+                                vErrors.length = _errs30;
+                              } else {
+                                vErrors = null;
+                              }
+                            }
+                          }
+                          var valid7 = _errs29 === errors;
+                          if (valid7) {
+                            validate79.errors = [{ instancePath: instancePath + "/items/" + i1, schemaPath: "#/properties/items/items/allOf/0/else/not", keyword: "not", params: {}, message: "must NOT be valid" }];
+                            return false;
+                          } else {
+                            errors = _errs28;
+                            if (vErrors !== null) {
+                              if (_errs28) {
+                                vErrors.length = _errs28;
+                              } else {
+                                vErrors = null;
+                              }
+                            }
+                          }
+                          var _valid0 = _errs27 === errors;
+                          valid5 = _valid0;
+                        }
+                        if (!valid5) {
+                          const err6 = { instancePath: instancePath + "/items/" + i1, schemaPath: "#/properties/items/items/allOf/0/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
+                          if (vErrors === null) {
+                            vErrors = [err6];
+                          } else {
+                            vErrors.push(err6);
+                          }
+                          errors++;
+                          validate79.errors = vErrors;
+                          return false;
+                        }
                         if (errors === _errs21) {
                           if (data10 && typeof data10 == "object" && !Array.isArray(data10)) {
-                            let missing2;
-                            if (data10.id === void 0 && (missing2 = "id") || data10.transactionId === void 0 && (missing2 = "transactionId") || data10.outcome === void 0 && (missing2 = "outcome") || data10.creditPurpose === void 0 && (missing2 = "creditPurpose") || data10.creditState === void 0 && (missing2 = "creditState")) {
-                              validate79.errors = [{ instancePath: instancePath + "/items/" + i1, schemaPath: "#/properties/items/items/required", keyword: "required", params: { missingProperty: missing2 }, message: "must have required property '" + missing2 + "'" }];
+                            let missing6;
+                            if (data10.id === void 0 && (missing6 = "id") || data10.transactionId === void 0 && (missing6 = "transactionId") || data10.outcome === void 0 && (missing6 = "outcome") || data10.creditPurpose === void 0 && (missing6 = "creditPurpose") || data10.creditState === void 0 && (missing6 = "creditState")) {
+                              validate79.errors = [{ instancePath: instancePath + "/items/" + i1, schemaPath: "#/properties/items/items/required", keyword: "required", params: { missingProperty: missing6 }, message: "must have required property '" + missing6 + "'" }];
                               return false;
                             } else {
                               if (data10.id !== void 0) {
-                                const _errs23 = errors;
+                                const _errs34 = errors;
                                 if (typeof data10.id !== "string") {
                                   validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/id", schemaPath: "#/properties/items/items/properties/id/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                   return false;
                                 }
-                                var valid4 = _errs23 === errors;
+                                var valid9 = _errs34 === errors;
                               } else {
-                                var valid4 = true;
+                                var valid9 = true;
                               }
-                              if (valid4) {
+                              if (valid9) {
                                 if (data10.transactionId !== void 0) {
-                                  const _errs25 = errors;
+                                  const _errs36 = errors;
                                   if (typeof data10.transactionId !== "string") {
                                     validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/transactionId", schemaPath: "#/properties/items/items/properties/transactionId/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
                                   }
-                                  var valid4 = _errs25 === errors;
+                                  var valid9 = _errs36 === errors;
                                 } else {
-                                  var valid4 = true;
+                                  var valid9 = true;
                                 }
-                                if (valid4) {
+                                if (valid9) {
                                   if (data10.outcome !== void 0) {
-                                    let data13 = data10.outcome;
-                                    const _errs27 = errors;
-                                    if (typeof data13 !== "string") {
+                                    let data14 = data10.outcome;
+                                    const _errs38 = errors;
+                                    if (typeof data14 !== "string") {
                                       validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/outcome", schemaPath: "#/properties/items/items/properties/outcome/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                       return false;
                                     }
-                                    if (!(data13 === "verified_applied" || data13 === "verified_not_applied" || data13 === "verified_failed" || data13 === "pending" || data13 === "unknown" || data13 === "abandoned_unknown")) {
+                                    if (!(data14 === "verified_applied" || data14 === "verified_not_applied" || data14 === "verified_failed" || data14 === "pending" || data14 === "unknown" || data14 === "abandoned_unknown")) {
                                       validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/outcome", schemaPath: "#/properties/items/items/properties/outcome/enum", keyword: "enum", params: { allowedValues: schema84.properties.items.items.properties.outcome.enum }, message: "must be equal to one of the allowed values" }];
                                       return false;
                                     }
-                                    var valid4 = _errs27 === errors;
+                                    var valid9 = _errs38 === errors;
                                   } else {
-                                    var valid4 = true;
+                                    var valid9 = true;
                                   }
-                                  if (valid4) {
+                                  if (valid9) {
                                     if (data10.creditPurpose !== void 0) {
-                                      let data14 = data10.creditPurpose;
-                                      const _errs29 = errors;
-                                      if (typeof data14 !== "string" && data14 !== null) {
+                                      let data15 = data10.creditPurpose;
+                                      const _errs40 = errors;
+                                      if (typeof data15 !== "string" && data15 !== null) {
                                         validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/creditPurpose", schemaPath: "#/properties/items/items/properties/creditPurpose/type", keyword: "type", params: { type: schema84.properties.items.items.properties.creditPurpose.type }, message: "must be string,null" }];
                                         return false;
                                       }
-                                      if (!(data14 === "api_execution" || data14 === "website_cashback" || data14 === "partner_credit" || data14 === null)) {
+                                      if (!(data15 === "api_execution" || data15 === "website_cashback" || data15 === "partner_credit" || data15 === null)) {
                                         validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/creditPurpose", schemaPath: "#/properties/items/items/properties/creditPurpose/enum", keyword: "enum", params: { allowedValues: schema84.properties.items.items.properties.creditPurpose.enum }, message: "must be equal to one of the allowed values" }];
                                         return false;
                                       }
-                                      var valid4 = _errs29 === errors;
+                                      var valid9 = _errs40 === errors;
                                     } else {
-                                      var valid4 = true;
+                                      var valid9 = true;
                                     }
-                                    if (valid4) {
+                                    if (valid9) {
                                       if (data10.creditState !== void 0) {
-                                        let data15 = data10.creditState;
-                                        const _errs31 = errors;
-                                        if (typeof data15 !== "string" && data15 !== null) {
+                                        let data16 = data10.creditState;
+                                        const _errs42 = errors;
+                                        if (typeof data16 !== "string" && data16 !== null) {
                                           validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/creditState", schemaPath: "#/properties/items/items/properties/creditState/type", keyword: "type", params: { type: schema84.properties.items.items.properties.creditState.type }, message: "must be string,null" }];
                                           return false;
                                         }
-                                        if (!(data15 === "reserved" || data15 === "held" || data15 === "published" || data15 === null)) {
+                                        if (!(data16 === "reserved" || data16 === "held" || data16 === "published" || data16 === null)) {
                                           validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/creditState", schemaPath: "#/properties/items/items/properties/creditState/enum", keyword: "enum", params: { allowedValues: schema84.properties.items.items.properties.creditState.enum }, message: "must be equal to one of the allowed values" }];
                                           return false;
                                         }
-                                        var valid4 = _errs31 === errors;
+                                        var valid9 = _errs42 === errors;
                                       } else {
-                                        var valid4 = true;
+                                        var valid9 = true;
                                       }
-                                      if (valid4) {
+                                      if (valid9) {
                                         if (data10.recovered !== void 0) {
-                                          const _errs33 = errors;
+                                          const _errs44 = errors;
                                           if (!validate80(data10.recovered, { instancePath: instancePath + "/items/" + i1 + "/recovered", parentData: data10, parentDataProperty: "recovered", rootData, dynamicAnchors })) {
                                             vErrors = vErrors === null ? validate80.errors : vErrors.concat(validate80.errors);
                                             errors = vErrors.length;
                                           }
-                                          var valid4 = _errs33 === errors;
+                                          var valid9 = _errs44 === errors;
                                         } else {
-                                          var valid4 = true;
+                                          var valid9 = true;
                                         }
-                                        if (valid4) {
+                                        if (valid9) {
                                           if (data10.serviceFee !== void 0) {
-                                            const _errs34 = errors;
+                                            const _errs45 = errors;
                                             if (!validate80(data10.serviceFee, { instancePath: instancePath + "/items/" + i1 + "/serviceFee", parentData: data10, parentDataProperty: "serviceFee", rootData, dynamicAnchors })) {
                                               vErrors = vErrors === null ? validate80.errors : vErrors.concat(validate80.errors);
                                               errors = vErrors.length;
                                             }
-                                            var valid4 = _errs34 === errors;
+                                            var valid9 = _errs45 === errors;
                                           } else {
-                                            var valid4 = true;
+                                            var valid9 = true;
                                           }
-                                          if (valid4) {
+                                          if (valid9) {
                                             if (data10.burnedBaseUnits !== void 0) {
-                                              let data18 = data10.burnedBaseUnits;
-                                              const _errs35 = errors;
-                                              const _errs36 = errors;
-                                              if (errors === _errs36) {
-                                                if (typeof data18 === "string") {
-                                                  if (!pattern9.test(data18)) {
+                                              let data19 = data10.burnedBaseUnits;
+                                              const _errs46 = errors;
+                                              const _errs47 = errors;
+                                              if (errors === _errs47) {
+                                                if (typeof data19 === "string") {
+                                                  if (!pattern9.test(data19)) {
                                                     validate79.errors = [{ instancePath: instancePath + "/items/" + i1 + "/burnedBaseUnits", schemaPath: "#/components/schemas/IntegerString/pattern", keyword: "pattern", params: { pattern: "^[0-9]+$" }, message: 'must match pattern "^[0-9]+$"' }];
                                                     return false;
                                                   }
@@ -6580,9 +6713,9 @@ function validate79(data, { instancePath = "", parentData, parentDataProperty, r
                                                   return false;
                                                 }
                                               }
-                                              var valid4 = _errs35 === errors;
+                                              var valid9 = _errs46 === errors;
                                             } else {
-                                              var valid4 = true;
+                                              var valid9 = true;
                                             }
                                           }
                                         }

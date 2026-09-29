@@ -5,6 +5,7 @@ export type RetryAction =
   | "restart_snapshot"
   | "same_receipt"
   | "none";
+type Operation = "analysis" | "build" | "record";
 export class UnclaimedApiError extends Error {
   readonly name = "UnclaimedApiError";
   readonly code: ErrorCode;
@@ -15,10 +16,10 @@ export class UnclaimedApiError extends Error {
     readonly status: number,
     envelope: ErrorEnvelope,
     readonly retryAfterMs: number | null,
-    operation: "analysis" | "record" = "analysis",
+    operation: Operation = "analysis",
   ) {
     // Never retain arbitrary server message/details, bearer, request body or URL.
-    super(`Unclaimed analysis refused (${envelope.error.code}).`);
+    super(`Unclaimed ${operation} refused (${envelope.error.code}).`);
     this.code = envelope.error.code;
     this.requestId = envelope.requestId;
     this.retryable = envelope.error.retryable;
@@ -40,20 +41,26 @@ export class UnclaimedApiError extends Error {
 }
 export class UnclaimedTransportError extends Error {
   readonly name = "UnclaimedTransportError";
-  readonly retryAction = "same_key";
-  constructor() {
+  readonly retryAction: "same_key" | "same_receipt";
+  constructor(operation: Operation = "analysis") {
     super(
-      "Analysis response unavailable. Outcome unknown; retry the unchanged request with the same idempotency key.",
+      operation === "record"
+        ? "Record response unavailable. Outcome unknown; retry the unchanged reported transaction data with the same execution receipt."
+        : `${operation === "build" ? "Build" : "Analysis"} response unavailable. Outcome unknown; retry the unchanged request with the same idempotency key.`,
     );
+    this.retryAction = operation === "record" ? "same_receipt" : "same_key";
   }
 }
 export class UnclaimedProtocolError extends Error {
   readonly name = "UnclaimedProtocolError";
-  readonly retryAction = "same_key";
-  constructor() {
+  readonly retryAction: "same_key" | "same_receipt";
+  constructor(operation: Operation = "analysis") {
     super(
-      "Invalid analysis response. Outcome unknown; retain the unchanged request and idempotency key.",
+      operation === "record"
+        ? "Invalid record response. Outcome unknown; retain the unchanged reported transaction data and execution receipt."
+        : `Invalid ${operation} response. Outcome unknown; retain the unchanged request and idempotency key.`,
     );
+    this.retryAction = operation === "record" ? "same_receipt" : "same_key";
   }
 }
 export class UnclaimedInputError extends Error {

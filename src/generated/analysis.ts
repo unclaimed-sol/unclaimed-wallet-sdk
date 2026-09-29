@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 d9f7c142d812bf35464f503a49402c18734f1ad7d8978017951d892940654b3f). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 90cf9d9f1d1382cf42d90471163e0d37b96290d8a8bee9def3195763a7cf9ef8). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -507,7 +507,7 @@ export interface components {
                 outcome: "verified_success" | "verified_failure" | "pending" | "unknown" | "duplicate" | "not_signed_pending_expiry" | "abandoned_unknown";
                 landedSlot?: number | null;
             }[];
-            items: {
+            items: ({
                 id: string;
                 transactionId: string;
                 /** @enum {string} */
@@ -544,7 +544,7 @@ export interface components {
                  *     only for `verified_applied` burn-and-close items.
                  */
                 burnedBaseUnits?: components["schemas"]["IntegerString"];
-            }[];
+            } & unknown)[];
         };
     };
     responses: {
@@ -754,7 +754,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
-            /** @description unauthorized: missing or invalid customer API key. */
+            /** @description unauthorized: missing or invalid customer API key or execution session token. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -809,7 +809,7 @@ export interface operations {
                 };
             };
             429: components["responses"]["RateLimited"];
-            /** @description Fresh on-chain validation could not complete safely. No bytes. */
+            /** @description upstream_unavailable: engine unavailable or fresh build evidence invalid. platform_failure_recorded: confirmed terminal storage failure. platform_unavailable: persistence outcome uncertain; reconcile with the same key. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -818,7 +818,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            504: components["responses"]["Timeout"];
+            /** @description deadline_exceeded: fresh build exceeded its remaining engine budget. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     recordExecution: {
@@ -871,6 +879,17 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description request_in_progress: another record call holds this receipt lease. Retry with the same receipt and unchanged transaction data after Retry-After. */
+            409: {
+                headers: {
+                    /** @description Seconds to wait before retrying (currently 1). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Receipt expired before any record was started. */
             410: {
                 headers: {
@@ -890,7 +909,7 @@ export interface operations {
                 };
             };
             429: components["responses"]["RateLimited"];
-            /** @description `upstream_unavailable`: status reconciliation could not complete, or `credit_admission_paused` during the signature-purpose migration. Retry. */
+            /** @description upstream_unavailable: verification or status reconciliation could not complete. credit_admission_paused: signature-purpose admission is paused. platform_unavailable: storage failed or its outcome is uncertain. Retry with the same receipt and transaction data. */
             503: {
                 headers: {
                     [name: string]: unknown;

@@ -31,3 +31,9 @@ record cross-repository work in its single authoritative engine handoff.
 SDK generation preserves dependency symlinks when bundling standalone validators,
 so emitted helper labels are independent of the dependency-cache checkout path.
 Keep generation freshness passing in ordinary and symlinked local installs.
+
+Execution serialization failures are local input errors before sending. Unknown
+build outcomes retain the same key; unknown record outcomes retain the same
+receipt and transaction data (`same_receipt`). Outcome-dependent recovery fields
+are enforced by the platform-owned schema and generated validators, not a second
+handwritten SDK rule. Keep the mounted copy and generated outputs synchronized.

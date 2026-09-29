@@ -161,7 +161,8 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
-          description: "unauthorized: missing or invalid customer API key."
+          description: "unauthorized: missing or invalid customer API key or execution
+            session token."
           content:
             application/json:
               schema:
@@ -203,13 +204,21 @@ paths:
         "429":
           $ref: "#/components/responses/RateLimited"
         "503":
-          description: Fresh on-chain validation could not complete safely. No bytes.
+          description: "upstream_unavailable: engine unavailable or fresh build evidence
+            invalid. platform_failure_recorded: confirmed terminal storage
+            failure. platform_unavailable: persistence outcome uncertain;
+            reconcile with the same key."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "504":
-          $ref: "#/components/responses/Timeout"
+          description: "deadline_exceeded: fresh build exceeded its remaining engine
+            budget."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
   /executions/record:
@@ -264,6 +273,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: "request_in_progress: another record call holds this receipt lease.
+            Retry with the same receipt and unchanged transaction data after
+            Retry-After."
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying (currently 1).
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "410":
           description: Receipt expired before any record was started.
           content:
@@ -281,9 +304,10 @@ paths:
         "429":
           $ref: "#/components/responses/RateLimited"
         "503":
-          description: "`upstream_unavailable`: status reconciliation could not complete,
-            or `credit_admission_paused` during the signature-purpose migration.
-            Retry."
+          description: "upstream_unavailable: verification or status reconciliation could
+            not complete. credit_admission_paused: signature-purpose admission
+            is paused. platform_unavailable: storage failed or its outcome is
+            uncertain. Retry with the same receipt and transaction data."
           content:
             application/json:
               schema:
@@ -1597,6 +1621,8 @@ components:
                   signature:
                     type: string
                     description: Base58 transaction signature.
+                    pattern: ^[1-9A-HJ-NP-Za-km-z]{64,88}$
+                additionalProperties: false
               - type: object
                 required:
                   - id
@@ -1608,6 +1634,8 @@ components:
                     type: string
                     enum:
                       - not_signed
+                additionalProperties: false
+          maxItems: 20
       additionalProperties: false
     RecordResponse:
       type: object
@@ -1663,6 +1691,22 @@ components:
               - outcome
               - creditPurpose
               - creditState
+            allOf:
+              - if:
+                  properties:
+                    outcome:
+                      const: verified_applied
+                  required:
+                    - outcome
+                else:
+                  not:
+                    anyOf:
+                      - required:
+                          - recovered
+                      - required:
+                          - serviceFee
+                      - required:
+                          - burnedBaseUnits
             properties:
               id:
                 type: string
