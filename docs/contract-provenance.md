@@ -68,4 +68,4 @@ and both generated outputs remain synchronized.
 
 The mounted submitted-signature schema now matches the service’s Base58
 alphabet and 64–88-character bounds. The SDK copy and generated outputs were
-regenerated together; this is an unreleased contract synchronization.
+regenerated together and are included in version `0.1.0-preview.2`.

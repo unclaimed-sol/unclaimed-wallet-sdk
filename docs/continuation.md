@@ -1,5 +1,21 @@
 # SDK release and continuation
 
+## Version 0.1.0-preview.2
+
+This checkout targets `@unclaimedsol/wallet-sdk@0.1.0-preview.2`, based on
+merged SDK main `02855bef4f6f70cbfccd8be863f62002d6c3dc9c`. It includes the
+previous missing-build-key correction and the remaining independent-assessment
+fixes: local serialization errors, `same_receipt` guidance for unknown recording
+outcomes, and platform-generated outcome constraints. The mounted contract also
+keeps `submittedSignatures` typed as an array of Solana signatures.
+
+The package version and `X-Unclaimed-SDK-Version` header are both
+`0.1.0-preview.2`. Registry metadata determines whether this version is available;
+source readiness alone does not establish publication. API credentials and
+execution enablement remain separate from the SDK release.
+
+## Historical published version 0.1.0-preview.1
+
 Updated September 26, 2026. `@unclaimedsol/wallet-sdk@0.1.0-preview.1` is public
 on npm. Unauthenticated registry metadata, latest tag, integrity, a fresh plain
 install and package-name import were verified. Early post-publication 404s are
@@ -42,7 +58,7 @@ The project LICENSE and package license field are absent. Choosing a project
 license remains an owner decision for review; third-party notices do not supply
 a license for the SDK itself. This documentation does not make that choice.
 
-## Unreleased review corrections
+## Corrections included in 0.1.0-preview.2
 
 Merged PR #3 already rejects missing/non-string build idempotency keys and
 regenerates the mounted contract with corrected build headers/authentication,
@@ -65,6 +81,6 @@ these results use a separate copy against current source. No test establishes
 live API access or recovery. The private handoff records platform/Postgres and
 synthetic execution acceptance and exact revisions.
 
-A future publication requires a new version, fresh artifact review and separate
-authorization; do not republish the existing version. No publication, deployment
-or activation is part of these corrections.
+The fixes above were merged before release preparation. Publication requires
+inspection of the versioned tarball under `docs/publication.md`; do not overwrite
+an existing version. Publishing the SDK does not deploy or activate the API.

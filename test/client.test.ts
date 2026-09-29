@@ -79,7 +79,7 @@ test("one request, explicit headers and exact cursor/body, no redirects", async 
     const h = new Headers(init?.headers);
     assert.equal(h.get("authorization"), "Bearer offline-fixture-only");
     assert.equal(h.get("idempotency-key"), "explicit-page-1");
-    assert.equal(h.get("x-unclaimed-sdk-version"), "0.1.0-preview.1");
+    assert.equal(h.get("x-unclaimed-sdk-version"), "0.1.0-preview.2");
     assert.deepEqual(JSON.parse(init?.body as string), input);
     return Response.json(pages()[0]);
   });
