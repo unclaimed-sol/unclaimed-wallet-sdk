@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`90cf9d9f1d1382cf42d90471163e0d37b96290d8a8bee9def3195763a7cf9ef8`.
+`98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 
@@ -69,3 +69,10 @@ and both generated outputs remain synchronized.
 The mounted submitted-signature schema now matches the service’s Base58
 alphabet and 64–88-character bounds. The SDK copy and generated outputs were
 regenerated together and are included in version `0.1.0-preview.2`.
+
+## September 29 claim-and-earn candidate
+
+The current mounted schema copy adds optional canonical v2 consent, immutable
+receipt attribution and separate recovery/partner-credit completion. Historical
+ordinary receipt responses remain valid. The candidate is unpublished; source
+readiness does not establish API deployment or execution activation.

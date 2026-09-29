@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 90cf9d9f1d1382cf42d90471163e0d37b96290d8a8bee9def3195763a7cf9ef8). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -339,7 +339,7 @@ export interface components {
             requestId: string;
             error: {
                 /** @enum {string} */
-                code: "unauthorized" | "key_revoked" | "mode_not_permitted" | "mode_not_available" | "idempotency_key_reused" | "request_in_progress" | "snapshot_expired" | "request_too_large" | "invalid_wallet" | "cursor_mismatch" | "airdrops_not_available" | "wallet_too_large" | "module_limit_exceeded" | "rate_limited" | "internal_error" | "invalid_idempotency_key" | "platform_unavailable" | "platform_failure_recorded" | "invalid_request" | "incomplete" | "upstream_unavailable" | "deadline_exceeded" | "session_mismatch" | "session_expired" | "item_not_in_session" | "execution_in_progress" | "invalid_receipt" | "receipt_mismatch" | "receipt_expired" | "invalid_signature" | "credit_admission_paused";
+                code: "unauthorized" | "key_revoked" | "mode_not_permitted" | "mode_not_available" | "idempotency_key_reused" | "request_in_progress" | "snapshot_expired" | "request_too_large" | "invalid_wallet" | "cursor_mismatch" | "airdrops_not_available" | "wallet_too_large" | "module_limit_exceeded" | "rate_limited" | "internal_error" | "invalid_idempotency_key" | "platform_unavailable" | "platform_failure_recorded" | "invalid_request" | "incomplete" | "upstream_unavailable" | "deadline_exceeded" | "session_mismatch" | "session_expired" | "item_not_in_session" | "execution_in_progress" | "invalid_receipt" | "receipt_mismatch" | "receipt_expired" | "invalid_signature" | "credit_admission_paused" | "execution_not_permitted" | "invalid_attribution";
                 message: string;
                 retryable: boolean;
                 /** @description Never contains upstream URLs, credentials, raw RPC messages, or provider names. */
@@ -353,8 +353,20 @@ export interface components {
             items: {
                 id: string;
                 /** @enum {string} */
-                action: "burn_and_close" | "recover_excess_lamports";
+                action: "burn_and_close";
             }[];
+            partnerAttribution?: components["schemas"]["PartnerAttributionProof"];
+        };
+        PartnerAttributionProof: {
+            /** @constant */
+            version: 2;
+            partnerId: string;
+            /** @description Canonical HTTPS origin, or null. HTTP loopback origins are permitted for offline reference tests. */
+            origin: string | null;
+            /** Format: date-time */
+            issuedAt: string;
+            selectedBuildDigest: string;
+            signature: string;
         };
         BuildResponse: {
             requestId: string;
@@ -389,19 +401,24 @@ export interface components {
                 valuation: null | components["schemas"]["Valuation"];
             };
             /** @description Null only when no transaction was built. */
-            executionReceipt: null | {
+            executionReceipt: null | ({
                 token: string;
                 /**
                  * Format: date-time
                  * @description Seven days after build.
                  */
                 expiresAt: string;
-                /**
-                 * @description Preview: always false.
-                 * @enum {boolean}
-                 */
-                partnerAttribution: false;
-            };
+                /** @description True only when this receipt accepted the bound v2 wallet proof. */
+                partnerAttribution: boolean;
+                attribution?: {
+                    /** @constant */
+                    version: 2;
+                    partnerId: string;
+                    selectedBuildDigest: string;
+                    /** Format: date-time */
+                    acceptedAt: string;
+                };
+            } & unknown);
             warnings: string[];
         };
         /** @description An item that produced bytes. Fresh authoritative amounts are mandatory so the integration reviews build-time values, not analysis-time estimates. */
@@ -545,7 +562,18 @@ export interface components {
                  */
                 burnedBaseUnits?: components["schemas"]["IntegerString"];
             } & unknown)[];
+            /** @description Recovery is settled independently of partner credit repair. */
+            recoveryTerminal?: boolean;
+            partnerCredit?: components["schemas"]["PartnerCredit"];
         };
+        PartnerCredit: {
+            /** @enum {unknown} */
+            status: "not_requested" | "pending" | "applied" | "not_eligible" | "held";
+            partnerId?: string;
+            amount?: components["schemas"]["Amount"];
+            /** Format: date-time */
+            appliedAt?: string;
+        } & (unknown & unknown);
     };
     responses: {
         /** @description Malformed JSON or unsupported request shape. */
@@ -763,7 +791,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Wallet, item, or action outside the session authorization. */
+            /** @description execution_not_permitted: execution capability is disabled for new work; issued receipts remain recordable. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -799,7 +827,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description invalid_request: invalid selections, more than 20 items, or overlapping account actions. session_mismatch or item_not_in_session: selection is outside the session. */
+            /** @description invalid_request: invalid selections, more than 10 items, or overlapping account actions. session_mismatch or item_not_in_session: selection is outside the session. */
             422: {
                 headers: {
                     [name: string]: unknown;

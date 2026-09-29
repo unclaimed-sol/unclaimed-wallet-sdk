@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "90cf9d9f1d1382cf42d90471163e0d37b96290d8a8bee9def3195763a7cf9ef8",
+    "98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {
@@ -79,7 +79,7 @@ test("one request, explicit headers and exact cursor/body, no redirects", async 
     const h = new Headers(init?.headers);
     assert.equal(h.get("authorization"), "Bearer offline-fixture-only");
     assert.equal(h.get("idempotency-key"), "explicit-page-1");
-    assert.equal(h.get("x-unclaimed-sdk-version"), "0.1.0-preview.2");
+    assert.equal(h.get("x-unclaimed-sdk-version"), "0.1.0-preview.3");
     assert.deepEqual(JSON.parse(init?.body as string), input);
     return Response.json(pages()[0]);
   });

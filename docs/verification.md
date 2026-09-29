@@ -46,3 +46,14 @@ Review follow-up: 41 SDK tests and 95 platform tests pass; see the browser recor
 for retry-delay interaction evidence and corrected harness observation coverage.
 The earlier 92 Postgres and 17 SDK acceptance checks were not repeated for these
 UI/test-harness-only review changes.
+
+## September 29 claim-and-earn candidate (offline only)
+
+63 SDK tests pass, including exact proof fixtures, mounted reference restart and
+Origin enforcement, signed-message/signature tampering, expiry without send,
+lost submission response, pending-credit repair and retained application transport
+reservations after restart. Generation freshness, typecheck and build pass.
+A fresh offline tarball install imported by package name ran the synthetic
+loopback reference without private source. No product API/provider was contacted.
+Browser wallet/live signing remains an owner-run gate; synthetic tests do not
+prove a real recovery. Candidate preview.3 has not been published.

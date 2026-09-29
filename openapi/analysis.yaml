@@ -168,7 +168,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "403":
-          description: Wallet, item, or action outside the session authorization.
+          description: "execution_not_permitted: execution capability is disabled for new
+            work; issued receipts remain recordable."
           content:
             application/json:
               schema:
@@ -194,7 +195,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "422":
-          description: "invalid_request: invalid selections, more than 20 items, or
+          description: "invalid_request: invalid selections, more than 10 items, or
             overlapping account actions. session_mismatch or
             item_not_in_session: selection is outside the session."
           content:
@@ -1238,6 +1239,8 @@ components:
                 - receipt_expired
                 - invalid_signature
                 - credit_admission_paused
+                - execution_not_permitted
+                - invalid_attribution
             message:
               type: string
             retryable:
@@ -1258,7 +1261,7 @@ components:
         items:
           type: array
           minItems: 1
-          maxItems: 20
+          maxItems: 10
           items:
             type: object
             required:
@@ -1271,9 +1274,41 @@ components:
                 type: string
                 enum:
                   - burn_and_close
-                  - recover_excess_lamports
             additionalProperties: false
+        partnerAttribution:
+          $ref: "#/components/schemas/PartnerAttributionProof"
       additionalProperties: false
+    PartnerAttributionProof:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+        - partnerId
+        - origin
+        - issuedAt
+        - selectedBuildDigest
+        - signature
+      properties:
+        version:
+          const: 2
+        partnerId:
+          type: string
+          pattern: ^[a-z0-9_-]{3,64}$
+        origin:
+          type:
+            - string
+            - "null"
+          description: Canonical HTTPS origin, or null. HTTP loopback origins are
+            permitted for offline reference tests.
+        issuedAt:
+          type: string
+          format: date-time
+        selectedBuildDigest:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        signature:
+          type: string
+          pattern: ^[A-Za-z0-9+/]{86}==$
     BuildResponse:
       type: object
       required:
@@ -1397,9 +1432,39 @@ components:
                   description: Seven days after build.
                 partnerAttribution:
                   type: boolean
-                  enum:
-                    - false
-                  description: "Preview: always false."
+                  description: True only when this receipt accepted the bound v2 wallet proof.
+                attribution:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - version
+                    - partnerId
+                    - selectedBuildDigest
+                    - acceptedAt
+                  properties:
+                    version:
+                      const: 2
+                    partnerId:
+                      type: string
+                      pattern: ^[a-z0-9_-]{3,64}$
+                    selectedBuildDigest:
+                      type: string
+                      pattern: ^[a-f0-9]{64}$
+                    acceptedAt:
+                      type: string
+                      format: date-time
+              allOf:
+                - if:
+                    properties:
+                      partnerAttribution:
+                        const: true
+                  then:
+                    required:
+                      - attribution
+                  else:
+                    not:
+                      required:
+                        - attribution
           description: Null only when no transaction was built.
         warnings:
           type: array
@@ -1769,6 +1834,64 @@ components:
                   burned, from the transaction. Compared server-side with the
                   reviewed balance to measure the section 6 downgrade. Present
                   only for `verified_applied` burn-and-close items.
+        recoveryTerminal:
+          type: boolean
+          description: Recovery is settled independently of partner credit repair.
+        partnerCredit:
+          $ref: "#/components/schemas/PartnerCredit"
+    PartnerCredit:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          enum:
+            - not_requested
+            - pending
+            - applied
+            - not_eligible
+            - held
+        partnerId:
+          type: string
+          pattern: ^[a-z0-9_-]{3,64}$
+        amount:
+          $ref: "#/components/schemas/Amount"
+        appliedAt:
+          type: string
+          format: date-time
+      allOf:
+        - if:
+            properties:
+              status:
+                const: not_requested
+          then:
+            not:
+              anyOf:
+                - required:
+                    - partnerId
+                - required:
+                    - amount
+                - required:
+                    - appliedAt
+          else:
+            required:
+              - partnerId
+        - if:
+            properties:
+              status:
+                const: applied
+          then:
+            required:
+              - amount
+              - appliedAt
+          else:
+            not:
+              anyOf:
+                - required:
+                    - amount
+                - required:
+                    - appliedAt
   responses:
     BadRequest:
       description: Malformed JSON or unsupported request shape.
