@@ -62,3 +62,10 @@ A local browser with synthetic Wallet Standard fixture verified connect, analysi
 explicit selection, optional attribution, fresh build display, denied transaction
 signing, and browser reload/resume of the same retained journal. No real wallet
 extension, provider or live signature was used.
+
+`node scripts/check-preview2-compat.mjs` also passes against immutable public
+preview.2 revision `231330066f3290dd1fa050d0b3428e4c1c567c9a`. Its original generated
+validators and SDK accept ordinary build receipts, historical records and new
+ordinary terminal/pending records carrying `recoveryTerminal` and `partnerCredit`.
+The old client still rejects attributed receipts, as expected. This probe uses
+synthetic fetch responses only and requires that retained Git revision locally.
