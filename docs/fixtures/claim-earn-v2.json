@@ -1,0 +1,28 @@
+{
+  "input": {
+    "partnerId": "fixture-partner",
+    "wallet": "11111111111111111111111111111111",
+    "origin": "https://example.invalid",
+    "sessionId": "fixture-session-v2",
+    "issuedAt": "2026-09-29T12:00:00.000Z",
+    "idempotencyKey": "fixture-build-key-v2",
+    "items": [
+      {
+        "id": "fixture-account-1",
+        "action": "burn_and_close"
+      },
+      {
+        "id": "fixture-account-2",
+        "action": "burn_and_close"
+      }
+    ]
+  },
+  "message": "Unclaimed SOL API partner attribution v2\nI authorize the partner below to receive 20% of the verified recovery service fee.\nThis does not change my recovery fee or authorize a transaction.\nPartner: fixture-partner\nWallet: 11111111111111111111111111111111\nOrigin: https://example.invalid\nSession: fixture-session-v2\nIssued At: 2026-09-29T12:00:00.000Z\nSelected Build: 23e351e028a4329823492ac73a33c59a2e6f6c659f1a2b0b18087f695ce8321c",
+  "proof": {
+    "version": 2,
+    "partnerId": "fixture-partner",
+    "origin": "https://example.invalid",
+    "issuedAt": "2026-09-29T12:00:00.000Z",
+    "selectedBuildDigest": "23e351e028a4329823492ac73a33c59a2e6f6c659f1a2b0b18087f695ce8321c"
+  }
+}

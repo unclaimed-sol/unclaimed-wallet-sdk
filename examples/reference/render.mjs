@@ -1,4 +1,4 @@
-import { summarizeOpportunities } from "../../dist/index.js";
+import { summarizeOpportunities } from "@unclaimedsol/wallet-sdk";
 export const escapeHtml = (value) =>
   String(value).replace(
     /[&<>"']/g,

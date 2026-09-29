@@ -8,13 +8,14 @@ import {
   UnclaimedApiError,
   UnclaimedTransportError,
   UnclaimedProtocolError,
-} from "../../dist/index.js";
+} from "@unclaimedsol/wallet-sdk";
 import { fixtureFetch, fixtureWallet } from "./fixtures.mjs";
 import { render } from "./render.mjs";
-/** @param {{mode?: "fixture" | "platform", clientOptions?: import("../../dist/index.js").ClientOptions}} options */
+/** @param {{mode?: "fixture" | "platform", clientOptions?: import("@unclaimedsol/wallet-sdk").ClientOptions, pilot?: Function}} options */
 export function createReferenceServer({
   mode = "fixture",
   clientOptions,
+  pilot,
 } = {}) {
   if (!["fixture", "platform"].includes(mode))
     throw Error("Invalid reference mode.");
@@ -39,6 +40,7 @@ export function createReferenceServer({
       res.writeHead(403).end("Forbidden.");
       return;
     }
+    if (pilot && await pilot(req, res)) return;
     if (req.url === "/loading.js" && req.method === "GET") {
       res.setHeader("Content-Type", "text/javascript");
       res.end(await loading);
@@ -226,7 +228,21 @@ if (
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
   const mode = process.env.REFERENCE_MODE ?? "fixture";
+  let pilot;
+  if (process.env.REFERENCE_EXECUTION === '1') {
+    if (mode !== 'platform' || !process.env.REFERENCE_JOURNAL_DIR || !process.env.REFERENCE_RPC_URL ||
+      !process.env.REFERENCE_MAX_SUBMISSIONS || !process.env.REFERENCE_MAX_HEIGHT_READS)
+      throw Error('Explicit reference connection, private journal and numerical allowances required.');
+    const { createSubmissionConnection } = await import('./submission-connection.mjs');
+    const { createPilotHandler } = await import('./pilot-server.mjs');
+    const connection = await createSubmissionConnection({ endpoint: process.env.REFERENCE_RPC_URL,
+      directory: process.env.REFERENCE_JOURNAL_DIR, maxSubmissions: Number(process.env.REFERENCE_MAX_SUBMISSIONS),
+      maxHeightReads: Number(process.env.REFERENCE_MAX_HEIGHT_READS) });
+    pilot = createPilotHandler({ client: createUnclaimedClient({ baseUrl: process.env.UNCLAIMED_API_ORIGIN, apiKey: process.env.UNCLAIMED_API_KEY }),
+      directory: process.env.REFERENCE_JOURNAL_DIR, connection, partnerId: process.env.REFERENCE_PARTNER_ID ?? null });
+  }
   const server = createReferenceServer({
+    pilot,
     mode,
     clientOptions:
       mode === "platform"

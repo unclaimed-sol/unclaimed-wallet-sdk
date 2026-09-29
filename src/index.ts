@@ -13,3 +13,5 @@ export {
 } from "./errors.js";
 export type { RetryAction } from "./errors.js";
 export type * from "./types.js";
+export { createPartnerConsent } from './attribution.js';
+export type { PartnerConsentInput } from './attribution.js';

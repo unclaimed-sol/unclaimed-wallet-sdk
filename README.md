@@ -171,3 +171,9 @@ deposits; excess withdrawal preserves current tokens and the reviewed fee policy
 An external milestone requires someone outside this development session to use
 the demo key and these instructions against the deployed origin successfully.
 No such milestone has been claimed.
+
+## Prepared claim-and-earn source
+
+The opt-in [claim-and-earn reference](docs/claim-earn-reference.md) includes canonical
+v2 consent and durable exact-work reconciliation. This is source under review,
+not npm publication or execution activation. Published preview.2 remains unchanged.

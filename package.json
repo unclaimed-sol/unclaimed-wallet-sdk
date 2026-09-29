@@ -1,6 +1,6 @@
 {
   "name": "@unclaimedsol/wallet-sdk",
-  "version": "0.1.0-preview.2",
+  "version": "0.1.0-preview.3",
   "description": "Server-side TypeScript client for the Unclaimed API preview",
   "type": "module",
   "engines": {
@@ -18,7 +18,8 @@
     "README.md",
     "docs",
     "PRIOR_WORK.md",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "examples/reference"
   ],
   "scripts": {
     "generate": "node scripts/generate.mjs",

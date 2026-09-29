@@ -37,3 +37,9 @@ build outcomes retain the same key; unknown record outcomes retain the same
 receipt and transaction data (`same_receipt`). Outcome-dependent recovery fields
 are enforced by the platform-owned schema and generated validators, not a second
 handwritten SDK rule. Keep the mounted copy and generated outputs synchronized.
+
+The claim-and-earn candidate adds the pure `createPartnerConsent` v2 helper and
+shared fixture. The opt-in Wallet Standard reference journals exact work before
+sending; its application-owned submission connection reserves every wire call in
+an append-only fsynced budget file. Never truncate retained reservations or
+silently replace unknown work. Preview.3 is prepared, not published or activated.

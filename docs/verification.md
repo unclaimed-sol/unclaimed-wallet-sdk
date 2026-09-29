@@ -46,3 +46,44 @@ Review follow-up: 41 SDK tests and 95 platform tests pass; see the browser recor
 for retry-delay interaction evidence and corrected harness observation coverage.
 The earlier 92 Postgres and 17 SDK acceptance checks were not repeated for these
 UI/test-harness-only review changes.
+
+## September 29 claim-and-earn candidate (offline only)
+
+64 SDK tests pass, including exact proof fixtures, mounted reference restart and
+Origin enforcement, signed-message/signature tampering, expiry without send,
+lost submission response, pending-credit repair and retained application transport
+reservations after restart. Generation freshness, typecheck and build pass.
+A fresh offline tarball install imported by package name ran the synthetic
+loopback reference without private source. No product API/provider was contacted.
+Browser wallet/live signing remains an owner-run gate; synthetic tests do not
+prove a real recovery. Candidate preview.3 has not been published.
+
+A local browser with synthetic Wallet Standard fixture verified connect, analysis,
+explicit selection, optional attribution, fresh build display, denied transaction
+signing, and browser reload/resume of the same retained journal. No real wallet
+extension, provider or live signature was used.
+
+`node scripts/check-preview2-compat.mjs` also passes against immutable public
+preview.2 revision `231330066f3290dd1fa050d0b3428e4c1c567c9a`. Its original generated
+validators and SDK accept ordinary build receipts, historical records and new
+ordinary terminal/pending records carrying `recoveryTerminal` and `partnerCredit`.
+The old client still rejects attributed receipts, as expected. This probe uses
+synthetic fetch responses only and requires that retained Git revision locally.
+
+The final candidate now ships all 12 reference files inside npm. A new empty
+application directory installed only the local candidate tarball (no copied
+examples). Imports came exclusively from its installed package: the reference
+served `/`, `/pilot`, browser JavaScript and CSS, then completed synthetic durable
+prepare/build/resume over loopback with one build call. No private/source checkout
+imports or external network were used.
+
+
+## First SDK review pass
+
+69 tests pass after the four initial CodeRabbit findings: invalid decline phases
+leave journals unchanged; saved analysis cannot silently switch page/cursor;
+unattributed malformed selections fail before journal creation; and only errors
+from dispatched transaction sends carry unknown-submission status. Tests retain
+signed bytes after pre-dispatch refusal/height failure and prove later reconciliation
+never resends. Provider error details remain sanitized. This is an offline pass;
+no extra review cycle or live execution is implied.
