@@ -76,3 +76,14 @@ examples). Imports came exclusively from its installed package: the reference
 served `/`, `/pilot`, browser JavaScript and CSS, then completed synthetic durable
 prepare/build/resume over loopback with one build call. No private/source checkout
 imports or external network were used.
+
+
+## First SDK review pass
+
+69 tests pass after the four initial CodeRabbit findings: invalid decline phases
+leave journals unchanged; saved analysis cannot silently switch page/cursor;
+unattributed malformed selections fail before journal creation; and only errors
+from dispatched transaction sends carry unknown-submission status. Tests retain
+signed bytes after pre-dispatch refusal/height failure and prove later reconciliation
+never resends. Provider error details remain sanitized. This is an offline pass;
+no extra review cycle or live execution is implied.

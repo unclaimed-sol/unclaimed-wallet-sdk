@@ -28,6 +28,7 @@ async function analyzePage(cursor) {
   if (!account) throw Error('Connect your wallet first.');
   const pending = JSON.parse(localStorage.getItem('unclaimed-pilot-analysis') ?? 'null') ?? { wallet: account.address, idempotencyKey: crypto.randomUUID(), ...(cursor ? { cursor } : {}) };
   if (pending.wallet !== account.address) throw Error('Reconcile the saved analysis with its original wallet first.');
+  if ((pending.cursor ?? null) !== (cursor ?? null)) throw Error('A saved analysis targets a different page. Retry it before changing pages.');
   localStorage.setItem('unclaimed-pilot-analysis', JSON.stringify(pending));
   analysis = await api('analyze', pending);
   localStorage.removeItem('unclaimed-pilot-analysis');

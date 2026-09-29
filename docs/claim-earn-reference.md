@@ -73,3 +73,11 @@ Default fixture mode uses no product API, provider or real wallet. The `/pilot`
 route is mounted only with the explicit owner configuration above. All browser,
 journal, signed-wire validation and application submission transport files ship in
 the package; no private repository or source checkout is needed.
+
+
+The application submission adapter tags failures as `submissionUnknown: true`
+only after transaction-send dispatch begins. Pre-dispatch lock, capacity and
+accounting errors retain their original local classification; block-height failures
+have a distinct sanitized message. Custom submission callbacks must honor this
+contract. The journal retains signed work for reconciliation after either class
+of failure, without inventing an unknown send or automatically resending.

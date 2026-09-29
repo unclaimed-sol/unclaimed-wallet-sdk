@@ -23,7 +23,7 @@ test('disk restart and lost submission response keep exact bytes; credit repair 
   const client = { build: async () => { builds++; return { executionReceipt: { token: 'receipt' }, transactions: [{ id: 'tx', lastValidBlockHeight: '100' }] }; },
     recordExecution: async () => { records++; return { terminal: records > 1, recoveryTerminal: true, partnerCredit: { status: records > 1 ? 'applied' : 'pending' } }; } };
   const options = { client, store, validateSigned: async () => 'synthetic-signature', getBlockHeight: async () => 99,
-    submit: async () => { sends++; throw Error('lost response'); } };
+    submit: async () => { sends++; throw Object.assign(Error('lost response'), { submissionUnknown: true }); } };
   const first = createExecutionJournal(options);
   const journal = await first.prepare({ input: { wallet: 'fixture', items: [] }, session: { token: 'session' }, buildKey: 'same-key' });
   await first.acceptSigned(journal.id, 'exact-bytes');
@@ -62,7 +62,7 @@ test('mounted pilot handler persists build identity across server restart and en
   let running = await make();
   let id: string;
   try {
-    const response = await running.post('prepare', { wallet: 'fixture', items: [], session: { id: 'session', token: 'token' } });
+    const response = await running.post('prepare', { wallet: 'fixture', items: [{ id: 'item', action: 'burn_and_close' }], session: { id: 'session', token: 'token' } });
     id = (await response.json()).id;
     assert.equal((await running.post('build', { id })).status, 200);
     assert.equal((await fetch(running.origin + '/pilot/build', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).status, 403);

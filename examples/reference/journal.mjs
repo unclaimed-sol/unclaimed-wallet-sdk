@@ -70,6 +70,7 @@ export function createExecutionJournal({ client, store, validateSigned, submit, 
       return exclusive(id, async () => {
         const journal = await store.load(id);
         if (journal.transactions.length) throw Error('Signed work requires reconciliation.');
+        if (journal.phase !== 'review') throw Error('Only reviewed builds can be declined.');
         journal.transactions = journal.build.transactions.map(tx => ({ id: tx.id, status: 'not_signed' }));
         journal.phase = 'record';
         await store.save(journal);
@@ -93,7 +94,10 @@ export function createExecutionJournal({ client, store, validateSigned, submit, 
         entry.submission = 'attempted';
         await store.save(journal);
         try { await submit(signedTransaction); entry.submission = 'acknowledged'; }
-        catch { entry.submission = 'unknown'; }
+        catch (error) {
+          if (error?.submissionUnknown !== true) throw error;
+          entry.submission = 'unknown';
+        }
         await store.save(journal);
         return record(journal);
       });
