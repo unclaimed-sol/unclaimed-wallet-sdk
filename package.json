@@ -18,7 +18,8 @@
     "README.md",
     "docs",
     "PRIOR_WORK.md",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "examples/reference"
   ],
   "scripts": {
     "generate": "node scripts/generate.mjs",

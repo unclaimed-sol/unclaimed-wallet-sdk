@@ -48,3 +48,9 @@ is made by this packaging change; retained third-party notices apply to their co
 The project LICENSE and package license field are absent. Choosing a project
 license remains an owner decision for review; third-party notices do not supply
 a license for the SDK itself. This documentation does not make that choice.
+
+
+The unpublished preview.3 candidate includes the public `examples/reference`
+directory. The historical preview.2 package excluded it. Validate the candidate
+by running the reference from its fresh installed package directory, without
+copying examples from a checkout. This packaging change is not publication approval.

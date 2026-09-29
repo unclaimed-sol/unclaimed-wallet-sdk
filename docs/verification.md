@@ -69,3 +69,10 @@ validators and SDK accept ordinary build receipts, historical records and new
 ordinary terminal/pending records carrying `recoveryTerminal` and `partnerCredit`.
 The old client still rejects attributed receipts, as expected. This probe uses
 synthetic fetch responses only and requires that retained Git revision locally.
+
+The final candidate now ships all 12 reference files inside npm. A new empty
+application directory installed only the local candidate tarball (no copied
+examples). Imports came exclusively from its installed package: the reference
+served `/`, `/pilot`, browser JavaScript and CSS, then completed synthetic durable
+prepare/build/resume over loopback with one build call. No private/source checkout
+imports or external network were used.

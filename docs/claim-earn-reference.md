@@ -62,3 +62,14 @@ closed. The owner may remove only that lock after proving its recorded process
 and every reference server using the directory have stopped. Never remove or
 edit `submission-budget.jsonl` or signed-work journals. Torn accounting requires
 operator evidence repair, not a reset; consumed allowance is never refunded.
+
+
+## Run the installed public reference
+
+The candidate package ships `examples/reference` alongside `dist`. After installing
+the separately approved version (or the inspected tarball for offline acceptance),
+run `node node_modules/@unclaimedsol/wallet-sdk/examples/reference/server.mjs`.
+Default fixture mode uses no product API, provider or real wallet. The `/pilot`
+route is mounted only with the explicit owner configuration above. All browser,
+journal, signed-wire validation and application submission transport files ship in
+the package; no private repository or source checkout is needed.
