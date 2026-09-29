@@ -1,4 +1,4 @@
-import { readFile, mkdir, open } from 'node:fs/promises';
+import { readFile, mkdir, open, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /** Application-owned, single-process, append-only reservation-before-dispatch transport.
@@ -10,19 +10,31 @@ export async function createSubmissionConnection({ endpoint, directory, maxSubmi
   for (const value of [maxSubmissions, maxHeightReads]) if (!Number.isSafeInteger(value) || value < 0) throw Error('Explicit numerical submission allowances required.');
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const path = join(directory, 'submission-budget.jsonl');
-  const used = { sendTransaction: 0, getBlockHeight: 0 };
-  try {
-    for (const line of (await readFile(path, 'utf8')).split('\n').filter(Boolean)) {
-      const entry = JSON.parse(line);
-      if (!Object.hasOwn(used, entry.method)) throw Error('Unrecognized retained reservation.');
-      used[entry.method]++;
-    }
-  } catch (error) { if (error.code !== 'ENOENT') throw Error('Retained submission accounting unreadable.'); }
+  async function readCounts() {
+    const used = { sendTransaction: 0, getBlockHeight: 0 };
+    try {
+      const contents = await readFile(path, 'utf8');
+      if (contents && !contents.endsWith('\n')) throw Error('Torn reservation.');
+      for (const line of contents.split('\n').filter(Boolean)) {
+        const entry = JSON.parse(line);
+        if (!Object.hasOwn(used, entry.method)) throw Error('Unrecognized retained reservation.');
+        used[entry.method]++;
+      }
+    } catch (error) { if (error.code !== 'ENOENT') throw Error('Retained submission accounting unreadable.'); }
+    return used;
+  }
+  await readCounts();
   let busy = false;
   async function call(method, params) {
     if (busy) throw Error('Submission transport busy.');
     busy = true;
+    let lock;
+    const lockPath = join(directory, 'submission-budget.lock');
     try {
+      lock = await open(lockPath, 'wx', 0o600);
+      await lock.writeFile(JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }));
+      await lock.sync();
+      const used = await readCounts();
       const max = method === 'sendTransaction' ? maxSubmissions : maxHeightReads;
       if (used[method] >= max) throw Error('Submission transport allowance exhausted.');
       used[method]++;
@@ -40,7 +52,10 @@ export async function createSubmissionConnection({ endpoint, directory, maxSubmi
       if (result.error || result.id !== 1) throw Error('Submission provider rejected request.');
       return result.result;
     } catch { throw Error('Submission transport unavailable; retain exact work for reconciliation.'); }
-    finally { busy = false; }
+    finally {
+      if (lock) { await lock.close(); await unlink(lockPath); }
+      busy = false;
+    }
   }
   return {
     async getBlockHeight() {

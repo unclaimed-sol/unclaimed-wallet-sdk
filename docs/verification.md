@@ -49,7 +49,7 @@ UI/test-harness-only review changes.
 
 ## September 29 claim-and-earn candidate (offline only)
 
-63 SDK tests pass, including exact proof fixtures, mounted reference restart and
+64 SDK tests pass, including exact proof fixtures, mounted reference restart and
 Origin enforcement, signed-message/signature tampering, expiry without send,
 lost submission response, pending-credit repair and retained application transport
 reservations after restart. Generation freshness, typecheck and build pass.
@@ -57,3 +57,8 @@ A fresh offline tarball install imported by package name ran the synthetic
 loopback reference without private source. No product API/provider was contacted.
 Browser wallet/live signing remains an owner-run gate; synthetic tests do not
 prove a real recovery. Candidate preview.3 has not been published.
+
+A local browser with synthetic Wallet Standard fixture verified connect, analysis,
+explicit selection, optional attribution, fresh build display, denied transaction
+signing, and browser reload/resume of the same retained journal. No real wallet
+extension, provider or live signature was used.

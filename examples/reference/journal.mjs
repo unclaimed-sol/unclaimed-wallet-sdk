@@ -1,4 +1,4 @@
-import { mkdir, open, readFile, rename } from 'node:fs/promises';
+import { mkdir, open, readFile, rename, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
@@ -9,6 +9,16 @@ export function fileJournal(directory) {
     return join(directory, `${id}.json`);
   };
   return {
+    async findOpen(wallet) {
+      let files;
+      try { files = await readdir(directory); } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
+      if (files.length > 1000) throw Error('Local journal capacity reached. Retain journals and reconcile before operator maintenance.');
+      for (const name of files.filter(name => /^[0-9a-f-]{36}\.json$/.test(name))) {
+        const journal = JSON.parse(await readFile(join(directory, name), 'utf8'));
+        if (journal.input.wallet === wallet && journal.phase !== 'no_transaction' && journal.record?.terminal !== true) return journal;
+      }
+      return null;
+    },
     async load(id) { return JSON.parse(await readFile(path(id), 'utf8')); },
     async save(journal) {
       await mkdir(directory, { recursive: true, mode: 0o700 });

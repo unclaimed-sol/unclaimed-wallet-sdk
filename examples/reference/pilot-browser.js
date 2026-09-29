@@ -10,7 +10,12 @@ const api = async (action, data = {}) => {
   if (!response.ok) throw Error(await response.text());
   return response.json();
 };
-const show = value => { $('result').textContent = JSON.stringify(value, null, 2); };
+const show = value => {
+  $('reviewed').checked = false;
+  const build = value.build ?? value;
+  const review = value.data ? { items: value.data.items, pagination: value.data.pagination } : { items: build.items, plan: build.plan, warnings: build.warnings, record: value.record };
+  $('result').textContent = JSON.stringify(review, null, 2);
+};
 const run = fn => async () => { try { await fn(); } catch (error) { $('status').textContent = error.message; } };
 $('connect').onclick = run(async () => {
   wallet = wallets.find(w => w.features['solana:signTransaction'] && w.features['standard:connect']);
@@ -45,10 +50,10 @@ $('build').onclick = run(async () => {
   localStorage.setItem('unclaimed-pilot-resume', prepared.id);
   journal = prepared;
   if ($('attribution').checked && wallet.features['solana:signMessage'] && prepared.consent) {
-    try {
-      const [signed] = await wallet.features['solana:signMessage'].signMessage({ account, message: new TextEncoder().encode(prepared.consent.message) });
-      journal = await api('build', { id: prepared.id, signature: base64(signed.signature) });
-    } catch { $('status').textContent = 'Attribution signature declined. Continue without attribution using the button below.'; return; }
+    let signed;
+    try { [signed] = await wallet.features['solana:signMessage'].signMessage({ account, message: new TextEncoder().encode(prepared.consent.message) }); }
+    catch { $('status').textContent = 'Attribution signature declined. Continue without attribution using the button below.'; return; }
+    journal = await api('build', { id: prepared.id, signature: base64(signed.signature) });
   } else journal = await api('build', { id: prepared.id });
   show(journal.build);
 });

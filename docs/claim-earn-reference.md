@@ -54,3 +54,11 @@ cumulative over the retained file; never delete/reset it to replenish allowance.
 Status reconciliation uses the execution receipt API and its protected verifier
 budget. Pagination is explicit and clears the current page's selection; it never
 sums page estimates or silently selects additional accounts.
+
+Submission reservations use an exclusive per-call filesystem lock and reload
+retained counts while locked, including when two connection instances share the
+directory. A process crash may leave `submission-budget.lock`; recovery fails
+closed. The owner may remove only that lock after proving its recorded process
+and every reference server using the directory have stopped. Never remove or
+edit `submission-budget.jsonl` or signed-work journals. Torn accounting requires
+operator evidence repair, not a reset; consumed allowance is never refunded.

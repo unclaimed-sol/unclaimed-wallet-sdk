@@ -30,6 +30,7 @@ export function createPilotHandler({ client, directory, connection, partnerId = 
       if (req.url === '/pilot/analyze') result = await client.checkWallet({ wallet: input.wallet, mode: 'safe', limit: 200, ...(input.cursor ? { cursor: input.cursor } : {}) }, { idempotencyKey: input.idempotencyKey });
       else if (req.url === '/pilot/prepare') {
         if (!input.session?.id || !input.session?.token) throw Error('Execution unavailable.');
+        if (await store.findOpen(input.wallet)) throw Error('Resume the retained wallet journal before preparing replacement work.');
         const buildKey = randomUUID();
         const consent = partnerId ? createPartnerConsent({ partnerId, wallet: input.wallet, origin: `http://${req.headers.host}`,
           sessionId: input.session.id, issuedAt: new Date().toISOString(), idempotencyKey: buildKey, items: input.items }) : null;

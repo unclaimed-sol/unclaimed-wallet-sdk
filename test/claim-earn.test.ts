@@ -103,3 +103,13 @@ test('application submission reservations survive restart and unknown dispatch w
   await assert.rejects(restarted.sendRawTransaction(Buffer.from('fixture')));
   assert.equal(wires, 1);
 });
+
+test('shared application budget lock prevents concurrent connections spending one allowance twice', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'sdk-shared-'));
+  let wires = 0;
+  const options = { directory, endpoint: 'https://example.invalid', maxSubmissions: 1, maxHeightReads: 0,
+    fetch: async () => { wires++; return new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: 'synthetic' })); } };
+  const a = await createSubmissionConnection(options), b = await createSubmissionConnection(options);
+  const outcomes = await Promise.allSettled([a.sendRawTransaction(Buffer.from('fixture')), b.sendRawTransaction(Buffer.from('fixture'))]);
+  assert.equal(outcomes.filter(r => r.status === 'fulfilled').length, 1); assert.equal(wires, 1);
+});
