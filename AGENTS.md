@@ -43,3 +43,9 @@ shared fixture. The opt-in Wallet Standard reference journals exact work before
 sending; its application-owned submission connection reserves every wire call in
 an append-only fsynced budget file. Never truncate retained reservations or
 silently replace unknown work. Preview.3 is prepared, not published or activated.
+
+The source reference performs a bounded height check before prompting for a wallet
+signature and preserves the separate post-signing check. Include both in explicit
+application allowances. An expired signed build retains its signature and local
+non-submission reason even when the API still reports unknown. Never terminalize,
+delete or replace that work based solely on local non-submission evidence.

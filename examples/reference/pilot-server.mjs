@@ -51,7 +51,8 @@ export function createPilotHandler({ client, directory, connection, partnerId = 
           journal.phase = 'building'; await store.save(journal);
         }
         result = await execution.resumeBuild(input.id);
-      } else if (req.url === '/pilot/signed') result = await execution.acceptSigned(input.id, input.signedTransaction);
+      } else if (req.url === '/pilot/check-signing') result = await execution.checkSigning(input.id);
+      else if (req.url === '/pilot/signed') result = await execution.acceptSigned(input.id, input.signedTransaction);
       else if (req.url === '/pilot/decline') result = await execution.decline(input.id);
       else if (req.url === '/pilot/resume') {
         const journal = await store.load(input.id);

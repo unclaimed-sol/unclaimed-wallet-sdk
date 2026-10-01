@@ -50,6 +50,22 @@ export function createExecutionJournal({ client, store, validateSigned, submit, 
     return journal;
   }
   return {
+    async checkSigning(id) {
+      return exclusive(id, async () => {
+        const journal = await store.load(id);
+        if (journal.transactions.length) return { status: 'reconciliation_required' };
+        if (journal.phase !== 'review' || journal.build.transactions.length !== 1) throw Error('Pilot requires one reviewed transaction.');
+        if (journal.signingCheck?.status === 'expired') return journal.signingCheck;
+        const tx = journal.build.transactions[0];
+        let height;
+        try { height = BigInt(await getBlockHeight()); }
+        catch { return { status: 'unavailable' }; }
+        journal.signingCheck = { status: height > BigInt(tx.lastValidBlockHeight) ? 'expired' : 'ready',
+          transactionId: tx.id, currentBlockHeight: String(height), lastValidBlockHeight: tx.lastValidBlockHeight };
+        await store.save(journal);
+        return journal.signingCheck;
+      });
+    },
     async prepare({ input, session, buildKey }) {
       const journal = { id: randomUUID(), input, session, buildKey, phase: 'building', transactions: [] };
       await store.save(journal);
@@ -90,7 +106,19 @@ export function createExecutionJournal({ client, store, validateSigned, submit, 
         await store.save(journal);
         const entry = journal.transactions[0];
         // Never substitute a fresh blockhash. A failed height read leaves exact work retained.
-        if (BigInt(await getBlockHeight()) > BigInt(tx.lastValidBlockHeight)) return record(journal);
+        let height;
+        try { height = BigInt(await getBlockHeight()); }
+        catch (error) {
+          entry.submissionStopped = 'height_unavailable';
+          await store.save(journal);
+          throw error;
+        }
+        entry.observedBlockHeight = String(height);
+        if (height > BigInt(tx.lastValidBlockHeight)) {
+          entry.submissionStopped = 'blockhash_expired';
+          await store.save(journal);
+          return record(journal);
+        }
         entry.submission = 'attempted';
         await store.save(journal);
         try { await submit(signedTransaction); entry.submission = 'acknowledged'; }

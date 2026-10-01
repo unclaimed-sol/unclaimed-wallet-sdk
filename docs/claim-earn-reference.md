@@ -26,6 +26,23 @@ bytes remain reconciliation-only. Unknown sends never automatically rebuild or
 resend. Browser reload/server restart use the saved random journal ID; credit repair
 remains reachable after recovery succeeds. Settled records replay locally.
 
+The source reference checks the exact build's block height immediately before
+requesting a wallet signature. An expired build or unavailable height stops the
+wallet prompt. This consumes one additional application height-read allowance per
+manual signing check; plan that allowance explicitly before using this source
+change live. It does not replenish any existing budget or authorize a replacement
+build. A successful check cannot keep a wallet prompt from outlasting the blockhash,
+so the existing post-signing height check remains mandatory. Review and sign in one
+continuous interaction instead of waiting for an external review after building.
+
+The result distinguishes the application's submission attempt from the API's chain
+outcome. If the post-signing height check finds expiry, the journal retains the exact
+signed bytes, observed height and `blockhash_expired` stop reason, and the page says
+the app did not send. The API may still return `unknown` with pending partner credit;
+this is not a successful recovery, terminal failure or permission to rebuild. A
+recording error cannot erase the local stop evidence. Older signed journals without
+a stop reason remain readable without inferring why submission was not attempted.
+
 Treat journal IDs as local bearer capabilities: no URLs/logs. Run one server process
 per private directory; its lock is not distributed. Loopback Host/Origin checks are
 required. Public hosting needs application authentication and shared durable storage.

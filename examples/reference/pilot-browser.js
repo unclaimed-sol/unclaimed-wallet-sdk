@@ -1,7 +1,7 @@
 const wallets = [];
 window.addEventListener('wallet-standard:register-wallet', event => event.detail({ register: (...entries) => { wallets.push(...entries); return () => {}; } }));
 window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: { register: (...entries) => { wallets.push(...entries); return () => {}; } } }));
-let wallet, account, analysis, journal;
+let wallet, account, analysis, journal, signing = false;
 const $ = id => document.getElementById(id);
 const bytes = value => Uint8Array.from(atob(value), c => c.charCodeAt(0));
 const base64 = value => btoa(String.fromCharCode(...value));
@@ -13,10 +13,18 @@ const api = async (action, data = {}) => {
 const show = value => {
   $('reviewed').checked = false;
   const build = value.build ?? value;
-  const review = value.data ? { items: value.data.items, pagination: value.data.pagination } : { items: build.items, plan: build.plan, warnings: build.warnings, record: value.record };
+  const appSubmission = value.transactions?.filter(tx => tx.signature).map(tx => ({ id: tx.id,
+    submission: tx.submission, stoppedBecause: tx.submissionStopped, observedBlockHeight: tx.observedBlockHeight }));
+  const review = value.data ? { items: value.data.items, pagination: value.data.pagination } : { items: build.items, plan: build.plan, warnings: build.warnings,
+    ...(appSubmission?.length ? { appSubmission } : {}), record: value.record };
   $('result').textContent = JSON.stringify(review, null, 2);
+  if (appSubmission?.some(tx => tx.submission === 'not_attempted')) {
+    $('status').textContent = appSubmission.some(tx => tx.stoppedBecause === 'blockhash_expired')
+      ? 'The signed transaction expired before submission. This app did not send it. Saved work requires reconciliation; do not sign again.'
+      : 'Signed work is saved, but this app has not attempted submission. Resume the saved work for reconciliation; do not sign again.';
+  }
 };
-const run = fn => async () => { try { await fn(); } catch (error) { $('status').textContent = error.message; } };
+const run = fn => async () => { if (signing) return; try { await fn(); } catch (error) { $('status').textContent = error.message; } };
 $('connect').onclick = run(async () => {
   wallet = wallets.find(w => w.features['solana:signTransaction'] && w.features['standard:connect']);
   if (!wallet) throw Error('Install a Wallet Standard Solana wallet.');
@@ -60,13 +68,26 @@ $('build').onclick = run(async () => {
 });
 $('ordinary').onclick = run(async () => { journal = await api('build', { id: localStorage.getItem('unclaimed-pilot-resume') }); show(journal.build); });
 $('sign').onclick = run(async () => {
+  if (signing) return;
   if (!journal?.build || !account || account.address !== journal.input.wallet) throw Error('Resume and connect the build wallet first.');
+  if (journal.transactions?.length) throw Error('Saved work requires reconciliation; do not sign again.');
   if (!$('reviewed').checked) throw Error('Review the fresh build amounts, fees and funding before signing.');
-  const tx = journal.build.transactions[0];
-  let signed;
-  try { [signed] = await wallet.features['solana:signTransaction'].signTransaction({ account, chain: 'solana:mainnet', transaction: bytes(tx.unsignedTransaction) }); }
-  catch { journal = await api('decline', { id: journal.id }); show(journal); return; }
-  journal = await api('signed', { id: journal.id, signedTransaction: base64(signed.signedTransaction) }); show(journal);
+  signing = true;
+  // Freeze this click's wallet and exact build while the freshness check and wallet UI run.
+  const selected = { wallet, account, journal };
+  $('sign').disabled = true;
+  try {
+    const freshness = await api('check-signing', { id: selected.journal.id });
+    if (freshness.status === 'expired') throw Error('This build expired before signing. No wallet signature was requested. Retain the build; do not rebuild automatically.');
+    if (freshness.status === 'reconciliation_required') throw Error('Saved work requires reconciliation; do not sign again.');
+    if (freshness.status !== 'ready') throw Error('Could not check transaction expiry. No wallet signature was requested.');
+    const tx = selected.journal.build.transactions[0];
+    if (freshness.transactionId !== tx.id || freshness.lastValidBlockHeight !== tx.lastValidBlockHeight) throw Error('The signing check does not match the reviewed transaction.');
+    let signed;
+    try { [signed] = await selected.wallet.features['solana:signTransaction'].signTransaction({ account: selected.account, chain: 'solana:mainnet', transaction: bytes(tx.unsignedTransaction) }); }
+    catch { journal = await api('decline', { id: selected.journal.id }); show(journal); return; }
+    journal = await api('signed', { id: selected.journal.id, signedTransaction: base64(signed.signedTransaction) }); show(journal);
+  } finally { signing = false; $('sign').disabled = false; }
 });
 $('resume').onclick = run(async () => { journal = await api('resume', { id: localStorage.getItem('unclaimed-pilot-resume') }); show(journal); });
 $('decline').onclick = run(async () => { journal = await api('decline', { id: journal.id }); show(journal); });
