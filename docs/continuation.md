@@ -1,5 +1,27 @@
 # SDK release and continuation
 
+## October 2: preview.4 release candidate
+
+Preview.4 is prepared locally from merged SDK main
+`b540d055a43dbd1093e60d9a09dba294d3cb9cbe` (PR #7). It carries that reference
+expiry correction, updates package/header version together and reconciles the
+public instructions. The mounted schema, analysis/build/record client behavior
+and existing fee/consent contracts are unchanged.
+
+The npm registry currently lists preview.1–preview.3, with preview.3 tagged latest.
+Preview.4 has not been published. Publish only a reviewed tarball after explicit
+authorization; then independently verify registry integrity, tag and fresh
+installation before directing partners to it. API access and live execution
+remain separate from package publication. No owner wallet tests need repeating.
+
+The public preview.3 package includes `examples/reference`; its pre-sign expiry
+fix is absent. This release includes that merged fix without changing historical
+receipts or interpreting unknown chain outcomes as failure.
+
+## Historical release records
+
+The dated sections below describe prior releases, not current source status.
+
 ## Version 0.1.0-preview.2
 
 This checkout targets `@unclaimedsol/wallet-sdk@0.1.0-preview.2`, based on

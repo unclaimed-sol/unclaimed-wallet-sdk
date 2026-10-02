@@ -10,11 +10,21 @@ provisioned server-side credentials; installing the package does not enable
 access or execution. The current partner rollout keeps builds disabled.
 
 ```sh
-npm install @unclaimedsol/wallet-sdk
+npm install --save-exact @unclaimedsol/wallet-sdk@0.1.0-preview.4
 ```
 
-Requires Node 22–24. To develop or run the offline reference, use the GitHub
-checkout (the npm package contains the SDK, not the reference application):
+This source targets **0.1.0-preview.4**. The command above becomes available
+after its separately approved npm publication; on October 2 the verified public
+release is preview.3. This release includes the merged pre-sign expiry fix.
+
+Requires Node 22–24. The npm package includes the SDK and reference assets.
+From an installed package, run:
+
+```sh
+node node_modules/@unclaimedsol/wallet-sdk/examples/reference/server.mjs
+```
+
+To develop from the GitHub checkout:
 
 ```sh
 npm ci
@@ -91,8 +101,8 @@ protected/no-action token item does not suppress independently supported excess.
 Do not mix wallets or snapshots. Amounts remain decimal strings and sums use
 BigInt. Net is after service fees, **before** network/setup costs. Null costs or
 USD valuations are unavailable, not zero. No estimate is recovered funds.
-Until the last page loads, totals cover only loaded pages. No burn selectors or
-execution controls are provided. The API's destructive consent text is shown
+Until the last page loads, totals cover only loaded pages. The default analysis
+reference has no execution controls; the separately configured pilot is opt-in. The API's destructive consent text is shown
 verbatim in the reference, including for currently empty accounts.
 
 ## Reference platform mode
@@ -164,16 +174,26 @@ retryable API refusals, transport failures and malformed responses). Retain the
 unchanged reported transaction data; recording uses no idempotency key.
 A 202 is pending reconciliation. `abandoned_unknown`
 is unverified expiry, carries no recovered value and never proves chain absence.
-A later valid signature can supersede it. No API cashback or partner credit is
-created. Empty-account execution retains the disclosed risk of burning later
-deposits; excess withdrawal preserves current tokens and the reviewed fee policy.
+Retain the exact work for reconciliation; do not sign again. An unverified
+outcome earns no partner credit or API cashback. The execution
+pilot supports only 1–10 empty non-native classic SPL accounts in one transaction,
+with the disclosed risk of burning later deposits. Token-2022, positive-balance
+burns, collectibles, Excess SOL, swaps and gasless are outside this pilot.
 
 An external milestone requires someone outside this development session to use
-the demo key and these instructions against the deployed origin successfully.
+their own separately activated server key and these instructions against the deployed origin successfully.
 No such milestone has been claimed.
 
-## Prepared claim-and-earn source
+## Claim-and-earn reference and expiry handling
 
 The opt-in [claim-and-earn reference](docs/claim-earn-reference.md) includes canonical
-v2 consent and durable exact-work reconciliation. This is source under review,
-not npm publication or execution activation. Published preview.2 remains unchanged.
+v2 consent and durable exact-work reconciliation. Preview.4 includes the reviewed
+expiry correction: check the exact block height before opening the wallet, keep
+the separate post-signing check, prevent duplicate signing clicks, and retain
+local non-submission evidence without claiming chain absence. Budget both height
+reads. Wallet/provider, selected items and reviewed build remain bound through
+signing. Unknown work stays reconciliation-only; do not rebuild automatically.
+
+SDK publication does not activate a key or approve any live test. Applied partner
+credit is 20% of verified eligible service fees, floored once per immutable batch;
+credit is not payout. Users may decline attribution and recover without credit.
