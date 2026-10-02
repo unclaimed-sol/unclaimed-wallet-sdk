@@ -174,7 +174,8 @@ retryable API refusals, transport failures and malformed responses). Retain the
 unchanged reported transaction data; recording uses no idempotency key.
 A 202 is pending reconciliation. `abandoned_unknown`
 is unverified expiry, carries no recovered value and never proves chain absence.
-A later valid signature can supersede it. An unverified outcome earns no partner credit or API cashback. The execution
+Retain the exact work for reconciliation; do not sign again. An unverified
+outcome earns no partner credit or API cashback. The execution
 pilot supports only 1–10 empty non-native classic SPL accounts in one transaction,
 with the disclosed risk of burning later deposits. Token-2022, positive-balance
 burns, collectibles, Excess SOL, swaps and gasless are outside this pilot.
