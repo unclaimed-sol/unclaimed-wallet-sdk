@@ -1,8 +1,9 @@
 # Claim-and-earn source reference
 
-This branch prepares claim-and-earn. Published `@unclaimedsol/wallet-sdk@0.1.0-preview.2`
-remains unchanged and rejects attributed receipt responses. Synthetic tests do not
-establish publication, deployment, activation or real-wallet recovery.
+This source targets preview.4, which includes the merged reference expiry fix.
+Preview.3 is the last verified public version as of October 2, 2026; preview.4
+publication is separately gated. The packaged reference assets require no private
+repository. Synthetic tests do not establish live access, recovery or adoption.
 
 `createPartnerConsent` returns canonical UTF-8 message text and unsigned v2 proof
 fields. The wallet optionally signs that text; attach its canonical base64 signature
@@ -48,10 +49,11 @@ per private directory; its lock is not distributed. Loopback Host/Origin checks 
 required. Public hosting needs application authentication and shared durable storage.
 The reference is not a hosted multi-tenant service.
 
-Before live acceptance, install the reviewed public candidate fresh, verify matching
-engine/platform revisions, and obtain separate activation approval, numerical
-provider/submission budgets and an owner-controlled signing wallet. Test attributed
-recovery with applied auditable credit and attribution-declined recovery. Credit is
+Before live acceptance, install the reviewed published version fresh and obtain
+a separately approved partner scope: active identity/enrollment, reviewed app,
+consented signing wallet/accounts, UTC window, numerical API/provider/submission/
+height/signing budgets, fee ceiling and closure owner. Exercise only the cases
+covered by that scope. Completed owner acceptance does not authorize a partner run. Credit is
 not payout; synthetic execution is not live recovery or partner adoption.
 
 ## Owner-configured opt-in runner
@@ -83,7 +85,7 @@ operator evidence repair, not a reset; consumed allowance is never refunded.
 
 ## Run the installed public reference
 
-The candidate package ships `examples/reference` alongside `dist`. After installing
+The package ships `examples/reference` alongside `dist`. After installing
 the separately approved version (or the inspected tarball for offline acceptance),
 run `node node_modules/@unclaimedsol/wallet-sdk/examples/reference/server.mjs`.
 Default fixture mode uses no product API, provider or real wallet. The `/pilot`

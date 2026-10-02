@@ -50,7 +50,8 @@ license remains an owner decision for review; third-party notices do not supply
 a license for the SDK itself. This documentation does not make that choice.
 
 
-The unpublished preview.3 candidate includes the public `examples/reference`
-directory. The historical preview.2 package excluded it. Validate the candidate
+Published preview.3 includes the public `examples/reference` directory. The
+preview.4 candidate additionally includes the merged pre-sign expiry correction.
+The historical preview.2 package excluded the reference. Validate preview.4
 by running the reference from its fresh installed package directory, without
 copying examples from a checkout. This packaging change is not publication approval.

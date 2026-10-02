@@ -1,6 +1,6 @@
 {
   "name": "@unclaimedsol/wallet-sdk",
-  "version": "0.1.0-preview.3",
+  "version": "0.1.0-preview.4",
   "description": "Server-side TypeScript client for the Unclaimed API preview",
   "type": "module",
   "engines": {
