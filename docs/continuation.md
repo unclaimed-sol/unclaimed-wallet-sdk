@@ -1,22 +1,24 @@
 # SDK release and continuation
 
-## October 2: preview.4 release candidate
+## October 3: preview.5 coordinated stale-price release
 
-Preview.4 is prepared locally from merged SDK main
-`b540d055a43dbd1093e60d9a09dba294d3cb9cbe` (PR #7). It carries that reference
-expiry correction, updates package/header version together and reconciles the
-public instructions. The mounted schema, analysis/build/record client behavior
-and existing fee/consent contracts are unchanged.
+This source targets `@unclaimedsol/wallet-sdk@0.1.0-preview.5`. Package metadata
+and the SDK request header match. The owner authorized this release after the
+coordinated stale-price review. Publish only the inspected tarball, then verify
+registry integrity, the latest tag and a fresh installed-package smoke test.
+Registry metadata is authoritative for publication status; a source merge alone
+is not publication evidence.
 
-The npm registry currently lists preview.1–preview.3, with preview.3 tagged latest.
-Preview.4 has not been published. Publish only a reviewed tarball after explicit
-authorization; then independently verify registry integrity, tag and fresh
-installation before directing partners to it. API access and live execution
-remain separate from package publication. No owner wallet tests need repeating.
+Preview.5 accepts the explicit protected `stale_price` state and rejects unsafe
+or noncanonical stale balances. Existing response states and exact replay
+handling remain supported. Upgrade integrations before the API emits that state;
+preview.4 rejects its new enums. Retain preview.5 or a later compatible client
+while stored stale-price responses can be replayed. See [release notes](release-notes.md).
 
-The public preview.3 package includes `examples/reference`; its pre-sign expiry
-fix is absent. This release includes that merged fix without changing historical
-receipts or interpreting unknown chain outcomes as failure.
+Preview.4 was published and verified as latest on October 2. It contains the
+pre-sign expiry correction; preview.5 retains it. No API key, access limit,
+execution gate, signing/submission behavior or historical receipt changes are
+required by this SDK upgrade. No owner wallet tests need repeating.
 
 ## Historical release records
 

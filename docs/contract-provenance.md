@@ -77,11 +77,11 @@ receipt attribution and separate recovery/partner-credit completion. Historical
 ordinary receipt responses remain valid. The candidate is unpublished; source
 readiness does not establish API deployment or execution activation.
 
-## October 3 stale-reference correction (unreleased)
+## October 3 stale-reference correction (preview.5)
 
 The mounted contract adds the `stale_price` reason and protection. Its conditional
 requires a protected positive account, no executable opportunity and unavailable
 market evidence with null quote value/time/availability. Both generated outputs
 and the schema digest above are synchronized. The published preview.4 package
-is unchanged; this candidate needs a separately authorized new package release
-and integration upgrade before the engine starts emitting the new state.
+is unchanged. Preview.5 carries the correction under owner-authorized publication;
+verify its registry artifact and upgrade integrations before the API emits the new state.

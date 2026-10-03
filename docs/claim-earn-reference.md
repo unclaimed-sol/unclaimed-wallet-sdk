@@ -1,9 +1,9 @@
 # Claim-and-earn source reference
 
-This source targets preview.4, which includes the merged reference expiry fix.
-Preview.3 is the last verified public version as of October 2, 2026; preview.4
-publication is separately gated. The packaged reference assets require no private
-repository. Synthetic tests do not establish live access, recovery or adoption.
+This source targets preview.5, which accepts protected stale-price analysis
+results and retains the reference expiry checks. The packaged reference assets
+require no private repository. Synthetic tests do not establish live access,
+recovery or adoption; SDK upgrades do not enable execution.
 
 `createPartnerConsent` returns canonical UTF-8 message text and unsigned v2 proof
 fields. The wallet optionally signs that text; attach its canonical base64 signature
