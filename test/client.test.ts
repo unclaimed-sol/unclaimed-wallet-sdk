@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256",
+    "389541e4deb623dce0eabe0576347ed9e55a7bdef895975fac2cee4ad6b4f1a1",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {
@@ -79,7 +79,7 @@ test("one request, explicit headers and exact cursor/body, no redirects", async 
     const h = new Headers(init?.headers);
     assert.equal(h.get("authorization"), "Bearer offline-fixture-only");
     assert.equal(h.get("idempotency-key"), "explicit-page-1");
-    assert.equal(h.get("x-unclaimed-sdk-version"), "0.1.0-preview.4");
+    assert.equal(h.get("x-unclaimed-sdk-version"), "0.1.0-preview.5");
     assert.deepEqual(JSON.parse(init?.body as string), input);
     return Response.json(pages()[0]);
   });
@@ -365,4 +365,40 @@ test("mounted execution refusals remain actionable API errors", async () => {
   }
   const sdk = client(async () => refusal("invalid_signature", false, 422));
   await assert.rejects(sdk.recordExecution({ wallet: fixtureWallet, transactions: [] }, "fixture-receipt"), (error: unknown) => error instanceof UnclaimedApiError && error.code === "invalid_signature" && error.retryAction === "none");
+});
+
+test('accepts protected stale prices, retains empty siblings and rejects unsafe stale wire states', async () => {
+  const page = pages()[1]!;
+  page.data.pagination.walletModulesIncluded = true;
+  const stale: any = { id: 'stale-fixture', kind: 'token_account', source: 'spl_token',
+    asset: { mint: fixtureWallet, decimals: 6, assetType: 'fungible' },
+    account: { address: fixtureWallet, program: 'spl_token', balanceBaseUnits: '1', rentLamports: '2039280' },
+    classification: { disposition: 'protected', confidence: 'low', reviewRequired: true, reasons: ['stale_price'], protections: ['stale_price'] },
+    market: { quoteStatus: 'unavailable', sellRouteAvailable: null, executableQuoteUsd: null, quotedAt: null },
+    opportunity: { action: 'none', destructive: false, executionSupported: false, valueComponents: [], estimated: true } };
+  const before = summarizeOpportunities(page.data.items);
+  page.data.items.push(stale);
+  page.data.pagination.returned += 1;
+  page.data.summary.analyzedAssetAccounts += 1;
+  page.data.summary.protectedAssetCount += 1;
+  const staleInput = { ...input, limit: page.data.pagination.returned };
+  assert.equal(validateResponse(page), true);
+  const result = await client(async () => Response.json(page)).checkWallet(staleInput, { idempotencyKey: 'stale-offline' });
+  assert.deepEqual(result.data.items.at(-1), stale);
+  assert.deepEqual(summarizeOpportunities(result.data.items).totalsByAsset, before.totalsByAsset);
+  for (const mutate of [
+    (x: any) => { delete x.market; },
+    ...['0', '00', '000', '01', '-1', '1.0'].map(balance => (x: any) => { x.account.balanceBaseUnits = balance; }),
+    (x: any) => { x.classification.reasons = ['unpriced']; },
+    (x: any) => { x.classification.protections = ['unpriced']; },
+    (x: any) => { x.market.executableQuoteUsd = '0.000000'; },
+    (x: any) => { x.opportunity.executionSupported = true; },
+    (x: any) => { x.opportunity.action = 'burn_and_close'; },
+    (x: any) => { x.market = { quoteStatus: 'complete', sellRouteAvailable: true, executableQuoteUsd: null, quotedAt: new Date().toISOString() }; },
+  ]) {
+    const bad = structuredClone(page);
+    mutate(bad.data.items.at(-1));
+    assert.equal(validateResponse(bad), false);
+    await assert.rejects(client(async () => Response.json(bad)).checkWallet(staleInput, { idempotencyKey: 'invalid-stale' }), UnclaimedProtocolError);
+  }
 });

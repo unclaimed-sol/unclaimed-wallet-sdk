@@ -50,8 +50,9 @@ license remains an owner decision for review; third-party notices do not supply
 a license for the SDK itself. This documentation does not make that choice.
 
 
-Published preview.3 includes the public `examples/reference` directory. The
-preview.4 candidate additionally includes the merged pre-sign expiry correction.
-The historical preview.2 package excluded the reference. Validate preview.4
-by running the reference from its fresh installed package directory, without
-copying examples from a checkout. This packaging change is not publication approval.
+Published preview.3 and preview.4 include `examples/reference`; preview.4 also
+contains the merged pre-sign expiry correction. Preview.5 retains those assets
+and adds the stale-price contract. Validate each new package by running the
+reference from a fresh installed package directory, without copying examples
+from a checkout. The owner authorized preview.5 publication; the tarball, registry
+integrity, latest tag and installed-package checks remain required.

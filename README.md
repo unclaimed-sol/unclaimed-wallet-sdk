@@ -10,12 +10,13 @@ provisioned server-side credentials; installing the package does not enable
 access or execution. The current partner rollout keeps builds disabled.
 
 ```sh
-npm install --save-exact @unclaimedsol/wallet-sdk@0.1.0-preview.4
+npm install --save-exact @unclaimedsol/wallet-sdk@0.1.0-preview.5
 ```
 
-This source targets **0.1.0-preview.4**. The command above becomes available
-after its separately approved npm publication; on October 2 the verified public
-release is preview.3. This release includes the merged pre-sign expiry fix.
+This source targets **0.1.0-preview.5**, which accepts protected stale-price
+analysis results and retains the pre-sign expiry checks. Upgrade before consuming
+API responses containing `stale_price`; preview.4 rejects that state. See the
+[release notes](docs/release-notes.md) for compatibility and rollout guidance.
 
 Requires Node 22–24. The npm package includes the SDK and reference assets.
 From an installed package, run:

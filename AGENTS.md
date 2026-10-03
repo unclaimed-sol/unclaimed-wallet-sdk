@@ -42,12 +42,21 @@ The claim-and-earn candidate adds the pure `createPartnerConsent` v2 helper and
 shared fixture. The opt-in Wallet Standard reference journals exact work before
 sending; its application-owned submission connection reserves every wire call in
 an append-only fsynced budget file. Never truncate retained reservations or
-silently replace unknown work. Preview.3 is published; preview.4 is the current unpublished candidate carrying
-the merged reference expiry fix. Neither package publication nor source readiness
-activates execution. Keep package/header versions and public status docs aligned.
+silently replace unknown work. Preview.4 is published with the merged reference
+expiry fix. The owner authorized preview.5 for the stale-price correction; its
+release notes and package/header versions are aligned. Verify the inspected
+tarball, registry integrity/tag and fresh installation before reporting publication. Neither
+package publication nor source readiness activates execution. Keep package/header versions and public status docs aligned.
 
 The source reference performs a bounded height check before prompting for a wallet
 signature and preserves the separate post-signing check. Include both in explicit
 application allowances. An expired signed build retains its signature and local
 non-submission reason even when the API still reports unknown. Never terminalize,
 delete or replace that work based solely on local non-submission evidence.
+
+Stale-reference analysis uses public reason/protection `stale_price` only for
+protected positive token accounts with no executable action, no quote and no USD
+value. The private engine status is `stale`; do not map it to `unpriced` or zero.
+Keep the mounted schema and generated SDK validators synchronized. Old stored
+responses remain valid and unchanged; new enum values require coordinated SDK,
+platform and engine rollout. This patch does not activate execution.

@@ -19,7 +19,7 @@ import {
   UnclaimedProtocolError,
   UnclaimedTransportError,
 } from "./errors.js";
-export const SDK_VERSION = "0.1.0-preview.4";
+export const SDK_VERSION = "0.1.0-preview.5";
 export interface ClientOptions {
   /** Operator-provided origin only. HTTPS required except literal local loopback. */
   baseUrl: string;
