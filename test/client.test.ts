@@ -65,7 +65,7 @@ test("schema fixtures obey mounted conditionals and pin source provenance", () =
   );
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
-    "e6e29b0aed687f3770f1f5501d9f49bcd50c83ff820501dca567492d0c742f04",
+    "389541e4deb623dce0eabe0576347ed9e55a7bdef895975fac2cee4ad6b4f1a1",
   );
 });
 test("one request, explicit headers and exact cursor/body, no redirects", async () => {
@@ -378,12 +378,17 @@ test('accepts protected stale prices, retains empty siblings and rejects unsafe 
     opportunity: { action: 'none', destructive: false, executionSupported: false, valueComponents: [], estimated: true } };
   const before = summarizeOpportunities(page.data.items);
   page.data.items.push(stale);
+  page.data.pagination.returned += 1;
+  page.data.summary.analyzedAssetAccounts += 1;
+  page.data.summary.protectedAssetCount += 1;
+  const staleInput = { ...input, limit: page.data.pagination.returned };
   assert.equal(validateResponse(page), true);
-  const result = await client(async () => Response.json(page)).checkWallet(input, { idempotencyKey: 'stale-offline' });
+  const result = await client(async () => Response.json(page)).checkWallet(staleInput, { idempotencyKey: 'stale-offline' });
   assert.deepEqual(result.data.items.at(-1), stale);
   assert.deepEqual(summarizeOpportunities(result.data.items).totalsByAsset, before.totalsByAsset);
   for (const mutate of [
-    (x: any) => { delete x.market; }, (x: any) => { x.account.balanceBaseUnits = '0'; },
+    (x: any) => { delete x.market; },
+    ...['0', '00', '000', '01', '-1', '1.0'].map(balance => (x: any) => { x.account.balanceBaseUnits = balance; }),
     (x: any) => { x.classification.reasons = ['unpriced']; },
     (x: any) => { x.classification.protections = ['unpriced']; },
     (x: any) => { x.market.executableQuoteUsd = '0.000000'; },
@@ -394,6 +399,6 @@ test('accepts protected stale prices, retains empty siblings and rejects unsafe 
     const bad = structuredClone(page);
     mutate(bad.data.items.at(-1));
     assert.equal(validateResponse(bad), false);
-    await assert.rejects(client(async () => Response.json(bad)).checkWallet(input, { idempotencyKey: 'invalid-stale' }), UnclaimedProtocolError);
+    await assert.rejects(client(async () => Response.json(bad)).checkWallet(staleInput, { idempotencyKey: 'invalid-stale' }), UnclaimedProtocolError);
   }
 });

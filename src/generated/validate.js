@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 e6e29b0aed687f3770f1f5501d9f49bcd50c83ff820501dca567492d0c742f04). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 389541e4deb623dce0eabe0576347ed9e55a7bdef895975fac2cee4ad6b4f1a1). Do not edit.
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
@@ -465,10 +465,11 @@ var validateResponse = validate23;
 var schema35 = { "type": "object", "required": ["requestId", "apiVersion", "rulesetVersion", "assetIntelligenceRulesetVersion", "analyzedAt", "complete", "data", "billing"], "properties": { "requestId": { "type": "string" }, "apiVersion": { "type": "string", "enum": ["v1-preview"] }, "rulesetVersion": { "type": "string" }, "assetIntelligenceRulesetVersion": { "type": "null", "description": "Preview: always null; no Asset Intelligence is served." }, "analyzedAt": { "type": "string", "format": "date-time" }, "complete": { "type": "boolean", "enum": [true], "description": "Always true on a 200. Incomplete pages are refused, not served." }, "data": { "type": "object", "required": ["wallet", "mode", "summary", "pagination", "items", "airdrops", "executionSession", "limits"], "allOf": [{ "if": { "properties": { "items": { "contains": { "properties": { "opportunity": { "properties": { "executionSupported": { "const": true } }, "required": ["executionSupported"] } }, "required": ["opportunity"] } } } }, "then": { "properties": { "executionSession": { "$ref": "#/components/schemas/ExecutionSession" } } } }], "properties": { "wallet": { "$ref": "#/components/schemas/Base58" }, "mode": { "type": "string", "enum": ["safe"] }, "summary": { "type": "object", "description": "Presentation-only, current page plus first-page wallet modules. Never a whole-wallet total while `hasMore` is true.", "required": ["scope", "analyzedAssetAccounts", "opportunityCount", "protectedAssetCount", "totalsByAsset", "estimatedNetValueUsd"], "properties": { "scope": { "type": "string", "enum": ["page"] }, "analyzedAssetAccounts": { "type": "integer" }, "opportunityCount": { "type": "integer" }, "protectedAssetCount": { "type": "integer" }, "totalsByAsset": { "type": "array", "items": { "type": "object", "required": ["asset", "decimals", "grossBaseUnits", "serviceFeeBaseUnits", "netBaseUnits"], "properties": { "asset": { "type": "string" }, "mint": { "$ref": "#/components/schemas/Base58" }, "decimals": { "type": "integer" }, "grossBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "serviceFeeBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "netBaseUnits": { "$ref": "#/components/schemas/IntegerString" } } } }, "estimatedNetValueUsd": { "type": ["string", "null"], "description": "Null whenever any required price input is missing or stale." } } }, "pagination": { "type": "object", "required": ["returned", "hasMore", "nextCursor", "walletModulesIncluded", "expiresAt"], "properties": { "returned": { "type": "integer", "description": "Raw token accounts analyzed on this page, including those with no opportunity." }, "hasMore": { "type": "boolean" }, "nextCursor": { "type": ["string", "null"] }, "walletModulesIncluded": { "type": "boolean", "description": "True only on the first page." }, "expiresAt": { "type": "string", "format": "date-time", "description": "Shared snapshot and cursor expiry. Session lifetime is shared when enabled." } } }, "items": { "type": "array", "items": { "$ref": "#/components/schemas/WalletItem" } }, "airdrops": { "type": "null" }, "executionSession": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/ExecutionSession" }], "description": "Issued only when execution preview is enabled. Shares snapshot expiry." }, "limits": { "type": "object", "required": ["maxRawTokenAccounts", "pageLimitMax"], "properties": { "maxRawTokenAccounts": { "type": "integer", "enum": [400], "description": "Preview cap, enforced before enrichment." }, "pageLimitMax": { "type": "integer", "enum": [200] } } } } }, "billing": { "$ref": "#/components/schemas/Billing" } } };
 var formats0 = require_formats().fastFormats["date-time"];
 var pattern9 = new RegExp("^[0-9]+$", "u");
-var schema42 = { "type": "object", "description": "One discriminated item. Preview omits `discardEvidence` and `classification.reputation` entirely rather than nulling them.", "required": ["id", "kind", "source", "classification", "opportunity"], "properties": { "id": { "type": "string" }, "kind": { "type": "string", "enum": ["token_account", "excess_lamports"] }, "source": { "type": "string", "enum": ["spl_token", "token_2022", "excess_lamports"], "description": "For disappeared or unsupported accounts, the platform retains the source from its address-bound frozen inventory. It never supplies missing current account facts from that snapshot." }, "targetAccount": { "$ref": "#/components/schemas/Base58", "description": "Exact target of an excess-lamports item. No current token balance is inferred from frozen inventory." }, "alternativeGroupId": { "type": "string", "description": "Present on every excess-lamports item for a token account and on the token-account item for the same account. The two are alternatives, never additive." }, "asset": { "type": "object", "required": ["mint", "assetType", "decimals"], "properties": { "mint": { "$ref": "#/components/schemas/Base58" }, "assetType": { "type": "string", "enum": ["fungible", "token_account_collectible", "unknown"] }, "symbol": { "type": ["string", "null"] }, "decimals": { "type": "integer" } } }, "account": { "type": "object", "required": ["address", "program", "balanceBaseUnits", "rentLamports"], "additionalProperties": false, "properties": { "address": { "$ref": "#/components/schemas/Base58" }, "program": { "type": "string", "enum": ["spl_token", "token_2022"] }, "balanceBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "rentLamports": { "$ref": "#/components/schemas/IntegerString" } } }, "classification": { "type": "object", "required": ["disposition", "confidence", "reviewRequired", "reasons", "protections"], "properties": { "disposition": { "type": "string", "enum": ["closeable_empty", "withdrawable", "protected", "review_only", "no_op"], "description": "Safe analysis only. Max-mode burn candidates are unavailable. Sell candidates are returned as `review_only`." }, "confidence": { "type": "string", "enum": ["known", "high", "low"] }, "reviewRequired": { "type": "boolean" }, "reasons": { "type": "array", "items": { "type": "string", "enum": ["zero_balance", "priced_dust_within_policy", "sell_not_supported_in_preview", "above_dust_threshold", "above_net_rent", "frozen", "collectible", "lp_or_position_shaped", "receipt_token_policy", "dangerous_token_2022_extension", "account_missing", "unsupported_account", "positive_wsol", "unpriced", "stale_price", "completed_no_sell_route", "unsupported_signer", "non_positive_net", "excess_above_rent_exempt_minimum"] } }, "protections": { "type": "array", "items": { "type": "string", "enum": ["frozen", "collectible", "lp_position", "receipt_token", "token_2022_extension", "unpriced", "stale_price", "account_state"] } } } }, "market": { "type": "object", "description": "Present on fungible token-account items.", "required": ["quoteStatus", "sellRouteAvailable", "executableQuoteUsd", "quotedAt"], "properties": { "quoteStatus": { "type": "string", "enum": ["complete", "unavailable"] }, "sellRouteAvailable": { "type": ["boolean", "null"], "description": "Null when a route was not requested; false only for a completed no-route lookup." }, "executableQuoteUsd": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/DecimalUsd" }] }, "quotedAt": { "type": ["string", "null"], "format": "date-time" } }, "allOf": [{ "if": { "properties": { "quoteStatus": { "const": "unavailable" } } }, "then": { "properties": { "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "else": { "properties": { "sellRouteAvailable": { "type": "boolean" }, "quotedAt": { "type": "string", "format": "date-time" } } } }, { "if": { "properties": { "sellRouteAvailable": { "const": false } } }, "then": { "properties": { "executableQuoteUsd": { "const": null } } } }] }, "opportunity": { "oneOf": [{ "$ref": "#/components/schemas/BurnAndCloseOpportunity" }, { "$ref": "#/components/schemas/RecoverExcessLamportsOpportunity" }, { "$ref": "#/components/schemas/NoActionOpportunity" }], "discriminator": { "propertyName": "action", "mapping": { "burn_and_close": "#/components/schemas/BurnAndCloseOpportunity", "recover_excess_lamports": "#/components/schemas/RecoverExcessLamportsOpportunity", "none": "#/components/schemas/NoActionOpportunity" } } } }, "allOf": [{ "if": { "properties": { "kind": { "const": "excess_lamports" } } }, "then": { "required": ["targetAccount", "alternativeGroupId"], "not": { "required": ["account"] }, "properties": { "source": { "const": "excess_lamports" }, "classification": { "properties": { "disposition": { "const": "withdrawable" }, "confidence": { "const": "known" }, "reviewRequired": { "const": true }, "reasons": { "const": ["excess_above_rent_exempt_minimum"] }, "protections": { "maxItems": 0 } } }, "opportunity": { "properties": { "action": { "const": "recover_excess_lamports" } } } } }, "else": { "not": { "required": ["targetAccount"] }, "properties": { "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty", "protected", "review_only", "no_op"] }, "reasons": { "not": { "contains": { "const": "excess_above_rent_exempt_minimum" } } } } }, "opportunity": { "properties": { "action": { "enum": ["none", "burn_and_close"] } } } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "spl_token" } } } } }, "then": { "properties": { "source": { "const": "spl_token" } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "token_2022" } } } } }, "then": { "properties": { "source": { "const": "token_2022" } } } }, { "if": { "required": ["market"] }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "asset": { "properties": { "assetType": { "const": "fungible" } } } } } }, { "if": { "properties": { "opportunity": { "properties": { "action": { "const": "burn_and_close" } } } } }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty"] }, "reviewRequired": { "const": true }, "protections": { "maxItems": 0 } } } } } }, { "if": { "properties": { "classification": { "properties": { "disposition": { "const": "closeable_empty" } } } } }, "then": { "required": ["account", "asset"], "properties": { "account": { "properties": { "balanceBaseUnits": { "const": "0" } } }, "opportunity": { "properties": { "action": { "const": "burn_and_close" }, "reviewedBalanceBaseUnits": { "const": "0" } } } } } }, { "if": { "properties": { "classification": { "properties": { "reasons": { "contains": { "enum": ["account_missing", "unsupported_account"] } } } } } }, "then": { "properties": { "classification": { "properties": { "disposition": { "const": "protected" }, "protections": { "contains": { "const": "account_state" } } } }, "opportunity": { "properties": { "action": { "const": "none" } } } }, "not": { "required": ["market"] } } }, { "if": { "anyOf": [{ "properties": { "classification": { "properties": { "reasons": { "contains": { "const": "stale_price" } } } } } }, { "properties": { "classification": { "properties": { "protections": { "contains": { "const": "stale_price" } } } } } }] }, "then": { "required": ["account", "asset", "market"], "properties": { "kind": { "const": "token_account" }, "account": { "properties": { "balanceBaseUnits": { "not": { "const": "0" } } } }, "classification": { "properties": { "disposition": { "const": "protected" }, "confidence": { "const": "low" }, "reviewRequired": { "const": true }, "reasons": { "const": ["stale_price"] }, "protections": { "const": ["stale_price"] } } }, "market": { "properties": { "quoteStatus": { "const": "unavailable" }, "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "opportunity": { "properties": { "action": { "const": "none" } } } } } }] };
+var schema42 = { "type": "object", "description": "One discriminated item. Preview omits `discardEvidence` and `classification.reputation` entirely rather than nulling them.", "required": ["id", "kind", "source", "classification", "opportunity"], "properties": { "id": { "type": "string" }, "kind": { "type": "string", "enum": ["token_account", "excess_lamports"] }, "source": { "type": "string", "enum": ["spl_token", "token_2022", "excess_lamports"], "description": "For disappeared or unsupported accounts, the platform retains the source from its address-bound frozen inventory. It never supplies missing current account facts from that snapshot." }, "targetAccount": { "$ref": "#/components/schemas/Base58", "description": "Exact target of an excess-lamports item. No current token balance is inferred from frozen inventory." }, "alternativeGroupId": { "type": "string", "description": "Present on every excess-lamports item for a token account and on the token-account item for the same account. The two are alternatives, never additive." }, "asset": { "type": "object", "required": ["mint", "assetType", "decimals"], "properties": { "mint": { "$ref": "#/components/schemas/Base58" }, "assetType": { "type": "string", "enum": ["fungible", "token_account_collectible", "unknown"] }, "symbol": { "type": ["string", "null"] }, "decimals": { "type": "integer" } } }, "account": { "type": "object", "required": ["address", "program", "balanceBaseUnits", "rentLamports"], "additionalProperties": false, "properties": { "address": { "$ref": "#/components/schemas/Base58" }, "program": { "type": "string", "enum": ["spl_token", "token_2022"] }, "balanceBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "rentLamports": { "$ref": "#/components/schemas/IntegerString" } } }, "classification": { "type": "object", "required": ["disposition", "confidence", "reviewRequired", "reasons", "protections"], "properties": { "disposition": { "type": "string", "enum": ["closeable_empty", "withdrawable", "protected", "review_only", "no_op"], "description": "Safe analysis only. Max-mode burn candidates are unavailable. Sell candidates are returned as `review_only`." }, "confidence": { "type": "string", "enum": ["known", "high", "low"] }, "reviewRequired": { "type": "boolean" }, "reasons": { "type": "array", "items": { "type": "string", "enum": ["zero_balance", "priced_dust_within_policy", "sell_not_supported_in_preview", "above_dust_threshold", "above_net_rent", "frozen", "collectible", "lp_or_position_shaped", "receipt_token_policy", "dangerous_token_2022_extension", "account_missing", "unsupported_account", "positive_wsol", "unpriced", "stale_price", "completed_no_sell_route", "unsupported_signer", "non_positive_net", "excess_above_rent_exempt_minimum"] } }, "protections": { "type": "array", "items": { "type": "string", "enum": ["frozen", "collectible", "lp_position", "receipt_token", "token_2022_extension", "unpriced", "stale_price", "account_state"] } } } }, "market": { "type": "object", "description": "Present on fungible token-account items.", "required": ["quoteStatus", "sellRouteAvailable", "executableQuoteUsd", "quotedAt"], "properties": { "quoteStatus": { "type": "string", "enum": ["complete", "unavailable"] }, "sellRouteAvailable": { "type": ["boolean", "null"], "description": "Null when a route was not requested; false only for a completed no-route lookup." }, "executableQuoteUsd": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/DecimalUsd" }] }, "quotedAt": { "type": ["string", "null"], "format": "date-time" } }, "allOf": [{ "if": { "properties": { "quoteStatus": { "const": "unavailable" } } }, "then": { "properties": { "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "else": { "properties": { "sellRouteAvailable": { "type": "boolean" }, "quotedAt": { "type": "string", "format": "date-time" } } } }, { "if": { "properties": { "sellRouteAvailable": { "const": false } } }, "then": { "properties": { "executableQuoteUsd": { "const": null } } } }] }, "opportunity": { "oneOf": [{ "$ref": "#/components/schemas/BurnAndCloseOpportunity" }, { "$ref": "#/components/schemas/RecoverExcessLamportsOpportunity" }, { "$ref": "#/components/schemas/NoActionOpportunity" }], "discriminator": { "propertyName": "action", "mapping": { "burn_and_close": "#/components/schemas/BurnAndCloseOpportunity", "recover_excess_lamports": "#/components/schemas/RecoverExcessLamportsOpportunity", "none": "#/components/schemas/NoActionOpportunity" } } } }, "allOf": [{ "if": { "properties": { "kind": { "const": "excess_lamports" } } }, "then": { "required": ["targetAccount", "alternativeGroupId"], "not": { "required": ["account"] }, "properties": { "source": { "const": "excess_lamports" }, "classification": { "properties": { "disposition": { "const": "withdrawable" }, "confidence": { "const": "known" }, "reviewRequired": { "const": true }, "reasons": { "const": ["excess_above_rent_exempt_minimum"] }, "protections": { "maxItems": 0 } } }, "opportunity": { "properties": { "action": { "const": "recover_excess_lamports" } } } } }, "else": { "not": { "required": ["targetAccount"] }, "properties": { "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty", "protected", "review_only", "no_op"] }, "reasons": { "not": { "contains": { "const": "excess_above_rent_exempt_minimum" } } } } }, "opportunity": { "properties": { "action": { "enum": ["none", "burn_and_close"] } } } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "spl_token" } } } } }, "then": { "properties": { "source": { "const": "spl_token" } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "token_2022" } } } } }, "then": { "properties": { "source": { "const": "token_2022" } } } }, { "if": { "required": ["market"] }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "asset": { "properties": { "assetType": { "const": "fungible" } } } } } }, { "if": { "properties": { "opportunity": { "properties": { "action": { "const": "burn_and_close" } } } } }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty"] }, "reviewRequired": { "const": true }, "protections": { "maxItems": 0 } } } } } }, { "if": { "properties": { "classification": { "properties": { "disposition": { "const": "closeable_empty" } } } } }, "then": { "required": ["account", "asset"], "properties": { "account": { "properties": { "balanceBaseUnits": { "const": "0" } } }, "opportunity": { "properties": { "action": { "const": "burn_and_close" }, "reviewedBalanceBaseUnits": { "const": "0" } } } } } }, { "if": { "properties": { "classification": { "properties": { "reasons": { "contains": { "enum": ["account_missing", "unsupported_account"] } } } } } }, "then": { "properties": { "classification": { "properties": { "disposition": { "const": "protected" }, "protections": { "contains": { "const": "account_state" } } } }, "opportunity": { "properties": { "action": { "const": "none" } } } }, "not": { "required": ["market"] } } }, { "if": { "anyOf": [{ "properties": { "classification": { "properties": { "reasons": { "contains": { "const": "stale_price" } } } } } }, { "properties": { "classification": { "properties": { "protections": { "contains": { "const": "stale_price" } } } } } }] }, "then": { "required": ["account", "asset", "market"], "properties": { "kind": { "const": "token_account" }, "account": { "properties": { "balanceBaseUnits": { "pattern": "^[1-9][0-9]*$" } } }, "classification": { "properties": { "disposition": { "const": "protected" }, "confidence": { "const": "low" }, "reviewRequired": { "const": true }, "reasons": { "const": ["stale_price"] }, "protections": { "const": ["stale_price"] } } }, "market": { "properties": { "quoteStatus": { "const": "unavailable" }, "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "opportunity": { "properties": { "action": { "const": "none" } } } } } }] };
 var schema57 = { "type": "object", "description": "Protected, review-only, and no-op items. Never executable.", "required": ["action", "destructive", "executionSupported", "valueComponents", "estimated"], "properties": { "action": { "type": "string", "enum": ["none"] }, "destructive": { "type": "boolean", "enum": [false] }, "executionSupported": { "type": "boolean", "enum": [false] }, "valueComponents": { "type": "array", "maxItems": 0 }, "estimated": { "type": "boolean", "enum": [true] } } };
 var func0 = require_equal().default;
-var pattern17 = new RegExp("^[0-9]+\\.[0-9]{6}$", "u");
+var pattern12 = new RegExp("^[1-9][0-9]*$", "u");
+var pattern18 = new RegExp("^[0-9]+\\.[0-9]{6}$", "u");
 var schema49 = { "type": "object", "description": "Preview downgrade (contract section 6): executes on the existing\non-chain instruction, which burns whatever balance is present when the\ntransaction runs. Every instance is destructive and carries the\nconsent text, including accounts reviewed as empty.\n", "required": ["action", "destructive", "executionSupported", "consent", "reviewedBalanceBaseUnits", "valueComponents", "costs", "estimatedNetValueUsd", "estimated"], "properties": { "action": { "type": "string", "enum": ["burn_and_close"] }, "destructive": { "type": "boolean", "enum": [true] }, "executionSupported": { "type": "boolean", "description": "True only when the execution preview is enabled and this action is supported." }, "consent": { "type": "string", "minLength": 1, "description": "Exact text the integration must show before signing. States the reviewed balance and that execution burns whatever balance is present when the transaction runs; for `assumed_worthless` items also that no price was available." }, "reviewedBalanceBaseUnits": { "$ref": "#/components/schemas/IntegerString", "description": "The balance the user is reviewing. Zero for empty-account close." }, "valueComponents": { "type": "array", "minItems": 1, "items": { "allOf": [{ "$ref": "#/components/schemas/ValueComponent" }, { "properties": { "source": { "const": "token_account_close" } } }] } }, "costs": { "$ref": "#/components/schemas/OpportunityCosts" }, "estimatedNetValueUsd": { "type": ["string", "null"] }, "estimated": { "type": "boolean", "enum": [true] } } };
 var func4 = require_ucs2length().default;
 var schema51 = { "type": "object", "required": ["source", "gross", "serviceFee", "netAfterServiceFee"], "properties": { "source": { "type": "string", "enum": ["token_account_close", "excess_lamports"] }, "gross": { "$ref": "#/components/schemas/Amount" }, "serviceFee": { "$ref": "#/components/schemas/Amount" }, "netAfterServiceFee": { "$ref": "#/components/schemas/Amount" } } };
@@ -2345,29 +2346,11 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                           const _errs107 = errors;
                           if (data57 && typeof data57 == "object" && !Array.isArray(data57)) {
                             if (data57.balanceBaseUnits !== void 0) {
-                              const _errs109 = errors;
-                              const _errs110 = errors;
-                              if ("0" !== data57.balanceBaseUnits) {
-                                const err28 = {};
-                                if (vErrors === null) {
-                                  vErrors = [err28];
-                                } else {
-                                  vErrors.push(err28);
-                                }
-                                errors++;
-                              }
-                              var valid54 = _errs110 === errors;
-                              if (valid54) {
-                                validate25.errors = [{ instancePath: instancePath + "/account/balanceBaseUnits", schemaPath: "#/allOf/7/then/properties/account/properties/balanceBaseUnits/not", keyword: "not", params: {}, message: "must NOT be valid" }];
-                                return false;
-                              } else {
-                                errors = _errs109;
-                                if (vErrors !== null) {
-                                  if (_errs109) {
-                                    vErrors.length = _errs109;
-                                  } else {
-                                    vErrors = null;
-                                  }
+                              let data58 = data57.balanceBaseUnits;
+                              if (typeof data58 === "string") {
+                                if (!pattern12.test(data58)) {
+                                  validate25.errors = [{ instancePath: instancePath + "/account/balanceBaseUnits", schemaPath: "#/allOf/7/then/properties/account/properties/balanceBaseUnits/pattern", keyword: "pattern", params: { pattern: "^[1-9][0-9]*$" }, message: 'must match pattern "^[1-9][0-9]*$"' }];
+                                  return false;
                                 }
                               }
                             }
@@ -2379,59 +2362,116 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                         if (valid52) {
                           if (data.classification !== void 0) {
                             let data59 = data.classification;
-                            const _errs111 = errors;
+                            const _errs109 = errors;
                             if (data59 && typeof data59 == "object" && !Array.isArray(data59)) {
                               if (data59.disposition !== void 0) {
-                                const _errs112 = errors;
+                                const _errs110 = errors;
                                 if ("protected" !== data59.disposition) {
                                   validate25.errors = [{ instancePath: instancePath + "/classification/disposition", schemaPath: "#/allOf/7/then/properties/classification/properties/disposition/const", keyword: "const", params: { allowedValue: "protected" }, message: "must be equal to constant" }];
                                   return false;
                                 }
-                                var valid55 = _errs112 === errors;
+                                var valid54 = _errs110 === errors;
                               } else {
-                                var valid55 = true;
+                                var valid54 = true;
                               }
-                              if (valid55) {
+                              if (valid54) {
                                 if (data59.confidence !== void 0) {
-                                  const _errs113 = errors;
+                                  const _errs111 = errors;
                                   if ("low" !== data59.confidence) {
                                     validate25.errors = [{ instancePath: instancePath + "/classification/confidence", schemaPath: "#/allOf/7/then/properties/classification/properties/confidence/const", keyword: "const", params: { allowedValue: "low" }, message: "must be equal to constant" }];
                                     return false;
                                   }
-                                  var valid55 = _errs113 === errors;
+                                  var valid54 = _errs111 === errors;
                                 } else {
-                                  var valid55 = true;
+                                  var valid54 = true;
                                 }
-                                if (valid55) {
+                                if (valid54) {
                                   if (data59.reviewRequired !== void 0) {
-                                    const _errs114 = errors;
+                                    const _errs112 = errors;
                                     if (true !== data59.reviewRequired) {
                                       validate25.errors = [{ instancePath: instancePath + "/classification/reviewRequired", schemaPath: "#/allOf/7/then/properties/classification/properties/reviewRequired/const", keyword: "const", params: { allowedValue: true }, message: "must be equal to constant" }];
                                       return false;
                                     }
-                                    var valid55 = _errs114 === errors;
+                                    var valid54 = _errs112 === errors;
                                   } else {
-                                    var valid55 = true;
+                                    var valid54 = true;
                                   }
-                                  if (valid55) {
+                                  if (valid54) {
                                     if (data59.reasons !== void 0) {
-                                      const _errs115 = errors;
+                                      const _errs113 = errors;
                                       if (!func0(data59.reasons, schema42.allOf[7].then.properties.classification.properties.reasons.const)) {
                                         validate25.errors = [{ instancePath: instancePath + "/classification/reasons", schemaPath: "#/allOf/7/then/properties/classification/properties/reasons/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.classification.properties.reasons.const }, message: "must be equal to constant" }];
                                         return false;
                                       }
-                                      var valid55 = _errs115 === errors;
+                                      var valid54 = _errs113 === errors;
                                     } else {
-                                      var valid55 = true;
+                                      var valid54 = true;
                                     }
-                                    if (valid55) {
+                                    if (valid54) {
                                       if (data59.protections !== void 0) {
-                                        const _errs116 = errors;
+                                        const _errs114 = errors;
                                         if (!func0(data59.protections, schema42.allOf[7].then.properties.classification.properties.protections.const)) {
                                           validate25.errors = [{ instancePath: instancePath + "/classification/protections", schemaPath: "#/allOf/7/then/properties/classification/properties/protections/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.classification.properties.protections.const }, message: "must be equal to constant" }];
                                           return false;
                                         }
-                                        var valid55 = _errs116 === errors;
+                                        var valid54 = _errs114 === errors;
+                                      } else {
+                                        var valid54 = true;
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            var valid52 = _errs109 === errors;
+                          } else {
+                            var valid52 = true;
+                          }
+                          if (valid52) {
+                            if (data.market !== void 0) {
+                              let data65 = data.market;
+                              const _errs115 = errors;
+                              if (data65 && typeof data65 == "object" && !Array.isArray(data65)) {
+                                if (data65.quoteStatus !== void 0) {
+                                  const _errs116 = errors;
+                                  if ("unavailable" !== data65.quoteStatus) {
+                                    validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/allOf/7/then/properties/market/properties/quoteStatus/const", keyword: "const", params: { allowedValue: "unavailable" }, message: "must be equal to constant" }];
+                                    return false;
+                                  }
+                                  var valid55 = _errs116 === errors;
+                                } else {
+                                  var valid55 = true;
+                                }
+                                if (valid55) {
+                                  if (data65.sellRouteAvailable !== void 0) {
+                                    const _errs117 = errors;
+                                    if (null !== data65.sellRouteAvailable) {
+                                      validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/allOf/7/then/properties/market/properties/sellRouteAvailable/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.sellRouteAvailable.const }, message: "must be equal to constant" }];
+                                      return false;
+                                    }
+                                    var valid55 = _errs117 === errors;
+                                  } else {
+                                    var valid55 = true;
+                                  }
+                                  if (valid55) {
+                                    if (data65.executableQuoteUsd !== void 0) {
+                                      const _errs118 = errors;
+                                      if (null !== data65.executableQuoteUsd) {
+                                        validate25.errors = [{ instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/allOf/7/then/properties/market/properties/executableQuoteUsd/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.executableQuoteUsd.const }, message: "must be equal to constant" }];
+                                        return false;
+                                      }
+                                      var valid55 = _errs118 === errors;
+                                    } else {
+                                      var valid55 = true;
+                                    }
+                                    if (valid55) {
+                                      if (data65.quotedAt !== void 0) {
+                                        const _errs119 = errors;
+                                        if (null !== data65.quotedAt) {
+                                          validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/allOf/7/then/properties/market/properties/quotedAt/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.quotedAt.const }, message: "must be equal to constant" }];
+                                          return false;
+                                        }
+                                        var valid55 = _errs119 === errors;
                                       } else {
                                         var valid55 = true;
                                       }
@@ -2439,71 +2479,14 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                   }
                                 }
                               }
-                            }
-                            var valid52 = _errs111 === errors;
-                          } else {
-                            var valid52 = true;
-                          }
-                          if (valid52) {
-                            if (data.market !== void 0) {
-                              let data65 = data.market;
-                              const _errs117 = errors;
-                              if (data65 && typeof data65 == "object" && !Array.isArray(data65)) {
-                                if (data65.quoteStatus !== void 0) {
-                                  const _errs118 = errors;
-                                  if ("unavailable" !== data65.quoteStatus) {
-                                    validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/allOf/7/then/properties/market/properties/quoteStatus/const", keyword: "const", params: { allowedValue: "unavailable" }, message: "must be equal to constant" }];
-                                    return false;
-                                  }
-                                  var valid56 = _errs118 === errors;
-                                } else {
-                                  var valid56 = true;
-                                }
-                                if (valid56) {
-                                  if (data65.sellRouteAvailable !== void 0) {
-                                    const _errs119 = errors;
-                                    if (null !== data65.sellRouteAvailable) {
-                                      validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/allOf/7/then/properties/market/properties/sellRouteAvailable/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.sellRouteAvailable.const }, message: "must be equal to constant" }];
-                                      return false;
-                                    }
-                                    var valid56 = _errs119 === errors;
-                                  } else {
-                                    var valid56 = true;
-                                  }
-                                  if (valid56) {
-                                    if (data65.executableQuoteUsd !== void 0) {
-                                      const _errs120 = errors;
-                                      if (null !== data65.executableQuoteUsd) {
-                                        validate25.errors = [{ instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/allOf/7/then/properties/market/properties/executableQuoteUsd/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.executableQuoteUsd.const }, message: "must be equal to constant" }];
-                                        return false;
-                                      }
-                                      var valid56 = _errs120 === errors;
-                                    } else {
-                                      var valid56 = true;
-                                    }
-                                    if (valid56) {
-                                      if (data65.quotedAt !== void 0) {
-                                        const _errs121 = errors;
-                                        if (null !== data65.quotedAt) {
-                                          validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/allOf/7/then/properties/market/properties/quotedAt/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.quotedAt.const }, message: "must be equal to constant" }];
-                                          return false;
-                                        }
-                                        var valid56 = _errs121 === errors;
-                                      } else {
-                                        var valid56 = true;
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                              var valid52 = _errs117 === errors;
+                              var valid52 = _errs115 === errors;
                             } else {
                               var valid52 = true;
                             }
                             if (valid52) {
                               if (data.opportunity !== void 0) {
                                 let data70 = data.opportunity;
-                                const _errs122 = errors;
+                                const _errs120 = errors;
                                 if (data70 && typeof data70 == "object" && !Array.isArray(data70)) {
                                   if (data70.action !== void 0) {
                                     if ("none" !== data70.action) {
@@ -2512,7 +2495,7 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     }
                                   }
                                 }
-                                var valid52 = _errs122 === errors;
+                                var valid52 = _errs120 === errors;
                               } else {
                                 var valid52 = true;
                               }
@@ -2536,11 +2519,11 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                   }
                 }
                 if (!valid44) {
-                  const err29 = { instancePath, schemaPath: "#/allOf/7/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
+                  const err28 = { instancePath, schemaPath: "#/allOf/7/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
                   if (vErrors === null) {
-                    vErrors = [err29];
+                    vErrors = [err28];
                   } else {
-                    vErrors.push(err29);
+                    vErrors.push(err28);
                   }
                   errors++;
                   validate25.errors = vErrors;
@@ -2585,19 +2568,19 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
           props0.opportunity = true;
         }
         if (data.id !== void 0) {
-          const _errs124 = errors;
+          const _errs122 = errors;
           if (typeof data.id !== "string") {
             validate25.errors = [{ instancePath: instancePath + "/id", schemaPath: "#/properties/id/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
             return false;
           }
-          var valid58 = _errs124 === errors;
+          var valid57 = _errs122 === errors;
         } else {
-          var valid58 = true;
+          var valid57 = true;
         }
-        if (valid58) {
+        if (valid57) {
           if (data.kind !== void 0) {
             let data73 = data.kind;
-            const _errs126 = errors;
+            const _errs124 = errors;
             if (typeof data73 !== "string") {
               validate25.errors = [{ instancePath: instancePath + "/kind", schemaPath: "#/properties/kind/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
               return false;
@@ -2606,14 +2589,14 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
               validate25.errors = [{ instancePath: instancePath + "/kind", schemaPath: "#/properties/kind/enum", keyword: "enum", params: { allowedValues: schema42.properties.kind.enum }, message: "must be equal to one of the allowed values" }];
               return false;
             }
-            var valid58 = _errs126 === errors;
+            var valid57 = _errs124 === errors;
           } else {
-            var valid58 = true;
+            var valid57 = true;
           }
-          if (valid58) {
+          if (valid57) {
             if (data.source !== void 0) {
               let data74 = data.source;
-              const _errs128 = errors;
+              const _errs126 = errors;
               if (typeof data74 !== "string") {
                 validate25.errors = [{ instancePath: instancePath + "/source", schemaPath: "#/properties/source/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                 return false;
@@ -2622,16 +2605,16 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                 validate25.errors = [{ instancePath: instancePath + "/source", schemaPath: "#/properties/source/enum", keyword: "enum", params: { allowedValues: schema42.properties.source.enum }, message: "must be equal to one of the allowed values" }];
                 return false;
               }
-              var valid58 = _errs128 === errors;
+              var valid57 = _errs126 === errors;
             } else {
-              var valid58 = true;
+              var valid57 = true;
             }
-            if (valid58) {
+            if (valid57) {
               if (data.targetAccount !== void 0) {
                 let data75 = data.targetAccount;
-                const _errs130 = errors;
-                const _errs131 = errors;
-                if (errors === _errs131) {
+                const _errs128 = errors;
+                const _errs129 = errors;
+                if (errors === _errs129) {
                   if (typeof data75 === "string") {
                     if (!pattern4.test(data75)) {
                       validate25.errors = [{ instancePath: instancePath + "/targetAccount", schemaPath: "#/components/schemas/Base58/pattern", keyword: "pattern", params: { pattern: "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }, message: 'must match pattern "^[1-9A-HJ-NP-Za-km-z]{32,44}$"' }];
@@ -2642,26 +2625,26 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                     return false;
                   }
                 }
-                var valid58 = _errs130 === errors;
+                var valid57 = _errs128 === errors;
               } else {
-                var valid58 = true;
+                var valid57 = true;
               }
-              if (valid58) {
+              if (valid57) {
                 if (data.alternativeGroupId !== void 0) {
-                  const _errs133 = errors;
+                  const _errs131 = errors;
                   if (typeof data.alternativeGroupId !== "string") {
                     validate25.errors = [{ instancePath: instancePath + "/alternativeGroupId", schemaPath: "#/properties/alternativeGroupId/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                     return false;
                   }
-                  var valid58 = _errs133 === errors;
+                  var valid57 = _errs131 === errors;
                 } else {
-                  var valid58 = true;
+                  var valid57 = true;
                 }
-                if (valid58) {
+                if (valid57) {
                   if (data.asset !== void 0) {
                     let data77 = data.asset;
-                    const _errs135 = errors;
-                    if (errors === _errs135) {
+                    const _errs133 = errors;
+                    if (errors === _errs133) {
                       if (data77 && typeof data77 == "object" && !Array.isArray(data77)) {
                         let missing12;
                         if (data77.mint === void 0 && (missing12 = "mint") || data77.assetType === void 0 && (missing12 = "assetType") || data77.decimals === void 0 && (missing12 = "decimals")) {
@@ -2670,9 +2653,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                         } else {
                           if (data77.mint !== void 0) {
                             let data78 = data77.mint;
-                            const _errs137 = errors;
-                            const _errs138 = errors;
-                            if (errors === _errs138) {
+                            const _errs135 = errors;
+                            const _errs136 = errors;
+                            if (errors === _errs136) {
                               if (typeof data78 === "string") {
                                 if (!pattern4.test(data78)) {
                                   validate25.errors = [{ instancePath: instancePath + "/asset/mint", schemaPath: "#/components/schemas/Base58/pattern", keyword: "pattern", params: { pattern: "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }, message: 'must match pattern "^[1-9A-HJ-NP-Za-km-z]{32,44}$"' }];
@@ -2683,14 +2666,14 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                 return false;
                               }
                             }
-                            var valid60 = _errs137 === errors;
+                            var valid59 = _errs135 === errors;
                           } else {
-                            var valid60 = true;
+                            var valid59 = true;
                           }
-                          if (valid60) {
+                          if (valid59) {
                             if (data77.assetType !== void 0) {
                               let data79 = data77.assetType;
-                              const _errs140 = errors;
+                              const _errs138 = errors;
                               if (typeof data79 !== "string") {
                                 validate25.errors = [{ instancePath: instancePath + "/asset/assetType", schemaPath: "#/properties/asset/properties/assetType/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                 return false;
@@ -2699,33 +2682,33 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                 validate25.errors = [{ instancePath: instancePath + "/asset/assetType", schemaPath: "#/properties/asset/properties/assetType/enum", keyword: "enum", params: { allowedValues: schema42.properties.asset.properties.assetType.enum }, message: "must be equal to one of the allowed values" }];
                                 return false;
                               }
-                              var valid60 = _errs140 === errors;
+                              var valid59 = _errs138 === errors;
                             } else {
-                              var valid60 = true;
+                              var valid59 = true;
                             }
-                            if (valid60) {
+                            if (valid59) {
                               if (data77.symbol !== void 0) {
                                 let data80 = data77.symbol;
-                                const _errs142 = errors;
+                                const _errs140 = errors;
                                 if (typeof data80 !== "string" && data80 !== null) {
                                   validate25.errors = [{ instancePath: instancePath + "/asset/symbol", schemaPath: "#/properties/asset/properties/symbol/type", keyword: "type", params: { type: schema42.properties.asset.properties.symbol.type }, message: "must be string,null" }];
                                   return false;
                                 }
-                                var valid60 = _errs142 === errors;
+                                var valid59 = _errs140 === errors;
                               } else {
-                                var valid60 = true;
+                                var valid59 = true;
                               }
-                              if (valid60) {
+                              if (valid59) {
                                 if (data77.decimals !== void 0) {
                                   let data81 = data77.decimals;
-                                  const _errs144 = errors;
+                                  const _errs142 = errors;
                                   if (!(typeof data81 == "number" && (!(data81 % 1) && !isNaN(data81)))) {
                                     validate25.errors = [{ instancePath: instancePath + "/asset/decimals", schemaPath: "#/properties/asset/properties/decimals/type", keyword: "type", params: { type: "integer" }, message: "must be integer" }];
                                     return false;
                                   }
-                                  var valid60 = _errs144 === errors;
+                                  var valid59 = _errs142 === errors;
                                 } else {
-                                  var valid60 = true;
+                                  var valid59 = true;
                                 }
                               }
                             }
@@ -2736,22 +2719,22 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                         return false;
                       }
                     }
-                    var valid58 = _errs135 === errors;
+                    var valid57 = _errs133 === errors;
                   } else {
-                    var valid58 = true;
+                    var valid57 = true;
                   }
-                  if (valid58) {
+                  if (valid57) {
                     if (data.account !== void 0) {
                       let data82 = data.account;
-                      const _errs146 = errors;
-                      if (errors === _errs146) {
+                      const _errs144 = errors;
+                      if (errors === _errs144) {
                         if (data82 && typeof data82 == "object" && !Array.isArray(data82)) {
                           let missing13;
                           if (data82.address === void 0 && (missing13 = "address") || data82.program === void 0 && (missing13 = "program") || data82.balanceBaseUnits === void 0 && (missing13 = "balanceBaseUnits") || data82.rentLamports === void 0 && (missing13 = "rentLamports")) {
                             validate25.errors = [{ instancePath: instancePath + "/account", schemaPath: "#/properties/account/required", keyword: "required", params: { missingProperty: missing13 }, message: "must have required property '" + missing13 + "'" }];
                             return false;
                           } else {
-                            const _errs148 = errors;
+                            const _errs146 = errors;
                             for (const key0 in data82) {
                               if (!(key0 === "address" || key0 === "program" || key0 === "balanceBaseUnits" || key0 === "rentLamports")) {
                                 validate25.errors = [{ instancePath: instancePath + "/account", schemaPath: "#/properties/account/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key0 }, message: "must NOT have additional properties" }];
@@ -2759,12 +2742,12 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                 break;
                               }
                             }
-                            if (_errs148 === errors) {
+                            if (_errs146 === errors) {
                               if (data82.address !== void 0) {
                                 let data83 = data82.address;
-                                const _errs149 = errors;
-                                const _errs150 = errors;
-                                if (errors === _errs150) {
+                                const _errs147 = errors;
+                                const _errs148 = errors;
+                                if (errors === _errs148) {
                                   if (typeof data83 === "string") {
                                     if (!pattern4.test(data83)) {
                                       validate25.errors = [{ instancePath: instancePath + "/account/address", schemaPath: "#/components/schemas/Base58/pattern", keyword: "pattern", params: { pattern: "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }, message: 'must match pattern "^[1-9A-HJ-NP-Za-km-z]{32,44}$"' }];
@@ -2775,14 +2758,14 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     return false;
                                   }
                                 }
-                                var valid62 = _errs149 === errors;
+                                var valid61 = _errs147 === errors;
                               } else {
-                                var valid62 = true;
+                                var valid61 = true;
                               }
-                              if (valid62) {
+                              if (valid61) {
                                 if (data82.program !== void 0) {
                                   let data84 = data82.program;
-                                  const _errs152 = errors;
+                                  const _errs150 = errors;
                                   if (typeof data84 !== "string") {
                                     validate25.errors = [{ instancePath: instancePath + "/account/program", schemaPath: "#/properties/account/properties/program/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
@@ -2791,16 +2774,16 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     validate25.errors = [{ instancePath: instancePath + "/account/program", schemaPath: "#/properties/account/properties/program/enum", keyword: "enum", params: { allowedValues: schema42.properties.account.properties.program.enum }, message: "must be equal to one of the allowed values" }];
                                     return false;
                                   }
-                                  var valid62 = _errs152 === errors;
+                                  var valid61 = _errs150 === errors;
                                 } else {
-                                  var valid62 = true;
+                                  var valid61 = true;
                                 }
-                                if (valid62) {
+                                if (valid61) {
                                   if (data82.balanceBaseUnits !== void 0) {
                                     let data85 = data82.balanceBaseUnits;
-                                    const _errs154 = errors;
-                                    const _errs155 = errors;
-                                    if (errors === _errs155) {
+                                    const _errs152 = errors;
+                                    const _errs153 = errors;
+                                    if (errors === _errs153) {
                                       if (typeof data85 === "string") {
                                         if (!pattern9.test(data85)) {
                                           validate25.errors = [{ instancePath: instancePath + "/account/balanceBaseUnits", schemaPath: "#/components/schemas/IntegerString/pattern", keyword: "pattern", params: { pattern: "^[0-9]+$" }, message: 'must match pattern "^[0-9]+$"' }];
@@ -2811,16 +2794,16 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                         return false;
                                       }
                                     }
-                                    var valid62 = _errs154 === errors;
+                                    var valid61 = _errs152 === errors;
                                   } else {
-                                    var valid62 = true;
+                                    var valid61 = true;
                                   }
-                                  if (valid62) {
+                                  if (valid61) {
                                     if (data82.rentLamports !== void 0) {
                                       let data86 = data82.rentLamports;
-                                      const _errs157 = errors;
-                                      const _errs158 = errors;
-                                      if (errors === _errs158) {
+                                      const _errs155 = errors;
+                                      const _errs156 = errors;
+                                      if (errors === _errs156) {
                                         if (typeof data86 === "string") {
                                           if (!pattern9.test(data86)) {
                                             validate25.errors = [{ instancePath: instancePath + "/account/rentLamports", schemaPath: "#/components/schemas/IntegerString/pattern", keyword: "pattern", params: { pattern: "^[0-9]+$" }, message: 'must match pattern "^[0-9]+$"' }];
@@ -2831,9 +2814,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                           return false;
                                         }
                                       }
-                                      var valid62 = _errs157 === errors;
+                                      var valid61 = _errs155 === errors;
                                     } else {
-                                      var valid62 = true;
+                                      var valid61 = true;
                                     }
                                   }
                                 }
@@ -2845,15 +2828,15 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                           return false;
                         }
                       }
-                      var valid58 = _errs146 === errors;
+                      var valid57 = _errs144 === errors;
                     } else {
-                      var valid58 = true;
+                      var valid57 = true;
                     }
-                    if (valid58) {
+                    if (valid57) {
                       if (data.classification !== void 0) {
                         let data87 = data.classification;
-                        const _errs160 = errors;
-                        if (errors === _errs160) {
+                        const _errs158 = errors;
+                        if (errors === _errs158) {
                           if (data87 && typeof data87 == "object" && !Array.isArray(data87)) {
                             let missing14;
                             if (data87.disposition === void 0 && (missing14 = "disposition") || data87.confidence === void 0 && (missing14 = "confidence") || data87.reviewRequired === void 0 && (missing14 = "reviewRequired") || data87.reasons === void 0 && (missing14 = "reasons") || data87.protections === void 0 && (missing14 = "protections")) {
@@ -2862,7 +2845,7 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                             } else {
                               if (data87.disposition !== void 0) {
                                 let data88 = data87.disposition;
-                                const _errs162 = errors;
+                                const _errs160 = errors;
                                 if (typeof data88 !== "string") {
                                   validate25.errors = [{ instancePath: instancePath + "/classification/disposition", schemaPath: "#/properties/classification/properties/disposition/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                   return false;
@@ -2871,14 +2854,14 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                   validate25.errors = [{ instancePath: instancePath + "/classification/disposition", schemaPath: "#/properties/classification/properties/disposition/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.disposition.enum }, message: "must be equal to one of the allowed values" }];
                                   return false;
                                 }
-                                var valid66 = _errs162 === errors;
+                                var valid65 = _errs160 === errors;
                               } else {
-                                var valid66 = true;
+                                var valid65 = true;
                               }
-                              if (valid66) {
+                              if (valid65) {
                                 if (data87.confidence !== void 0) {
                                   let data89 = data87.confidence;
-                                  const _errs164 = errors;
+                                  const _errs162 = errors;
                                   if (typeof data89 !== "string") {
                                     validate25.errors = [{ instancePath: instancePath + "/classification/confidence", schemaPath: "#/properties/classification/properties/confidence/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
@@ -2887,32 +2870,32 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     validate25.errors = [{ instancePath: instancePath + "/classification/confidence", schemaPath: "#/properties/classification/properties/confidence/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.confidence.enum }, message: "must be equal to one of the allowed values" }];
                                     return false;
                                   }
-                                  var valid66 = _errs164 === errors;
+                                  var valid65 = _errs162 === errors;
                                 } else {
-                                  var valid66 = true;
+                                  var valid65 = true;
                                 }
-                                if (valid66) {
+                                if (valid65) {
                                   if (data87.reviewRequired !== void 0) {
-                                    const _errs166 = errors;
+                                    const _errs164 = errors;
                                     if (typeof data87.reviewRequired !== "boolean") {
                                       validate25.errors = [{ instancePath: instancePath + "/classification/reviewRequired", schemaPath: "#/properties/classification/properties/reviewRequired/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" }];
                                       return false;
                                     }
-                                    var valid66 = _errs166 === errors;
+                                    var valid65 = _errs164 === errors;
                                   } else {
-                                    var valid66 = true;
+                                    var valid65 = true;
                                   }
-                                  if (valid66) {
+                                  if (valid65) {
                                     if (data87.reasons !== void 0) {
                                       let data91 = data87.reasons;
-                                      const _errs168 = errors;
-                                      if (errors === _errs168) {
+                                      const _errs166 = errors;
+                                      if (errors === _errs166) {
                                         if (Array.isArray(data91)) {
-                                          var valid67 = true;
+                                          var valid66 = true;
                                           const len5 = data91.length;
                                           for (let i5 = 0; i5 < len5; i5++) {
                                             let data92 = data91[i5];
-                                            const _errs170 = errors;
+                                            const _errs168 = errors;
                                             if (typeof data92 !== "string") {
                                               validate25.errors = [{ instancePath: instancePath + "/classification/reasons/" + i5, schemaPath: "#/properties/classification/properties/reasons/items/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                               return false;
@@ -2921,8 +2904,8 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                               validate25.errors = [{ instancePath: instancePath + "/classification/reasons/" + i5, schemaPath: "#/properties/classification/properties/reasons/items/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.reasons.items.enum }, message: "must be equal to one of the allowed values" }];
                                               return false;
                                             }
-                                            var valid67 = _errs170 === errors;
-                                            if (!valid67) {
+                                            var valid66 = _errs168 === errors;
+                                            if (!valid66) {
                                               break;
                                             }
                                           }
@@ -2931,21 +2914,21 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                           return false;
                                         }
                                       }
-                                      var valid66 = _errs168 === errors;
+                                      var valid65 = _errs166 === errors;
                                     } else {
-                                      var valid66 = true;
+                                      var valid65 = true;
                                     }
-                                    if (valid66) {
+                                    if (valid65) {
                                       if (data87.protections !== void 0) {
                                         let data93 = data87.protections;
-                                        const _errs172 = errors;
-                                        if (errors === _errs172) {
+                                        const _errs170 = errors;
+                                        if (errors === _errs170) {
                                           if (Array.isArray(data93)) {
-                                            var valid68 = true;
+                                            var valid67 = true;
                                             const len6 = data93.length;
                                             for (let i6 = 0; i6 < len6; i6++) {
                                               let data94 = data93[i6];
-                                              const _errs174 = errors;
+                                              const _errs172 = errors;
                                               if (typeof data94 !== "string") {
                                                 validate25.errors = [{ instancePath: instancePath + "/classification/protections/" + i6, schemaPath: "#/properties/classification/properties/protections/items/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                                 return false;
@@ -2954,8 +2937,8 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                                 validate25.errors = [{ instancePath: instancePath + "/classification/protections/" + i6, schemaPath: "#/properties/classification/properties/protections/items/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.protections.items.enum }, message: "must be equal to one of the allowed values" }];
                                                 return false;
                                               }
-                                              var valid68 = _errs174 === errors;
-                                              if (!valid68) {
+                                              var valid67 = _errs172 === errors;
+                                              if (!valid67) {
                                                 break;
                                               }
                                             }
@@ -2964,9 +2947,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                             return false;
                                           }
                                         }
-                                        var valid66 = _errs172 === errors;
+                                        var valid65 = _errs170 === errors;
                                       } else {
-                                        var valid66 = true;
+                                        var valid65 = true;
                                       }
                                     }
                                   }
@@ -2978,82 +2961,82 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                             return false;
                           }
                         }
-                        var valid58 = _errs160 === errors;
+                        var valid57 = _errs158 === errors;
                       } else {
-                        var valid58 = true;
+                        var valid57 = true;
                       }
-                      if (valid58) {
+                      if (valid57) {
                         if (data.market !== void 0) {
                           let data95 = data.market;
+                          const _errs174 = errors;
                           const _errs176 = errors;
+                          const _errs177 = errors;
+                          let valid69 = true;
                           const _errs178 = errors;
-                          const _errs179 = errors;
-                          let valid70 = true;
-                          const _errs180 = errors;
                           if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
                             if (data95.quoteStatus !== void 0) {
                               if ("unavailable" !== data95.quoteStatus) {
-                                const err30 = {};
+                                const err29 = {};
                                 if (vErrors === null) {
-                                  vErrors = [err30];
+                                  vErrors = [err29];
                                 } else {
-                                  vErrors.push(err30);
+                                  vErrors.push(err29);
                                 }
                                 errors++;
                               }
                             }
                           }
-                          var _valid9 = _errs180 === errors;
-                          errors = _errs179;
+                          var _valid9 = _errs178 === errors;
+                          errors = _errs177;
                           if (vErrors !== null) {
-                            if (_errs179) {
-                              vErrors.length = _errs179;
+                            if (_errs177) {
+                              vErrors.length = _errs177;
                             } else {
                               vErrors = null;
                             }
                           }
                           let ifClause1;
                           if (_valid9) {
-                            const _errs182 = errors;
+                            const _errs180 = errors;
                             if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
                               if (data95.sellRouteAvailable !== void 0) {
-                                const _errs183 = errors;
+                                const _errs181 = errors;
                                 if (null !== data95.sellRouteAvailable) {
                                   validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/properties/market/allOf/0/then/properties/sellRouteAvailable/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[0].then.properties.sellRouteAvailable.const }, message: "must be equal to constant" }];
                                   return false;
                                 }
-                                var valid72 = _errs183 === errors;
+                                var valid71 = _errs181 === errors;
                               } else {
-                                var valid72 = true;
+                                var valid71 = true;
                               }
-                              if (valid72) {
+                              if (valid71) {
                                 if (data95.executableQuoteUsd !== void 0) {
-                                  const _errs184 = errors;
+                                  const _errs182 = errors;
                                   if (null !== data95.executableQuoteUsd) {
                                     validate25.errors = [{ instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/allOf/0/then/properties/executableQuoteUsd/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[0].then.properties.executableQuoteUsd.const }, message: "must be equal to constant" }];
                                     return false;
                                   }
-                                  var valid72 = _errs184 === errors;
+                                  var valid71 = _errs182 === errors;
                                 } else {
-                                  var valid72 = true;
+                                  var valid71 = true;
                                 }
-                                if (valid72) {
+                                if (valid71) {
                                   if (data95.quotedAt !== void 0) {
-                                    const _errs185 = errors;
+                                    const _errs183 = errors;
                                     if (null !== data95.quotedAt) {
                                       validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/allOf/0/then/properties/quotedAt/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[0].then.properties.quotedAt.const }, message: "must be equal to constant" }];
                                       return false;
                                     }
-                                    var valid72 = _errs185 === errors;
+                                    var valid71 = _errs183 === errors;
                                   } else {
-                                    var valid72 = true;
+                                    var valid71 = true;
                                   }
                                 }
                               }
                             }
-                            var _valid9 = _errs182 === errors;
-                            valid70 = _valid9;
-                            if (valid70) {
+                            var _valid9 = _errs180 === errors;
+                            valid69 = _valid9;
+                            if (valid69) {
                               var props8 = {};
                               props8.sellRouteAvailable = true;
                               props8.executableQuoteUsd = true;
@@ -3062,24 +3045,24 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                             }
                             ifClause1 = "then";
                           } else {
-                            const _errs186 = errors;
+                            const _errs184 = errors;
                             if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
                               if (data95.sellRouteAvailable !== void 0) {
-                                const _errs187 = errors;
+                                const _errs185 = errors;
                                 if (typeof data95.sellRouteAvailable !== "boolean") {
                                   validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/properties/market/allOf/0/else/properties/sellRouteAvailable/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" }];
                                   return false;
                                 }
-                                var valid73 = _errs187 === errors;
+                                var valid72 = _errs185 === errors;
                               } else {
-                                var valid73 = true;
+                                var valid72 = true;
                               }
-                              if (valid73) {
+                              if (valid72) {
                                 if (data95.quotedAt !== void 0) {
                                   let data101 = data95.quotedAt;
-                                  const _errs189 = errors;
-                                  if (errors === _errs189) {
-                                    if (errors === _errs189) {
+                                  const _errs187 = errors;
+                                  if (errors === _errs187) {
+                                    if (errors === _errs187) {
                                       if (typeof data101 === "string") {
                                         if (!formats0.validate.test(data101)) {
                                           validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/allOf/0/else/properties/quotedAt/format", keyword: "format", params: { format: "date-time" }, message: 'must match format "date-time"' }];
@@ -3091,15 +3074,15 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                       }
                                     }
                                   }
-                                  var valid73 = _errs189 === errors;
+                                  var valid72 = _errs187 === errors;
                                 } else {
-                                  var valid73 = true;
+                                  var valid72 = true;
                                 }
                               }
                             }
-                            var _valid9 = _errs186 === errors;
-                            valid70 = _valid9;
-                            if (valid70) {
+                            var _valid9 = _errs184 === errors;
+                            valid69 = _valid9;
+                            if (valid69) {
                               if (props8 !== true) {
                                 props8 = props8 || {};
                                 props8.sellRouteAvailable = true;
@@ -3108,47 +3091,47 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                             }
                             ifClause1 = "else";
                           }
-                          if (!valid70) {
-                            const err31 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/0/if", keyword: "if", params: { failingKeyword: ifClause1 }, message: 'must match "' + ifClause1 + '" schema' };
+                          if (!valid69) {
+                            const err30 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/0/if", keyword: "if", params: { failingKeyword: ifClause1 }, message: 'must match "' + ifClause1 + '" schema' };
                             if (vErrors === null) {
-                              vErrors = [err31];
+                              vErrors = [err30];
                             } else {
-                              vErrors.push(err31);
+                              vErrors.push(err30);
                             }
                             errors++;
                             validate25.errors = vErrors;
                             return false;
                           }
-                          var valid69 = _errs178 === errors;
-                          if (valid69) {
+                          var valid68 = _errs176 === errors;
+                          if (valid68) {
+                            const _errs189 = errors;
+                            const _errs190 = errors;
+                            let valid73 = true;
                             const _errs191 = errors;
-                            const _errs192 = errors;
-                            let valid74 = true;
-                            const _errs193 = errors;
                             if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
                               if (data95.sellRouteAvailable !== void 0) {
                                 if (false !== data95.sellRouteAvailable) {
-                                  const err32 = {};
+                                  const err31 = {};
                                   if (vErrors === null) {
-                                    vErrors = [err32];
+                                    vErrors = [err31];
                                   } else {
-                                    vErrors.push(err32);
+                                    vErrors.push(err31);
                                   }
                                   errors++;
                                 }
                               }
                             }
-                            var _valid10 = _errs193 === errors;
-                            errors = _errs192;
+                            var _valid10 = _errs191 === errors;
+                            errors = _errs190;
                             if (vErrors !== null) {
-                              if (_errs192) {
-                                vErrors.length = _errs192;
+                              if (_errs190) {
+                                vErrors.length = _errs190;
                               } else {
                                 vErrors = null;
                               }
                             }
                             if (_valid10) {
-                              const _errs195 = errors;
+                              const _errs193 = errors;
                               if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
                                 if (data95.executableQuoteUsd !== void 0) {
                                   if (null !== data95.executableQuoteUsd) {
@@ -3157,27 +3140,27 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                   }
                                 }
                               }
-                              var _valid10 = _errs195 === errors;
-                              valid74 = _valid10;
-                              if (valid74) {
+                              var _valid10 = _errs193 === errors;
+                              valid73 = _valid10;
+                              if (valid73) {
                                 var props9 = {};
                                 props9.executableQuoteUsd = true;
                                 props9.sellRouteAvailable = true;
                               }
                             }
-                            if (!valid74) {
-                              const err33 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/1/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
+                            if (!valid73) {
+                              const err32 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/1/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
                               if (vErrors === null) {
-                                vErrors = [err33];
+                                vErrors = [err32];
                               } else {
-                                vErrors.push(err33);
+                                vErrors.push(err32);
                               }
                               errors++;
                               validate25.errors = vErrors;
                               return false;
                             }
-                            var valid69 = _errs191 === errors;
-                            if (valid69) {
+                            var valid68 = _errs189 === errors;
+                            if (valid68) {
                               if (props8 !== true && props9 !== void 0) {
                                 if (props9 === true) {
                                   props8 = true;
@@ -3188,7 +3171,7 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                               }
                             }
                           }
-                          if (errors === _errs176) {
+                          if (errors === _errs174) {
                             if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
                               let missing15;
                               if (data95.quoteStatus === void 0 && (missing15 = "quoteStatus") || data95.sellRouteAvailable === void 0 && (missing15 = "sellRouteAvailable") || data95.executableQuoteUsd === void 0 && (missing15 = "executableQuoteUsd") || data95.quotedAt === void 0 && (missing15 = "quotedAt")) {
@@ -3204,7 +3187,7 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                 }
                                 if (data95.quoteStatus !== void 0) {
                                   let data104 = data95.quoteStatus;
-                                  const _errs197 = errors;
+                                  const _errs195 = errors;
                                   if (typeof data104 !== "string") {
                                     validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/properties/market/properties/quoteStatus/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
@@ -3213,111 +3196,111 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/properties/market/properties/quoteStatus/enum", keyword: "enum", params: { allowedValues: schema42.properties.market.properties.quoteStatus.enum }, message: "must be equal to one of the allowed values" }];
                                     return false;
                                   }
-                                  var valid77 = _errs197 === errors;
+                                  var valid76 = _errs195 === errors;
                                 } else {
-                                  var valid77 = true;
+                                  var valid76 = true;
                                 }
-                                if (valid77) {
+                                if (valid76) {
                                   if (data95.sellRouteAvailable !== void 0) {
                                     let data105 = data95.sellRouteAvailable;
-                                    const _errs199 = errors;
+                                    const _errs197 = errors;
                                     if (typeof data105 !== "boolean" && data105 !== null) {
                                       validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/properties/market/properties/sellRouteAvailable/type", keyword: "type", params: { type: schema42.properties.market.properties.sellRouteAvailable.type }, message: "must be boolean,null" }];
                                       return false;
                                     }
-                                    var valid77 = _errs199 === errors;
+                                    var valid76 = _errs197 === errors;
                                   } else {
-                                    var valid77 = true;
+                                    var valid76 = true;
                                   }
-                                  if (valid77) {
+                                  if (valid76) {
                                     if (data95.executableQuoteUsd !== void 0) {
                                       let data106 = data95.executableQuoteUsd;
-                                      const _errs201 = errors;
-                                      const _errs202 = errors;
-                                      let valid78 = false;
+                                      const _errs199 = errors;
+                                      const _errs200 = errors;
+                                      let valid77 = false;
                                       let passing0 = null;
-                                      const _errs203 = errors;
+                                      const _errs201 = errors;
                                       if (data106 !== null) {
-                                        const err34 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf/0/type", keyword: "type", params: { type: "null" }, message: "must be null" };
+                                        const err33 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf/0/type", keyword: "type", params: { type: "null" }, message: "must be null" };
                                         if (vErrors === null) {
-                                          vErrors = [err34];
+                                          vErrors = [err33];
                                         } else {
-                                          vErrors.push(err34);
+                                          vErrors.push(err33);
                                         }
                                         errors++;
                                       }
-                                      var _valid11 = _errs203 === errors;
+                                      var _valid11 = _errs201 === errors;
                                       if (_valid11) {
-                                        valid78 = true;
+                                        valid77 = true;
                                         passing0 = 0;
                                       }
-                                      const _errs205 = errors;
-                                      const _errs206 = errors;
-                                      if (errors === _errs206) {
+                                      const _errs203 = errors;
+                                      const _errs204 = errors;
+                                      if (errors === _errs204) {
                                         if (typeof data106 === "string") {
-                                          if (!pattern17.test(data106)) {
-                                            const err35 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' };
+                                          if (!pattern18.test(data106)) {
+                                            const err34 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' };
                                             if (vErrors === null) {
-                                              vErrors = [err35];
+                                              vErrors = [err34];
                                             } else {
-                                              vErrors.push(err35);
+                                              vErrors.push(err34);
                                             }
                                             errors++;
                                           }
                                         } else {
-                                          const err36 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                          const err35 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                           if (vErrors === null) {
-                                            vErrors = [err36];
+                                            vErrors = [err35];
                                           } else {
-                                            vErrors.push(err36);
+                                            vErrors.push(err35);
                                           }
                                           errors++;
                                         }
                                       }
-                                      var _valid11 = _errs205 === errors;
-                                      if (_valid11 && valid78) {
-                                        valid78 = false;
+                                      var _valid11 = _errs203 === errors;
+                                      if (_valid11 && valid77) {
+                                        valid77 = false;
                                         passing0 = [passing0, 1];
                                       } else {
                                         if (_valid11) {
-                                          valid78 = true;
+                                          valid77 = true;
                                           passing0 = 1;
                                         }
                                       }
-                                      if (!valid78) {
-                                        const err37 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf", keyword: "oneOf", params: { passingSchemas: passing0 }, message: "must match exactly one schema in oneOf" };
+                                      if (!valid77) {
+                                        const err36 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf", keyword: "oneOf", params: { passingSchemas: passing0 }, message: "must match exactly one schema in oneOf" };
                                         if (vErrors === null) {
-                                          vErrors = [err37];
+                                          vErrors = [err36];
                                         } else {
-                                          vErrors.push(err37);
+                                          vErrors.push(err36);
                                         }
                                         errors++;
                                         validate25.errors = vErrors;
                                         return false;
                                       } else {
-                                        errors = _errs202;
+                                        errors = _errs200;
                                         if (vErrors !== null) {
-                                          if (_errs202) {
-                                            vErrors.length = _errs202;
+                                          if (_errs200) {
+                                            vErrors.length = _errs200;
                                           } else {
                                             vErrors = null;
                                           }
                                         }
                                       }
-                                      var valid77 = _errs201 === errors;
+                                      var valid76 = _errs199 === errors;
                                     } else {
-                                      var valid77 = true;
+                                      var valid76 = true;
                                     }
-                                    if (valid77) {
+                                    if (valid76) {
                                       if (data95.quotedAt !== void 0) {
                                         let data107 = data95.quotedAt;
-                                        const _errs208 = errors;
+                                        const _errs206 = errors;
                                         if (typeof data107 !== "string" && data107 !== null) {
                                           validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/properties/quotedAt/type", keyword: "type", params: { type: schema42.properties.market.properties.quotedAt.type }, message: "must be string,null" }];
                                           return false;
                                         }
-                                        if (errors === _errs208) {
-                                          if (errors === _errs208) {
+                                        if (errors === _errs206) {
+                                          if (errors === _errs206) {
                                             if (typeof data107 === "string") {
                                               if (!formats0.validate.test(data107)) {
                                                 validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/properties/quotedAt/format", keyword: "format", params: { format: "date-time" }, message: 'must match format "date-time"' }];
@@ -3326,9 +3309,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                             }
                                           }
                                         }
-                                        var valid77 = _errs208 === errors;
+                                        var valid76 = _errs206 === errors;
                                       } else {
-                                        var valid77 = true;
+                                        var valid76 = true;
                                       }
                                     }
                                   }
@@ -3339,25 +3322,25 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                               return false;
                             }
                           }
-                          var valid58 = _errs176 === errors;
+                          var valid57 = _errs174 === errors;
                         } else {
-                          var valid58 = true;
+                          var valid57 = true;
                         }
-                        if (valid58) {
+                        if (valid57) {
                           if (data.opportunity !== void 0) {
                             let data108 = data.opportunity;
-                            const _errs210 = errors;
-                            const _errs211 = errors;
-                            let valid80 = false;
+                            const _errs208 = errors;
+                            const _errs209 = errors;
+                            let valid79 = false;
                             let passing1 = null;
-                            const _errs212 = errors;
+                            const _errs210 = errors;
                             if (!validate26(data108, { instancePath: instancePath + "/opportunity", parentData: data, parentDataProperty: "opportunity", rootData, dynamicAnchors })) {
                               vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
                               errors = vErrors.length;
                             }
-                            var _valid12 = _errs212 === errors;
+                            var _valid12 = _errs210 === errors;
                             if (_valid12) {
-                              valid80 = true;
+                              valid79 = true;
                               passing1 = 0;
                               var props10 = {};
                               props10.action = true;
@@ -3370,18 +3353,18 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                               props10.estimatedNetValueUsd = true;
                               props10.estimated = true;
                             }
-                            const _errs213 = errors;
+                            const _errs211 = errors;
                             if (!validate39(data108, { instancePath: instancePath + "/opportunity", parentData: data, parentDataProperty: "opportunity", rootData, dynamicAnchors })) {
                               vErrors = vErrors === null ? validate39.errors : vErrors.concat(validate39.errors);
                               errors = vErrors.length;
                             }
-                            var _valid12 = _errs213 === errors;
-                            if (_valid12 && valid80) {
-                              valid80 = false;
+                            var _valid12 = _errs211 === errors;
+                            if (_valid12 && valid79) {
+                              valid79 = false;
                               passing1 = [passing1, 1];
                             } else {
                               if (_valid12) {
-                                valid80 = true;
+                                valid79 = true;
                                 passing1 = 1;
                                 if (props10 !== true) {
                                   props10 = props10 || {};
@@ -3394,25 +3377,34 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                   props10.estimated = true;
                                 }
                               }
-                              const _errs214 = errors;
-                              const _errs215 = errors;
-                              if (errors === _errs215) {
+                              const _errs212 = errors;
+                              const _errs213 = errors;
+                              if (errors === _errs213) {
                                 if (data108 && typeof data108 == "object" && !Array.isArray(data108)) {
                                   let missing16;
                                   if (data108.action === void 0 && (missing16 = "action") || data108.destructive === void 0 && (missing16 = "destructive") || data108.executionSupported === void 0 && (missing16 = "executionSupported") || data108.valueComponents === void 0 && (missing16 = "valueComponents") || data108.estimated === void 0 && (missing16 = "estimated")) {
-                                    const err38 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/required", keyword: "required", params: { missingProperty: missing16 }, message: "must have required property '" + missing16 + "'" };
+                                    const err37 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/required", keyword: "required", params: { missingProperty: missing16 }, message: "must have required property '" + missing16 + "'" };
                                     if (vErrors === null) {
-                                      vErrors = [err38];
+                                      vErrors = [err37];
                                     } else {
-                                      vErrors.push(err38);
+                                      vErrors.push(err37);
                                     }
                                     errors++;
                                   } else {
                                     if (data108.action !== void 0) {
                                       let data109 = data108.action;
-                                      const _errs217 = errors;
+                                      const _errs215 = errors;
                                       if (typeof data109 !== "string") {
-                                        const err39 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                        const err38 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                        if (vErrors === null) {
+                                          vErrors = [err38];
+                                        } else {
+                                          vErrors.push(err38);
+                                        }
+                                        errors++;
+                                      }
+                                      if (!(data109 === "none")) {
+                                        const err39 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/enum", keyword: "enum", params: { allowedValues: schema57.properties.action.enum }, message: "must be equal to one of the allowed values" };
                                         if (vErrors === null) {
                                           vErrors = [err39];
                                         } else {
@@ -3420,25 +3412,25 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                         }
                                         errors++;
                                       }
-                                      if (!(data109 === "none")) {
-                                        const err40 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/enum", keyword: "enum", params: { allowedValues: schema57.properties.action.enum }, message: "must be equal to one of the allowed values" };
-                                        if (vErrors === null) {
-                                          vErrors = [err40];
-                                        } else {
-                                          vErrors.push(err40);
-                                        }
-                                        errors++;
-                                      }
-                                      var valid82 = _errs217 === errors;
+                                      var valid81 = _errs215 === errors;
                                     } else {
-                                      var valid82 = true;
+                                      var valid81 = true;
                                     }
-                                    if (valid82) {
+                                    if (valid81) {
                                       if (data108.destructive !== void 0) {
                                         let data110 = data108.destructive;
-                                        const _errs219 = errors;
+                                        const _errs217 = errors;
                                         if (typeof data110 !== "boolean") {
-                                          const err41 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                          const err40 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                          if (vErrors === null) {
+                                            vErrors = [err40];
+                                          } else {
+                                            vErrors.push(err40);
+                                          }
+                                          errors++;
+                                        }
+                                        if (!(data110 === false)) {
+                                          const err41 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/enum", keyword: "enum", params: { allowedValues: schema57.properties.destructive.enum }, message: "must be equal to one of the allowed values" };
                                           if (vErrors === null) {
                                             vErrors = [err41];
                                           } else {
@@ -3446,25 +3438,25 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                           }
                                           errors++;
                                         }
-                                        if (!(data110 === false)) {
-                                          const err42 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/enum", keyword: "enum", params: { allowedValues: schema57.properties.destructive.enum }, message: "must be equal to one of the allowed values" };
-                                          if (vErrors === null) {
-                                            vErrors = [err42];
-                                          } else {
-                                            vErrors.push(err42);
-                                          }
-                                          errors++;
-                                        }
-                                        var valid82 = _errs219 === errors;
+                                        var valid81 = _errs217 === errors;
                                       } else {
-                                        var valid82 = true;
+                                        var valid81 = true;
                                       }
-                                      if (valid82) {
+                                      if (valid81) {
                                         if (data108.executionSupported !== void 0) {
                                           let data111 = data108.executionSupported;
-                                          const _errs221 = errors;
+                                          const _errs219 = errors;
                                           if (typeof data111 !== "boolean") {
-                                            const err43 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                            const err42 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                            if (vErrors === null) {
+                                              vErrors = [err42];
+                                            } else {
+                                              vErrors.push(err42);
+                                            }
+                                            errors++;
+                                          }
+                                          if (!(data111 === false)) {
+                                            const err43 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/enum", keyword: "enum", params: { allowedValues: schema57.properties.executionSupported.enum }, message: "must be equal to one of the allowed values" };
                                             if (vErrors === null) {
                                               vErrors = [err43];
                                             } else {
@@ -3472,36 +3464,45 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                             }
                                             errors++;
                                           }
-                                          if (!(data111 === false)) {
-                                            const err44 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/enum", keyword: "enum", params: { allowedValues: schema57.properties.executionSupported.enum }, message: "must be equal to one of the allowed values" };
-                                            if (vErrors === null) {
-                                              vErrors = [err44];
-                                            } else {
-                                              vErrors.push(err44);
-                                            }
-                                            errors++;
-                                          }
-                                          var valid82 = _errs221 === errors;
+                                          var valid81 = _errs219 === errors;
                                         } else {
-                                          var valid82 = true;
+                                          var valid81 = true;
                                         }
-                                        if (valid82) {
+                                        if (valid81) {
                                           if (data108.valueComponents !== void 0) {
                                             let data112 = data108.valueComponents;
-                                            const _errs223 = errors;
-                                            if (errors === _errs223) {
+                                            const _errs221 = errors;
+                                            if (errors === _errs221) {
                                               if (Array.isArray(data112)) {
                                                 if (data112.length > 0) {
-                                                  const err45 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/maxItems", keyword: "maxItems", params: { limit: 0 }, message: "must NOT have more than 0 items" };
+                                                  const err44 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/maxItems", keyword: "maxItems", params: { limit: 0 }, message: "must NOT have more than 0 items" };
                                                   if (vErrors === null) {
-                                                    vErrors = [err45];
+                                                    vErrors = [err44];
                                                   } else {
-                                                    vErrors.push(err45);
+                                                    vErrors.push(err44);
                                                   }
                                                   errors++;
                                                 }
                                               } else {
-                                                const err46 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+                                                const err45 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+                                                if (vErrors === null) {
+                                                  vErrors = [err45];
+                                                } else {
+                                                  vErrors.push(err45);
+                                                }
+                                                errors++;
+                                              }
+                                            }
+                                            var valid81 = _errs221 === errors;
+                                          } else {
+                                            var valid81 = true;
+                                          }
+                                          if (valid81) {
+                                            if (data108.estimated !== void 0) {
+                                              let data113 = data108.estimated;
+                                              const _errs223 = errors;
+                                              if (typeof data113 !== "boolean") {
+                                                const err46 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
                                                 if (vErrors === null) {
                                                   vErrors = [err46];
                                                 } else {
@@ -3509,17 +3510,8 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                                 }
                                                 errors++;
                                               }
-                                            }
-                                            var valid82 = _errs223 === errors;
-                                          } else {
-                                            var valid82 = true;
-                                          }
-                                          if (valid82) {
-                                            if (data108.estimated !== void 0) {
-                                              let data113 = data108.estimated;
-                                              const _errs225 = errors;
-                                              if (typeof data113 !== "boolean") {
-                                                const err47 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                              if (!(data113 === true)) {
+                                                const err47 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/enum", keyword: "enum", params: { allowedValues: schema57.properties.estimated.enum }, message: "must be equal to one of the allowed values" };
                                                 if (vErrors === null) {
                                                   vErrors = [err47];
                                                 } else {
@@ -3527,18 +3519,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                                 }
                                                 errors++;
                                               }
-                                              if (!(data113 === true)) {
-                                                const err48 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/enum", keyword: "enum", params: { allowedValues: schema57.properties.estimated.enum }, message: "must be equal to one of the allowed values" };
-                                                if (vErrors === null) {
-                                                  vErrors = [err48];
-                                                } else {
-                                                  vErrors.push(err48);
-                                                }
-                                                errors++;
-                                              }
-                                              var valid82 = _errs225 === errors;
+                                              var valid81 = _errs223 === errors;
                                             } else {
-                                              var valid82 = true;
+                                              var valid81 = true;
                                             }
                                           }
                                         }
@@ -3546,22 +3529,22 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     }
                                   }
                                 } else {
-                                  const err49 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                                  const err48 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/type", keyword: "type", params: { type: "object" }, message: "must be object" };
                                   if (vErrors === null) {
-                                    vErrors = [err49];
+                                    vErrors = [err48];
                                   } else {
-                                    vErrors.push(err49);
+                                    vErrors.push(err48);
                                   }
                                   errors++;
                                 }
                               }
-                              var _valid12 = _errs214 === errors;
-                              if (_valid12 && valid80) {
-                                valid80 = false;
+                              var _valid12 = _errs212 === errors;
+                              if (_valid12 && valid79) {
+                                valid79 = false;
                                 passing1 = [passing1, 2];
                               } else {
                                 if (_valid12) {
-                                  valid80 = true;
+                                  valid79 = true;
                                   passing1 = 2;
                                   if (props10 !== true) {
                                     props10 = props10 || {};
@@ -3574,29 +3557,29 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                 }
                               }
                             }
-                            if (!valid80) {
-                              const err50 = { instancePath: instancePath + "/opportunity", schemaPath: "#/properties/opportunity/oneOf", keyword: "oneOf", params: { passingSchemas: passing1 }, message: "must match exactly one schema in oneOf" };
+                            if (!valid79) {
+                              const err49 = { instancePath: instancePath + "/opportunity", schemaPath: "#/properties/opportunity/oneOf", keyword: "oneOf", params: { passingSchemas: passing1 }, message: "must match exactly one schema in oneOf" };
                               if (vErrors === null) {
-                                vErrors = [err50];
+                                vErrors = [err49];
                               } else {
-                                vErrors.push(err50);
+                                vErrors.push(err49);
                               }
                               errors++;
                               validate25.errors = vErrors;
                               return false;
                             } else {
-                              errors = _errs211;
+                              errors = _errs209;
                               if (vErrors !== null) {
-                                if (_errs211) {
-                                  vErrors.length = _errs211;
+                                if (_errs209) {
+                                  vErrors.length = _errs209;
                                 } else {
                                   vErrors = null;
                                 }
                               }
                             }
-                            var valid58 = _errs210 === errors;
+                            var valid57 = _errs208 === errors;
                           } else {
-                            var valid58 = true;
+                            var valid57 = true;
                           }
                         }
                       }
@@ -3694,7 +3677,7 @@ function validate43(data, { instancePath = "", parentData, parentDataProperty, r
                 const _errs8 = errors;
                 if (errors === _errs8) {
                   if (typeof data3 === "string") {
-                    if (!pattern17.test(data3)) {
+                    if (!pattern18.test(data3)) {
                       validate43.errors = [{ instancePath: instancePath + "/baseChargeUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' }];
                       return false;
                     }
@@ -3714,7 +3697,7 @@ function validate43(data, { instancePath = "", parentData, parentDataProperty, r
                   const _errs11 = errors;
                   if (errors === _errs11) {
                     if (typeof data4 === "string") {
-                      if (!pattern17.test(data4)) {
+                      if (!pattern18.test(data4)) {
                         validate43.errors = [{ instancePath: instancePath + "/addOnChargeUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' }];
                         return false;
                       }
@@ -3734,7 +3717,7 @@ function validate43(data, { instancePath = "", parentData, parentDataProperty, r
                     const _errs14 = errors;
                     if (errors === _errs14) {
                       if (typeof data5 === "string") {
-                        if (!pattern17.test(data5)) {
+                        if (!pattern18.test(data5)) {
                           validate43.errors = [{ instancePath: instancePath + "/chargedUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' }];
                           return false;
                         }
@@ -4854,8 +4837,8 @@ function validate46(data, { instancePath = "", parentData, parentDataProperty, r
 validate46.evaluated = { "props": { "requestId": true, "error": true }, "dynamicProps": false, "dynamicItems": false };
 var validateBuild = validate47;
 var schema66 = { "type": "object", "required": ["requestId", "analysisRequestId", "apiVersion", "analysisRulesetVersion", "rulesetVersion", "builtAt", "transactions", "items", "plan", "executionReceipt", "warnings"], "properties": { "requestId": { "type": "string" }, "analysisRequestId": { "type": "string" }, "apiVersion": { "type": "string", "enum": ["v1-preview"] }, "analysisRulesetVersion": { "type": "string" }, "rulesetVersion": { "type": "string", "description": "Ruleset applied by this fresh build. May narrow, never loosen, the analyzed action." }, "builtAt": { "type": "string", "format": "date-time" }, "transactions": { "type": "array", "maxItems": 20, "items": { "type": "object", "required": ["id", "itemIds", "format", "submission", "unsignedTransaction", "lastValidBlockHeight", "estimatedNetworkFee"], "properties": { "id": { "type": "string" }, "itemIds": { "type": "array", "items": { "type": "string" } }, "format": { "type": "string", "enum": ["solana_legacy_base64"] }, "submission": { "type": "string", "enum": ["direct_solana"] }, "unsignedTransaction": { "type": "string", "description": "Base64. Unsigned. Contains placeholder signature slots." }, "lastValidBlockHeight": { "$ref": "#/components/schemas/IntegerString" }, "estimatedNetworkFee": { "$ref": "#/components/schemas/Amount" } } } }, "items": { "type": "array", "items": { "oneOf": [{ "$ref": "#/components/schemas/BuiltItem" }, { "$ref": "#/components/schemas/NotBuiltItem" }], "discriminator": { "propertyName": "status", "mapping": { "built": "#/components/schemas/BuiltItem", "changed": "#/components/schemas/NotBuiltItem", "rejected": "#/components/schemas/NotBuiltItem" } } } }, "plan": { "type": "object", "required": ["transactionCount", "estimatedTotalTransactionCount", "currentStageCosts", "costs", "estimatedNetValueUsd", "valuation"], "properties": { "transactionCount": { "type": "integer" }, "estimatedTotalTransactionCount": { "type": "integer", "description": "Equal to `transactionCount` for every preview action." }, "currentStageCosts": { "$ref": "#/components/schemas/PlanCosts" }, "costs": { "$ref": "#/components/schemas/PlanCosts" }, "estimatedNetValueUsd": { "type": ["string", "null"] }, "valuation": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/Valuation" }] } } }, "executionReceipt": { "oneOf": [{ "type": "null" }, { "type": "object", "required": ["token", "expiresAt", "partnerAttribution"], "properties": { "token": { "type": "string" }, "expiresAt": { "type": "string", "format": "date-time", "description": "Seven days after build." }, "partnerAttribution": { "type": "boolean", "description": "True only when this receipt accepted the bound v2 wallet proof." }, "attribution": { "type": "object", "additionalProperties": false, "required": ["version", "partnerId", "selectedBuildDigest", "acceptedAt"], "properties": { "version": { "const": 2 }, "partnerId": { "type": "string", "pattern": "^[a-z0-9_-]{3,64}$" }, "selectedBuildDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "acceptedAt": { "type": "string", "format": "date-time" } } } }, "allOf": [{ "if": { "properties": { "partnerAttribution": { "const": true } } }, "then": { "required": ["attribution"] }, "else": { "not": { "required": ["attribution"] } } }] }], "description": "Null only when no transaction was built." }, "warnings": { "type": "array", "items": { "type": "string" } } } };
-var pattern31 = new RegExp("^[a-z0-9_-]{3,64}$", "u");
-var pattern32 = new RegExp("^[a-f0-9]{64}$", "u");
+var pattern32 = new RegExp("^[a-z0-9_-]{3,64}$", "u");
+var pattern33 = new RegExp("^[a-f0-9]{64}$", "u");
 function validate49(data, { instancePath = "", parentData, parentDataProperty, rootData = data, dynamicAnchors = {} } = {}) {
   let vErrors = null;
   let errors = 0;
@@ -5793,7 +5776,7 @@ function validate75(data, { instancePath = "", parentData, parentDataProperty, r
                                   const _errs17 = errors;
                                   if (errors === _errs17) {
                                     if (typeof data7 === "string") {
-                                      if (!pattern17.test(data7)) {
+                                      if (!pattern18.test(data7)) {
                                         validate75.errors = [{ instancePath: instancePath + "/inputs/" + i0 + "/unitPriceUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' }];
                                         return false;
                                       }
@@ -6605,7 +6588,7 @@ function validate48(data, { instancePath = "", parentData, parentDataProperty, r
                                                       const _errs78 = errors;
                                                       if (errors === _errs78) {
                                                         if (typeof data32 === "string") {
-                                                          if (!pattern31.test(data32)) {
+                                                          if (!pattern32.test(data32)) {
                                                             const err17 = { instancePath: instancePath + "/executionReceipt/attribution/partnerId", schemaPath: "#/properties/executionReceipt/oneOf/1/properties/attribution/properties/partnerId/pattern", keyword: "pattern", params: { pattern: "^[a-z0-9_-]{3,64}$" }, message: 'must match pattern "^[a-z0-9_-]{3,64}$"' };
                                                             if (vErrors === null) {
                                                               vErrors = [err17];
@@ -6634,7 +6617,7 @@ function validate48(data, { instancePath = "", parentData, parentDataProperty, r
                                                         const _errs80 = errors;
                                                         if (errors === _errs80) {
                                                           if (typeof data33 === "string") {
-                                                            if (!pattern32.test(data33)) {
+                                                            if (!pattern33.test(data33)) {
                                                               const err19 = { instancePath: instancePath + "/executionReceipt/attribution/selectedBuildDigest", schemaPath: "#/properties/executionReceipt/oneOf/1/properties/attribution/properties/selectedBuildDigest/pattern", keyword: "pattern", params: { pattern: "^[a-f0-9]{64}$" }, message: 'must match pattern "^[a-f0-9]{64}$"' };
                                                               if (vErrors === null) {
                                                                 vErrors = [err19];
@@ -7241,7 +7224,7 @@ function validate83(data, { instancePath = "", parentData, parentDataProperty, r
               const _errs26 = errors;
               if (errors === _errs26) {
                 if (typeof data3 === "string") {
-                  if (!pattern31.test(data3)) {
+                  if (!pattern32.test(data3)) {
                     validate83.errors = [{ instancePath: instancePath + "/partnerId", schemaPath: "#/properties/partnerId/pattern", keyword: "pattern", params: { pattern: "^[a-z0-9_-]{3,64}$" }, message: 'must match pattern "^[a-z0-9_-]{3,64}$"' }];
                     return false;
                   }

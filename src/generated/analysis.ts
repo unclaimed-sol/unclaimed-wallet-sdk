@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 e6e29b0aed687f3770f1f5501d9f49bcd50c83ff820501dca567492d0c742f04). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 389541e4deb623dce0eabe0576347ed9e55a7bdef895975fac2cee4ad6b4f1a1). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {

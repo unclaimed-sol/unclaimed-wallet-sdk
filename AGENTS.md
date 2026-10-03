@@ -42,9 +42,10 @@ The claim-and-earn candidate adds the pure `createPartnerConsent` v2 helper and
 shared fixture. The opt-in Wallet Standard reference journals exact work before
 sending; its application-owned submission connection reserves every wire call in
 an append-only fsynced budget file. Never truncate retained reservations or
-silently replace unknown work. Preview.3 is published; preview.4 is the current unpublished candidate carrying
-the merged reference expiry fix. Neither package publication nor source readiness
-activates execution. Keep package/header versions and public status docs aligned.
+silently replace unknown work. Preview.4 is published with the merged reference
+expiry fix. The stale-price correction remains unreleased and requires a distinct
+new version and release notes before separately authorized publication. Neither
+package publication nor source readiness activates execution. Keep package/header versions and public status docs aligned.
 
 The source reference performs a bounded height check before prompting for a wallet
 signature and preserves the separate post-signing check. Include both in explicit
