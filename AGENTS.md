@@ -51,3 +51,10 @@ signature and preserves the separate post-signing check. Include both in explici
 application allowances. An expired signed build retains its signature and local
 non-submission reason even when the API still reports unknown. Never terminalize,
 delete or replace that work based solely on local non-submission evidence.
+
+Stale-reference analysis uses public reason/protection `stale_price` only for
+protected positive token accounts with no executable action, no quote and no USD
+value. The private engine status is `stale`; do not map it to `unpriced` or zero.
+Keep the mounted schema and generated SDK validators synchronized. Old stored
+responses remain valid and unchanged; new enum values require coordinated SDK,
+platform and engine rollout. This patch does not activate execution.

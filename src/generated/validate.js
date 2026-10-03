@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 e6e29b0aed687f3770f1f5501d9f49bcd50c83ff820501dca567492d0c742f04). Do not edit.
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
@@ -465,12 +465,12 @@ var validateResponse = validate23;
 var schema35 = { "type": "object", "required": ["requestId", "apiVersion", "rulesetVersion", "assetIntelligenceRulesetVersion", "analyzedAt", "complete", "data", "billing"], "properties": { "requestId": { "type": "string" }, "apiVersion": { "type": "string", "enum": ["v1-preview"] }, "rulesetVersion": { "type": "string" }, "assetIntelligenceRulesetVersion": { "type": "null", "description": "Preview: always null; no Asset Intelligence is served." }, "analyzedAt": { "type": "string", "format": "date-time" }, "complete": { "type": "boolean", "enum": [true], "description": "Always true on a 200. Incomplete pages are refused, not served." }, "data": { "type": "object", "required": ["wallet", "mode", "summary", "pagination", "items", "airdrops", "executionSession", "limits"], "allOf": [{ "if": { "properties": { "items": { "contains": { "properties": { "opportunity": { "properties": { "executionSupported": { "const": true } }, "required": ["executionSupported"] } }, "required": ["opportunity"] } } } }, "then": { "properties": { "executionSession": { "$ref": "#/components/schemas/ExecutionSession" } } } }], "properties": { "wallet": { "$ref": "#/components/schemas/Base58" }, "mode": { "type": "string", "enum": ["safe"] }, "summary": { "type": "object", "description": "Presentation-only, current page plus first-page wallet modules. Never a whole-wallet total while `hasMore` is true.", "required": ["scope", "analyzedAssetAccounts", "opportunityCount", "protectedAssetCount", "totalsByAsset", "estimatedNetValueUsd"], "properties": { "scope": { "type": "string", "enum": ["page"] }, "analyzedAssetAccounts": { "type": "integer" }, "opportunityCount": { "type": "integer" }, "protectedAssetCount": { "type": "integer" }, "totalsByAsset": { "type": "array", "items": { "type": "object", "required": ["asset", "decimals", "grossBaseUnits", "serviceFeeBaseUnits", "netBaseUnits"], "properties": { "asset": { "type": "string" }, "mint": { "$ref": "#/components/schemas/Base58" }, "decimals": { "type": "integer" }, "grossBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "serviceFeeBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "netBaseUnits": { "$ref": "#/components/schemas/IntegerString" } } } }, "estimatedNetValueUsd": { "type": ["string", "null"], "description": "Null whenever any required price input is missing or stale." } } }, "pagination": { "type": "object", "required": ["returned", "hasMore", "nextCursor", "walletModulesIncluded", "expiresAt"], "properties": { "returned": { "type": "integer", "description": "Raw token accounts analyzed on this page, including those with no opportunity." }, "hasMore": { "type": "boolean" }, "nextCursor": { "type": ["string", "null"] }, "walletModulesIncluded": { "type": "boolean", "description": "True only on the first page." }, "expiresAt": { "type": "string", "format": "date-time", "description": "Shared snapshot and cursor expiry. Session lifetime is shared when enabled." } } }, "items": { "type": "array", "items": { "$ref": "#/components/schemas/WalletItem" } }, "airdrops": { "type": "null" }, "executionSession": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/ExecutionSession" }], "description": "Issued only when execution preview is enabled. Shares snapshot expiry." }, "limits": { "type": "object", "required": ["maxRawTokenAccounts", "pageLimitMax"], "properties": { "maxRawTokenAccounts": { "type": "integer", "enum": [400], "description": "Preview cap, enforced before enrichment." }, "pageLimitMax": { "type": "integer", "enum": [200] } } } } }, "billing": { "$ref": "#/components/schemas/Billing" } } };
 var formats0 = require_formats().fastFormats["date-time"];
 var pattern9 = new RegExp("^[0-9]+$", "u");
-var schema42 = { "type": "object", "description": "One discriminated item. Preview omits `discardEvidence` and `classification.reputation` entirely rather than nulling them.", "required": ["id", "kind", "source", "classification", "opportunity"], "properties": { "id": { "type": "string" }, "kind": { "type": "string", "enum": ["token_account", "excess_lamports"] }, "source": { "type": "string", "enum": ["spl_token", "token_2022", "excess_lamports"], "description": "For disappeared or unsupported accounts, the platform retains the source from its address-bound frozen inventory. It never supplies missing current account facts from that snapshot." }, "targetAccount": { "$ref": "#/components/schemas/Base58", "description": "Exact target of an excess-lamports item. No current token balance is inferred from frozen inventory." }, "alternativeGroupId": { "type": "string", "description": "Present on every excess-lamports item for a token account and on the token-account item for the same account. The two are alternatives, never additive." }, "asset": { "type": "object", "required": ["mint", "assetType", "decimals"], "properties": { "mint": { "$ref": "#/components/schemas/Base58" }, "assetType": { "type": "string", "enum": ["fungible", "token_account_collectible", "unknown"] }, "symbol": { "type": ["string", "null"] }, "decimals": { "type": "integer" } } }, "account": { "type": "object", "required": ["address", "program", "balanceBaseUnits", "rentLamports"], "additionalProperties": false, "properties": { "address": { "$ref": "#/components/schemas/Base58" }, "program": { "type": "string", "enum": ["spl_token", "token_2022"] }, "balanceBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "rentLamports": { "$ref": "#/components/schemas/IntegerString" } } }, "classification": { "type": "object", "required": ["disposition", "confidence", "reviewRequired", "reasons", "protections"], "properties": { "disposition": { "type": "string", "enum": ["closeable_empty", "withdrawable", "protected", "review_only", "no_op"], "description": "Safe analysis only. Max-mode burn candidates are unavailable. Sell candidates are returned as `review_only`." }, "confidence": { "type": "string", "enum": ["known", "high", "low"] }, "reviewRequired": { "type": "boolean" }, "reasons": { "type": "array", "items": { "type": "string", "enum": ["zero_balance", "priced_dust_within_policy", "sell_not_supported_in_preview", "above_dust_threshold", "above_net_rent", "frozen", "collectible", "lp_or_position_shaped", "receipt_token_policy", "dangerous_token_2022_extension", "account_missing", "unsupported_account", "positive_wsol", "unpriced", "completed_no_sell_route", "unsupported_signer", "non_positive_net", "excess_above_rent_exempt_minimum"] } }, "protections": { "type": "array", "items": { "type": "string", "enum": ["frozen", "collectible", "lp_position", "receipt_token", "token_2022_extension", "unpriced", "account_state"] } } } }, "market": { "type": "object", "description": "Present on fungible token-account items.", "required": ["quoteStatus", "sellRouteAvailable", "executableQuoteUsd", "quotedAt"], "properties": { "quoteStatus": { "type": "string", "enum": ["complete", "unavailable"] }, "sellRouteAvailable": { "type": ["boolean", "null"], "description": "Null when a route was not requested; false only for a completed no-route lookup." }, "executableQuoteUsd": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/DecimalUsd" }] }, "quotedAt": { "type": ["string", "null"], "format": "date-time" } }, "allOf": [{ "if": { "properties": { "quoteStatus": { "const": "unavailable" } } }, "then": { "properties": { "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "else": { "properties": { "sellRouteAvailable": { "type": "boolean" }, "quotedAt": { "type": "string", "format": "date-time" } } } }, { "if": { "properties": { "sellRouteAvailable": { "const": false } } }, "then": { "properties": { "executableQuoteUsd": { "const": null } } } }] }, "opportunity": { "oneOf": [{ "$ref": "#/components/schemas/BurnAndCloseOpportunity" }, { "$ref": "#/components/schemas/RecoverExcessLamportsOpportunity" }, { "$ref": "#/components/schemas/NoActionOpportunity" }], "discriminator": { "propertyName": "action", "mapping": { "burn_and_close": "#/components/schemas/BurnAndCloseOpportunity", "recover_excess_lamports": "#/components/schemas/RecoverExcessLamportsOpportunity", "none": "#/components/schemas/NoActionOpportunity" } } } }, "allOf": [{ "if": { "properties": { "kind": { "const": "excess_lamports" } } }, "then": { "required": ["targetAccount", "alternativeGroupId"], "not": { "required": ["account"] }, "properties": { "source": { "const": "excess_lamports" }, "classification": { "properties": { "disposition": { "const": "withdrawable" }, "confidence": { "const": "known" }, "reviewRequired": { "const": true }, "reasons": { "const": ["excess_above_rent_exempt_minimum"] }, "protections": { "maxItems": 0 } } }, "opportunity": { "properties": { "action": { "const": "recover_excess_lamports" } } } } }, "else": { "not": { "required": ["targetAccount"] }, "properties": { "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty", "protected", "review_only", "no_op"] }, "reasons": { "not": { "contains": { "const": "excess_above_rent_exempt_minimum" } } } } }, "opportunity": { "properties": { "action": { "enum": ["none", "burn_and_close"] } } } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "spl_token" } } } } }, "then": { "properties": { "source": { "const": "spl_token" } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "token_2022" } } } } }, "then": { "properties": { "source": { "const": "token_2022" } } } }, { "if": { "required": ["market"] }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "asset": { "properties": { "assetType": { "const": "fungible" } } } } } }, { "if": { "properties": { "opportunity": { "properties": { "action": { "const": "burn_and_close" } } } } }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty"] }, "reviewRequired": { "const": true }, "protections": { "maxItems": 0 } } } } } }, { "if": { "properties": { "classification": { "properties": { "disposition": { "const": "closeable_empty" } } } } }, "then": { "required": ["account", "asset"], "properties": { "account": { "properties": { "balanceBaseUnits": { "const": "0" } } }, "opportunity": { "properties": { "action": { "const": "burn_and_close" }, "reviewedBalanceBaseUnits": { "const": "0" } } } } } }, { "if": { "properties": { "classification": { "properties": { "reasons": { "contains": { "enum": ["account_missing", "unsupported_account"] } } } } } }, "then": { "properties": { "classification": { "properties": { "disposition": { "const": "protected" }, "protections": { "contains": { "const": "account_state" } } } }, "opportunity": { "properties": { "action": { "const": "none" } } } }, "not": { "required": ["market"] } } }] };
+var schema42 = { "type": "object", "description": "One discriminated item. Preview omits `discardEvidence` and `classification.reputation` entirely rather than nulling them.", "required": ["id", "kind", "source", "classification", "opportunity"], "properties": { "id": { "type": "string" }, "kind": { "type": "string", "enum": ["token_account", "excess_lamports"] }, "source": { "type": "string", "enum": ["spl_token", "token_2022", "excess_lamports"], "description": "For disappeared or unsupported accounts, the platform retains the source from its address-bound frozen inventory. It never supplies missing current account facts from that snapshot." }, "targetAccount": { "$ref": "#/components/schemas/Base58", "description": "Exact target of an excess-lamports item. No current token balance is inferred from frozen inventory." }, "alternativeGroupId": { "type": "string", "description": "Present on every excess-lamports item for a token account and on the token-account item for the same account. The two are alternatives, never additive." }, "asset": { "type": "object", "required": ["mint", "assetType", "decimals"], "properties": { "mint": { "$ref": "#/components/schemas/Base58" }, "assetType": { "type": "string", "enum": ["fungible", "token_account_collectible", "unknown"] }, "symbol": { "type": ["string", "null"] }, "decimals": { "type": "integer" } } }, "account": { "type": "object", "required": ["address", "program", "balanceBaseUnits", "rentLamports"], "additionalProperties": false, "properties": { "address": { "$ref": "#/components/schemas/Base58" }, "program": { "type": "string", "enum": ["spl_token", "token_2022"] }, "balanceBaseUnits": { "$ref": "#/components/schemas/IntegerString" }, "rentLamports": { "$ref": "#/components/schemas/IntegerString" } } }, "classification": { "type": "object", "required": ["disposition", "confidence", "reviewRequired", "reasons", "protections"], "properties": { "disposition": { "type": "string", "enum": ["closeable_empty", "withdrawable", "protected", "review_only", "no_op"], "description": "Safe analysis only. Max-mode burn candidates are unavailable. Sell candidates are returned as `review_only`." }, "confidence": { "type": "string", "enum": ["known", "high", "low"] }, "reviewRequired": { "type": "boolean" }, "reasons": { "type": "array", "items": { "type": "string", "enum": ["zero_balance", "priced_dust_within_policy", "sell_not_supported_in_preview", "above_dust_threshold", "above_net_rent", "frozen", "collectible", "lp_or_position_shaped", "receipt_token_policy", "dangerous_token_2022_extension", "account_missing", "unsupported_account", "positive_wsol", "unpriced", "stale_price", "completed_no_sell_route", "unsupported_signer", "non_positive_net", "excess_above_rent_exempt_minimum"] } }, "protections": { "type": "array", "items": { "type": "string", "enum": ["frozen", "collectible", "lp_position", "receipt_token", "token_2022_extension", "unpriced", "stale_price", "account_state"] } } } }, "market": { "type": "object", "description": "Present on fungible token-account items.", "required": ["quoteStatus", "sellRouteAvailable", "executableQuoteUsd", "quotedAt"], "properties": { "quoteStatus": { "type": "string", "enum": ["complete", "unavailable"] }, "sellRouteAvailable": { "type": ["boolean", "null"], "description": "Null when a route was not requested; false only for a completed no-route lookup." }, "executableQuoteUsd": { "oneOf": [{ "type": "null" }, { "$ref": "#/components/schemas/DecimalUsd" }] }, "quotedAt": { "type": ["string", "null"], "format": "date-time" } }, "allOf": [{ "if": { "properties": { "quoteStatus": { "const": "unavailable" } } }, "then": { "properties": { "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "else": { "properties": { "sellRouteAvailable": { "type": "boolean" }, "quotedAt": { "type": "string", "format": "date-time" } } } }, { "if": { "properties": { "sellRouteAvailable": { "const": false } } }, "then": { "properties": { "executableQuoteUsd": { "const": null } } } }] }, "opportunity": { "oneOf": [{ "$ref": "#/components/schemas/BurnAndCloseOpportunity" }, { "$ref": "#/components/schemas/RecoverExcessLamportsOpportunity" }, { "$ref": "#/components/schemas/NoActionOpportunity" }], "discriminator": { "propertyName": "action", "mapping": { "burn_and_close": "#/components/schemas/BurnAndCloseOpportunity", "recover_excess_lamports": "#/components/schemas/RecoverExcessLamportsOpportunity", "none": "#/components/schemas/NoActionOpportunity" } } } }, "allOf": [{ "if": { "properties": { "kind": { "const": "excess_lamports" } } }, "then": { "required": ["targetAccount", "alternativeGroupId"], "not": { "required": ["account"] }, "properties": { "source": { "const": "excess_lamports" }, "classification": { "properties": { "disposition": { "const": "withdrawable" }, "confidence": { "const": "known" }, "reviewRequired": { "const": true }, "reasons": { "const": ["excess_above_rent_exempt_minimum"] }, "protections": { "maxItems": 0 } } }, "opportunity": { "properties": { "action": { "const": "recover_excess_lamports" } } } } }, "else": { "not": { "required": ["targetAccount"] }, "properties": { "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty", "protected", "review_only", "no_op"] }, "reasons": { "not": { "contains": { "const": "excess_above_rent_exempt_minimum" } } } } }, "opportunity": { "properties": { "action": { "enum": ["none", "burn_and_close"] } } } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "spl_token" } } } } }, "then": { "properties": { "source": { "const": "spl_token" } } } }, { "if": { "required": ["account"], "properties": { "account": { "properties": { "program": { "const": "token_2022" } } } } }, "then": { "properties": { "source": { "const": "token_2022" } } } }, { "if": { "required": ["market"] }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "asset": { "properties": { "assetType": { "const": "fungible" } } } } } }, { "if": { "properties": { "opportunity": { "properties": { "action": { "const": "burn_and_close" } } } } }, "then": { "required": ["account", "asset"], "properties": { "kind": { "const": "token_account" }, "source": { "enum": ["spl_token", "token_2022"] }, "classification": { "properties": { "disposition": { "enum": ["closeable_empty"] }, "reviewRequired": { "const": true }, "protections": { "maxItems": 0 } } } } } }, { "if": { "properties": { "classification": { "properties": { "disposition": { "const": "closeable_empty" } } } } }, "then": { "required": ["account", "asset"], "properties": { "account": { "properties": { "balanceBaseUnits": { "const": "0" } } }, "opportunity": { "properties": { "action": { "const": "burn_and_close" }, "reviewedBalanceBaseUnits": { "const": "0" } } } } } }, { "if": { "properties": { "classification": { "properties": { "reasons": { "contains": { "enum": ["account_missing", "unsupported_account"] } } } } } }, "then": { "properties": { "classification": { "properties": { "disposition": { "const": "protected" }, "protections": { "contains": { "const": "account_state" } } } }, "opportunity": { "properties": { "action": { "const": "none" } } } }, "not": { "required": ["market"] } } }, { "if": { "anyOf": [{ "properties": { "classification": { "properties": { "reasons": { "contains": { "const": "stale_price" } } } } } }, { "properties": { "classification": { "properties": { "protections": { "contains": { "const": "stale_price" } } } } } }] }, "then": { "required": ["account", "asset", "market"], "properties": { "kind": { "const": "token_account" }, "account": { "properties": { "balanceBaseUnits": { "not": { "const": "0" } } } }, "classification": { "properties": { "disposition": { "const": "protected" }, "confidence": { "const": "low" }, "reviewRequired": { "const": true }, "reasons": { "const": ["stale_price"] }, "protections": { "const": ["stale_price"] } } }, "market": { "properties": { "quoteStatus": { "const": "unavailable" }, "sellRouteAvailable": { "const": null }, "executableQuoteUsd": { "const": null }, "quotedAt": { "const": null } } }, "opportunity": { "properties": { "action": { "const": "none" } } } } } }] };
 var schema57 = { "type": "object", "description": "Protected, review-only, and no-op items. Never executable.", "required": ["action", "destructive", "executionSupported", "valueComponents", "estimated"], "properties": { "action": { "type": "string", "enum": ["none"] }, "destructive": { "type": "boolean", "enum": [false] }, "executionSupported": { "type": "boolean", "enum": [false] }, "valueComponents": { "type": "array", "maxItems": 0 }, "estimated": { "type": "boolean", "enum": [true] } } };
 var func0 = require_equal().default;
 var pattern17 = new RegExp("^[0-9]+\\.[0-9]{6}$", "u");
 var schema49 = { "type": "object", "description": "Preview downgrade (contract section 6): executes on the existing\non-chain instruction, which burns whatever balance is present when the\ntransaction runs. Every instance is destructive and carries the\nconsent text, including accounts reviewed as empty.\n", "required": ["action", "destructive", "executionSupported", "consent", "reviewedBalanceBaseUnits", "valueComponents", "costs", "estimatedNetValueUsd", "estimated"], "properties": { "action": { "type": "string", "enum": ["burn_and_close"] }, "destructive": { "type": "boolean", "enum": [true] }, "executionSupported": { "type": "boolean", "description": "True only when the execution preview is enabled and this action is supported." }, "consent": { "type": "string", "minLength": 1, "description": "Exact text the integration must show before signing. States the reviewed balance and that execution burns whatever balance is present when the transaction runs; for `assumed_worthless` items also that no price was available." }, "reviewedBalanceBaseUnits": { "$ref": "#/components/schemas/IntegerString", "description": "The balance the user is reviewing. Zero for empty-account close." }, "valueComponents": { "type": "array", "minItems": 1, "items": { "allOf": [{ "$ref": "#/components/schemas/ValueComponent" }, { "properties": { "source": { "const": "token_account_close" } } }] } }, "costs": { "$ref": "#/components/schemas/OpportunityCosts" }, "estimatedNetValueUsd": { "type": ["string", "null"] }, "estimated": { "type": "boolean", "enum": [true] } } };
-var func2 = require_ucs2length().default;
+var func4 = require_ucs2length().default;
 var schema51 = { "type": "object", "required": ["source", "gross", "serviceFee", "netAfterServiceFee"], "properties": { "source": { "type": "string", "enum": ["token_account_close", "excess_lamports"] }, "gross": { "$ref": "#/components/schemas/Amount" }, "serviceFee": { "$ref": "#/components/schemas/Amount" }, "netAfterServiceFee": { "$ref": "#/components/schemas/Amount" } } };
 function validate28(data, { instancePath = "", parentData, parentDataProperty, rootData = data, dynamicAnchors = {} } = {}) {
   let vErrors = null;
@@ -799,7 +799,7 @@ function validate26(data, { instancePath = "", parentData, parentDataProperty, r
                 const _errs7 = errors;
                 if (errors === _errs7) {
                   if (typeof data3 === "string") {
-                    if (func2(data3) < 1) {
+                    if (func4(data3) < 1) {
                       validate26.errors = [{ instancePath: instancePath + "/consent", schemaPath: "#/properties/consent/minLength", keyword: "minLength", params: { limit: 1 }, message: "must NOT have fewer than 1 characters" }];
                       return false;
                     }
@@ -2176,6 +2176,387 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                     Object.assign(props0, props6);
                   }
                 }
+                const _errs91 = errors;
+                const _errs92 = errors;
+                let valid44 = true;
+                const _errs93 = errors;
+                const _errs94 = errors;
+                let valid45 = false;
+                const _errs95 = errors;
+                if (data && typeof data == "object" && !Array.isArray(data)) {
+                  if (data.classification !== void 0) {
+                    let data50 = data.classification;
+                    if (data50 && typeof data50 == "object" && !Array.isArray(data50)) {
+                      if (data50.reasons !== void 0) {
+                        let data51 = data50.reasons;
+                        if (Array.isArray(data51)) {
+                          const _errs98 = errors;
+                          const len3 = data51.length;
+                          for (let i3 = 0; i3 < len3; i3++) {
+                            const _errs99 = errors;
+                            if ("stale_price" !== data51[i3]) {
+                              const err23 = {};
+                              if (vErrors === null) {
+                                vErrors = [err23];
+                              } else {
+                                vErrors.push(err23);
+                              }
+                              errors++;
+                            }
+                            var valid48 = _errs99 === errors;
+                            if (valid48) {
+                              break;
+                            }
+                          }
+                          if (!valid48) {
+                            const err24 = {};
+                            if (vErrors === null) {
+                              vErrors = [err24];
+                            } else {
+                              vErrors.push(err24);
+                            }
+                            errors++;
+                          } else {
+                            errors = _errs98;
+                            if (vErrors !== null) {
+                              if (_errs98) {
+                                vErrors.length = _errs98;
+                              } else {
+                                vErrors = null;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                var _valid8 = _errs95 === errors;
+                valid45 = valid45 || _valid8;
+                if (_valid8) {
+                  var props7 = {};
+                  props7.classification = true;
+                }
+                const _errs100 = errors;
+                if (data && typeof data == "object" && !Array.isArray(data)) {
+                  if (data.classification !== void 0) {
+                    let data53 = data.classification;
+                    if (data53 && typeof data53 == "object" && !Array.isArray(data53)) {
+                      if (data53.protections !== void 0) {
+                        let data54 = data53.protections;
+                        if (Array.isArray(data54)) {
+                          const _errs103 = errors;
+                          const len4 = data54.length;
+                          for (let i4 = 0; i4 < len4; i4++) {
+                            const _errs104 = errors;
+                            if ("stale_price" !== data54[i4]) {
+                              const err25 = {};
+                              if (vErrors === null) {
+                                vErrors = [err25];
+                              } else {
+                                vErrors.push(err25);
+                              }
+                              errors++;
+                            }
+                            var valid51 = _errs104 === errors;
+                            if (valid51) {
+                              break;
+                            }
+                          }
+                          if (!valid51) {
+                            const err26 = {};
+                            if (vErrors === null) {
+                              vErrors = [err26];
+                            } else {
+                              vErrors.push(err26);
+                            }
+                            errors++;
+                          } else {
+                            errors = _errs103;
+                            if (vErrors !== null) {
+                              if (_errs103) {
+                                vErrors.length = _errs103;
+                              } else {
+                                vErrors = null;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                var _valid8 = _errs100 === errors;
+                valid45 = valid45 || _valid8;
+                if (_valid8) {
+                  if (props7 !== true) {
+                    props7 = props7 || {};
+                    props7.classification = true;
+                  }
+                }
+                if (!valid45) {
+                  const err27 = {};
+                  if (vErrors === null) {
+                    vErrors = [err27];
+                  } else {
+                    vErrors.push(err27);
+                  }
+                  errors++;
+                } else {
+                  errors = _errs94;
+                  if (vErrors !== null) {
+                    if (_errs94) {
+                      vErrors.length = _errs94;
+                    } else {
+                      vErrors = null;
+                    }
+                  }
+                }
+                var _valid7 = _errs93 === errors;
+                errors = _errs92;
+                if (vErrors !== null) {
+                  if (_errs92) {
+                    vErrors.length = _errs92;
+                  } else {
+                    vErrors = null;
+                  }
+                }
+                if (_valid7) {
+                  const _errs105 = errors;
+                  if (data && typeof data == "object" && !Array.isArray(data)) {
+                    let missing10;
+                    if (data.account === void 0 && (missing10 = "account") || data.asset === void 0 && (missing10 = "asset") || data.market === void 0 && (missing10 = "market")) {
+                      validate25.errors = [{ instancePath, schemaPath: "#/allOf/7/then/required", keyword: "required", params: { missingProperty: missing10 }, message: "must have required property '" + missing10 + "'" }];
+                      return false;
+                    } else {
+                      if (data.kind !== void 0) {
+                        const _errs106 = errors;
+                        if ("token_account" !== data.kind) {
+                          validate25.errors = [{ instancePath: instancePath + "/kind", schemaPath: "#/allOf/7/then/properties/kind/const", keyword: "const", params: { allowedValue: "token_account" }, message: "must be equal to constant" }];
+                          return false;
+                        }
+                        var valid52 = _errs106 === errors;
+                      } else {
+                        var valid52 = true;
+                      }
+                      if (valid52) {
+                        if (data.account !== void 0) {
+                          let data57 = data.account;
+                          const _errs107 = errors;
+                          if (data57 && typeof data57 == "object" && !Array.isArray(data57)) {
+                            if (data57.balanceBaseUnits !== void 0) {
+                              const _errs109 = errors;
+                              const _errs110 = errors;
+                              if ("0" !== data57.balanceBaseUnits) {
+                                const err28 = {};
+                                if (vErrors === null) {
+                                  vErrors = [err28];
+                                } else {
+                                  vErrors.push(err28);
+                                }
+                                errors++;
+                              }
+                              var valid54 = _errs110 === errors;
+                              if (valid54) {
+                                validate25.errors = [{ instancePath: instancePath + "/account/balanceBaseUnits", schemaPath: "#/allOf/7/then/properties/account/properties/balanceBaseUnits/not", keyword: "not", params: {}, message: "must NOT be valid" }];
+                                return false;
+                              } else {
+                                errors = _errs109;
+                                if (vErrors !== null) {
+                                  if (_errs109) {
+                                    vErrors.length = _errs109;
+                                  } else {
+                                    vErrors = null;
+                                  }
+                                }
+                              }
+                            }
+                          }
+                          var valid52 = _errs107 === errors;
+                        } else {
+                          var valid52 = true;
+                        }
+                        if (valid52) {
+                          if (data.classification !== void 0) {
+                            let data59 = data.classification;
+                            const _errs111 = errors;
+                            if (data59 && typeof data59 == "object" && !Array.isArray(data59)) {
+                              if (data59.disposition !== void 0) {
+                                const _errs112 = errors;
+                                if ("protected" !== data59.disposition) {
+                                  validate25.errors = [{ instancePath: instancePath + "/classification/disposition", schemaPath: "#/allOf/7/then/properties/classification/properties/disposition/const", keyword: "const", params: { allowedValue: "protected" }, message: "must be equal to constant" }];
+                                  return false;
+                                }
+                                var valid55 = _errs112 === errors;
+                              } else {
+                                var valid55 = true;
+                              }
+                              if (valid55) {
+                                if (data59.confidence !== void 0) {
+                                  const _errs113 = errors;
+                                  if ("low" !== data59.confidence) {
+                                    validate25.errors = [{ instancePath: instancePath + "/classification/confidence", schemaPath: "#/allOf/7/then/properties/classification/properties/confidence/const", keyword: "const", params: { allowedValue: "low" }, message: "must be equal to constant" }];
+                                    return false;
+                                  }
+                                  var valid55 = _errs113 === errors;
+                                } else {
+                                  var valid55 = true;
+                                }
+                                if (valid55) {
+                                  if (data59.reviewRequired !== void 0) {
+                                    const _errs114 = errors;
+                                    if (true !== data59.reviewRequired) {
+                                      validate25.errors = [{ instancePath: instancePath + "/classification/reviewRequired", schemaPath: "#/allOf/7/then/properties/classification/properties/reviewRequired/const", keyword: "const", params: { allowedValue: true }, message: "must be equal to constant" }];
+                                      return false;
+                                    }
+                                    var valid55 = _errs114 === errors;
+                                  } else {
+                                    var valid55 = true;
+                                  }
+                                  if (valid55) {
+                                    if (data59.reasons !== void 0) {
+                                      const _errs115 = errors;
+                                      if (!func0(data59.reasons, schema42.allOf[7].then.properties.classification.properties.reasons.const)) {
+                                        validate25.errors = [{ instancePath: instancePath + "/classification/reasons", schemaPath: "#/allOf/7/then/properties/classification/properties/reasons/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.classification.properties.reasons.const }, message: "must be equal to constant" }];
+                                        return false;
+                                      }
+                                      var valid55 = _errs115 === errors;
+                                    } else {
+                                      var valid55 = true;
+                                    }
+                                    if (valid55) {
+                                      if (data59.protections !== void 0) {
+                                        const _errs116 = errors;
+                                        if (!func0(data59.protections, schema42.allOf[7].then.properties.classification.properties.protections.const)) {
+                                          validate25.errors = [{ instancePath: instancePath + "/classification/protections", schemaPath: "#/allOf/7/then/properties/classification/properties/protections/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.classification.properties.protections.const }, message: "must be equal to constant" }];
+                                          return false;
+                                        }
+                                        var valid55 = _errs116 === errors;
+                                      } else {
+                                        var valid55 = true;
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            var valid52 = _errs111 === errors;
+                          } else {
+                            var valid52 = true;
+                          }
+                          if (valid52) {
+                            if (data.market !== void 0) {
+                              let data65 = data.market;
+                              const _errs117 = errors;
+                              if (data65 && typeof data65 == "object" && !Array.isArray(data65)) {
+                                if (data65.quoteStatus !== void 0) {
+                                  const _errs118 = errors;
+                                  if ("unavailable" !== data65.quoteStatus) {
+                                    validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/allOf/7/then/properties/market/properties/quoteStatus/const", keyword: "const", params: { allowedValue: "unavailable" }, message: "must be equal to constant" }];
+                                    return false;
+                                  }
+                                  var valid56 = _errs118 === errors;
+                                } else {
+                                  var valid56 = true;
+                                }
+                                if (valid56) {
+                                  if (data65.sellRouteAvailable !== void 0) {
+                                    const _errs119 = errors;
+                                    if (null !== data65.sellRouteAvailable) {
+                                      validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/allOf/7/then/properties/market/properties/sellRouteAvailable/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.sellRouteAvailable.const }, message: "must be equal to constant" }];
+                                      return false;
+                                    }
+                                    var valid56 = _errs119 === errors;
+                                  } else {
+                                    var valid56 = true;
+                                  }
+                                  if (valid56) {
+                                    if (data65.executableQuoteUsd !== void 0) {
+                                      const _errs120 = errors;
+                                      if (null !== data65.executableQuoteUsd) {
+                                        validate25.errors = [{ instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/allOf/7/then/properties/market/properties/executableQuoteUsd/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.executableQuoteUsd.const }, message: "must be equal to constant" }];
+                                        return false;
+                                      }
+                                      var valid56 = _errs120 === errors;
+                                    } else {
+                                      var valid56 = true;
+                                    }
+                                    if (valid56) {
+                                      if (data65.quotedAt !== void 0) {
+                                        const _errs121 = errors;
+                                        if (null !== data65.quotedAt) {
+                                          validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/allOf/7/then/properties/market/properties/quotedAt/const", keyword: "const", params: { allowedValue: schema42.allOf[7].then.properties.market.properties.quotedAt.const }, message: "must be equal to constant" }];
+                                          return false;
+                                        }
+                                        var valid56 = _errs121 === errors;
+                                      } else {
+                                        var valid56 = true;
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              var valid52 = _errs117 === errors;
+                            } else {
+                              var valid52 = true;
+                            }
+                            if (valid52) {
+                              if (data.opportunity !== void 0) {
+                                let data70 = data.opportunity;
+                                const _errs122 = errors;
+                                if (data70 && typeof data70 == "object" && !Array.isArray(data70)) {
+                                  if (data70.action !== void 0) {
+                                    if ("none" !== data70.action) {
+                                      validate25.errors = [{ instancePath: instancePath + "/opportunity/action", schemaPath: "#/allOf/7/then/properties/opportunity/properties/action/const", keyword: "const", params: { allowedValue: "none" }, message: "must be equal to constant" }];
+                                      return false;
+                                    }
+                                  }
+                                }
+                                var valid52 = _errs122 === errors;
+                              } else {
+                                var valid52 = true;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  var _valid7 = _errs105 === errors;
+                  valid44 = _valid7;
+                  if (valid44) {
+                    if (props7 !== true) {
+                      props7 = props7 || {};
+                      props7.kind = true;
+                      props7.account = true;
+                      props7.classification = true;
+                      props7.market = true;
+                      props7.opportunity = true;
+                    }
+                  }
+                }
+                if (!valid44) {
+                  const err29 = { instancePath, schemaPath: "#/allOf/7/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
+                  if (vErrors === null) {
+                    vErrors = [err29];
+                  } else {
+                    vErrors.push(err29);
+                  }
+                  errors++;
+                  validate25.errors = vErrors;
+                  return false;
+                }
+                var valid0 = _errs91 === errors;
+                if (valid0) {
+                  if (props0 !== true && props7 !== void 0) {
+                    if (props7 === true) {
+                      props0 = true;
+                    } else {
+                      props0 = props0 || {};
+                      Object.assign(props0, props7);
+                    }
+                  }
+                }
               }
             }
           }
@@ -2185,9 +2566,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (errors === 0) {
     if (data && typeof data == "object" && !Array.isArray(data)) {
-      let missing10;
-      if (data.id === void 0 && (missing10 = "id") || data.kind === void 0 && (missing10 = "kind") || data.source === void 0 && (missing10 = "source") || data.classification === void 0 && (missing10 = "classification") || data.opportunity === void 0 && (missing10 = "opportunity")) {
-        validate25.errors = [{ instancePath, schemaPath: "#/required", keyword: "required", params: { missingProperty: missing10 }, message: "must have required property '" + missing10 + "'" }];
+      let missing11;
+      if (data.id === void 0 && (missing11 = "id") || data.kind === void 0 && (missing11 = "kind") || data.source === void 0 && (missing11 = "source") || data.classification === void 0 && (missing11 = "classification") || data.opportunity === void 0 && (missing11 = "opportunity")) {
+        validate25.errors = [{ instancePath, schemaPath: "#/required", keyword: "required", params: { missingProperty: missing11 }, message: "must have required property '" + missing11 + "'" }];
         return false;
       } else {
         if (props0 !== true) {
@@ -2204,55 +2585,55 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
           props0.opportunity = true;
         }
         if (data.id !== void 0) {
-          const _errs91 = errors;
+          const _errs124 = errors;
           if (typeof data.id !== "string") {
             validate25.errors = [{ instancePath: instancePath + "/id", schemaPath: "#/properties/id/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
             return false;
           }
-          var valid44 = _errs91 === errors;
+          var valid58 = _errs124 === errors;
         } else {
-          var valid44 = true;
+          var valid58 = true;
         }
-        if (valid44) {
+        if (valid58) {
           if (data.kind !== void 0) {
-            let data51 = data.kind;
-            const _errs93 = errors;
-            if (typeof data51 !== "string") {
+            let data73 = data.kind;
+            const _errs126 = errors;
+            if (typeof data73 !== "string") {
               validate25.errors = [{ instancePath: instancePath + "/kind", schemaPath: "#/properties/kind/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
               return false;
             }
-            if (!(data51 === "token_account" || data51 === "excess_lamports")) {
+            if (!(data73 === "token_account" || data73 === "excess_lamports")) {
               validate25.errors = [{ instancePath: instancePath + "/kind", schemaPath: "#/properties/kind/enum", keyword: "enum", params: { allowedValues: schema42.properties.kind.enum }, message: "must be equal to one of the allowed values" }];
               return false;
             }
-            var valid44 = _errs93 === errors;
+            var valid58 = _errs126 === errors;
           } else {
-            var valid44 = true;
+            var valid58 = true;
           }
-          if (valid44) {
+          if (valid58) {
             if (data.source !== void 0) {
-              let data52 = data.source;
-              const _errs95 = errors;
-              if (typeof data52 !== "string") {
+              let data74 = data.source;
+              const _errs128 = errors;
+              if (typeof data74 !== "string") {
                 validate25.errors = [{ instancePath: instancePath + "/source", schemaPath: "#/properties/source/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                 return false;
               }
-              if (!(data52 === "spl_token" || data52 === "token_2022" || data52 === "excess_lamports")) {
+              if (!(data74 === "spl_token" || data74 === "token_2022" || data74 === "excess_lamports")) {
                 validate25.errors = [{ instancePath: instancePath + "/source", schemaPath: "#/properties/source/enum", keyword: "enum", params: { allowedValues: schema42.properties.source.enum }, message: "must be equal to one of the allowed values" }];
                 return false;
               }
-              var valid44 = _errs95 === errors;
+              var valid58 = _errs128 === errors;
             } else {
-              var valid44 = true;
+              var valid58 = true;
             }
-            if (valid44) {
+            if (valid58) {
               if (data.targetAccount !== void 0) {
-                let data53 = data.targetAccount;
-                const _errs97 = errors;
-                const _errs98 = errors;
-                if (errors === _errs98) {
-                  if (typeof data53 === "string") {
-                    if (!pattern4.test(data53)) {
+                let data75 = data.targetAccount;
+                const _errs130 = errors;
+                const _errs131 = errors;
+                if (errors === _errs131) {
+                  if (typeof data75 === "string") {
+                    if (!pattern4.test(data75)) {
                       validate25.errors = [{ instancePath: instancePath + "/targetAccount", schemaPath: "#/components/schemas/Base58/pattern", keyword: "pattern", params: { pattern: "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }, message: 'must match pattern "^[1-9A-HJ-NP-Za-km-z]{32,44}$"' }];
                       return false;
                     }
@@ -2261,39 +2642,39 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                     return false;
                   }
                 }
-                var valid44 = _errs97 === errors;
+                var valid58 = _errs130 === errors;
               } else {
-                var valid44 = true;
+                var valid58 = true;
               }
-              if (valid44) {
+              if (valid58) {
                 if (data.alternativeGroupId !== void 0) {
-                  const _errs100 = errors;
+                  const _errs133 = errors;
                   if (typeof data.alternativeGroupId !== "string") {
                     validate25.errors = [{ instancePath: instancePath + "/alternativeGroupId", schemaPath: "#/properties/alternativeGroupId/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                     return false;
                   }
-                  var valid44 = _errs100 === errors;
+                  var valid58 = _errs133 === errors;
                 } else {
-                  var valid44 = true;
+                  var valid58 = true;
                 }
-                if (valid44) {
+                if (valid58) {
                   if (data.asset !== void 0) {
-                    let data55 = data.asset;
-                    const _errs102 = errors;
-                    if (errors === _errs102) {
-                      if (data55 && typeof data55 == "object" && !Array.isArray(data55)) {
-                        let missing11;
-                        if (data55.mint === void 0 && (missing11 = "mint") || data55.assetType === void 0 && (missing11 = "assetType") || data55.decimals === void 0 && (missing11 = "decimals")) {
-                          validate25.errors = [{ instancePath: instancePath + "/asset", schemaPath: "#/properties/asset/required", keyword: "required", params: { missingProperty: missing11 }, message: "must have required property '" + missing11 + "'" }];
+                    let data77 = data.asset;
+                    const _errs135 = errors;
+                    if (errors === _errs135) {
+                      if (data77 && typeof data77 == "object" && !Array.isArray(data77)) {
+                        let missing12;
+                        if (data77.mint === void 0 && (missing12 = "mint") || data77.assetType === void 0 && (missing12 = "assetType") || data77.decimals === void 0 && (missing12 = "decimals")) {
+                          validate25.errors = [{ instancePath: instancePath + "/asset", schemaPath: "#/properties/asset/required", keyword: "required", params: { missingProperty: missing12 }, message: "must have required property '" + missing12 + "'" }];
                           return false;
                         } else {
-                          if (data55.mint !== void 0) {
-                            let data56 = data55.mint;
-                            const _errs104 = errors;
-                            const _errs105 = errors;
-                            if (errors === _errs105) {
-                              if (typeof data56 === "string") {
-                                if (!pattern4.test(data56)) {
+                          if (data77.mint !== void 0) {
+                            let data78 = data77.mint;
+                            const _errs137 = errors;
+                            const _errs138 = errors;
+                            if (errors === _errs138) {
+                              if (typeof data78 === "string") {
+                                if (!pattern4.test(data78)) {
                                   validate25.errors = [{ instancePath: instancePath + "/asset/mint", schemaPath: "#/components/schemas/Base58/pattern", keyword: "pattern", params: { pattern: "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }, message: 'must match pattern "^[1-9A-HJ-NP-Za-km-z]{32,44}$"' }];
                                   return false;
                                 }
@@ -2302,49 +2683,49 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                 return false;
                               }
                             }
-                            var valid46 = _errs104 === errors;
+                            var valid60 = _errs137 === errors;
                           } else {
-                            var valid46 = true;
+                            var valid60 = true;
                           }
-                          if (valid46) {
-                            if (data55.assetType !== void 0) {
-                              let data57 = data55.assetType;
-                              const _errs107 = errors;
-                              if (typeof data57 !== "string") {
+                          if (valid60) {
+                            if (data77.assetType !== void 0) {
+                              let data79 = data77.assetType;
+                              const _errs140 = errors;
+                              if (typeof data79 !== "string") {
                                 validate25.errors = [{ instancePath: instancePath + "/asset/assetType", schemaPath: "#/properties/asset/properties/assetType/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                 return false;
                               }
-                              if (!(data57 === "fungible" || data57 === "token_account_collectible" || data57 === "unknown")) {
+                              if (!(data79 === "fungible" || data79 === "token_account_collectible" || data79 === "unknown")) {
                                 validate25.errors = [{ instancePath: instancePath + "/asset/assetType", schemaPath: "#/properties/asset/properties/assetType/enum", keyword: "enum", params: { allowedValues: schema42.properties.asset.properties.assetType.enum }, message: "must be equal to one of the allowed values" }];
                                 return false;
                               }
-                              var valid46 = _errs107 === errors;
+                              var valid60 = _errs140 === errors;
                             } else {
-                              var valid46 = true;
+                              var valid60 = true;
                             }
-                            if (valid46) {
-                              if (data55.symbol !== void 0) {
-                                let data58 = data55.symbol;
-                                const _errs109 = errors;
-                                if (typeof data58 !== "string" && data58 !== null) {
+                            if (valid60) {
+                              if (data77.symbol !== void 0) {
+                                let data80 = data77.symbol;
+                                const _errs142 = errors;
+                                if (typeof data80 !== "string" && data80 !== null) {
                                   validate25.errors = [{ instancePath: instancePath + "/asset/symbol", schemaPath: "#/properties/asset/properties/symbol/type", keyword: "type", params: { type: schema42.properties.asset.properties.symbol.type }, message: "must be string,null" }];
                                   return false;
                                 }
-                                var valid46 = _errs109 === errors;
+                                var valid60 = _errs142 === errors;
                               } else {
-                                var valid46 = true;
+                                var valid60 = true;
                               }
-                              if (valid46) {
-                                if (data55.decimals !== void 0) {
-                                  let data59 = data55.decimals;
-                                  const _errs111 = errors;
-                                  if (!(typeof data59 == "number" && (!(data59 % 1) && !isNaN(data59)))) {
+                              if (valid60) {
+                                if (data77.decimals !== void 0) {
+                                  let data81 = data77.decimals;
+                                  const _errs144 = errors;
+                                  if (!(typeof data81 == "number" && (!(data81 % 1) && !isNaN(data81)))) {
                                     validate25.errors = [{ instancePath: instancePath + "/asset/decimals", schemaPath: "#/properties/asset/properties/decimals/type", keyword: "type", params: { type: "integer" }, message: "must be integer" }];
                                     return false;
                                   }
-                                  var valid46 = _errs111 === errors;
+                                  var valid60 = _errs144 === errors;
                                 } else {
-                                  var valid46 = true;
+                                  var valid60 = true;
                                 }
                               }
                             }
@@ -2355,37 +2736,37 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                         return false;
                       }
                     }
-                    var valid44 = _errs102 === errors;
+                    var valid58 = _errs135 === errors;
                   } else {
-                    var valid44 = true;
+                    var valid58 = true;
                   }
-                  if (valid44) {
+                  if (valid58) {
                     if (data.account !== void 0) {
-                      let data60 = data.account;
-                      const _errs113 = errors;
-                      if (errors === _errs113) {
-                        if (data60 && typeof data60 == "object" && !Array.isArray(data60)) {
-                          let missing12;
-                          if (data60.address === void 0 && (missing12 = "address") || data60.program === void 0 && (missing12 = "program") || data60.balanceBaseUnits === void 0 && (missing12 = "balanceBaseUnits") || data60.rentLamports === void 0 && (missing12 = "rentLamports")) {
-                            validate25.errors = [{ instancePath: instancePath + "/account", schemaPath: "#/properties/account/required", keyword: "required", params: { missingProperty: missing12 }, message: "must have required property '" + missing12 + "'" }];
+                      let data82 = data.account;
+                      const _errs146 = errors;
+                      if (errors === _errs146) {
+                        if (data82 && typeof data82 == "object" && !Array.isArray(data82)) {
+                          let missing13;
+                          if (data82.address === void 0 && (missing13 = "address") || data82.program === void 0 && (missing13 = "program") || data82.balanceBaseUnits === void 0 && (missing13 = "balanceBaseUnits") || data82.rentLamports === void 0 && (missing13 = "rentLamports")) {
+                            validate25.errors = [{ instancePath: instancePath + "/account", schemaPath: "#/properties/account/required", keyword: "required", params: { missingProperty: missing13 }, message: "must have required property '" + missing13 + "'" }];
                             return false;
                           } else {
-                            const _errs115 = errors;
-                            for (const key0 in data60) {
+                            const _errs148 = errors;
+                            for (const key0 in data82) {
                               if (!(key0 === "address" || key0 === "program" || key0 === "balanceBaseUnits" || key0 === "rentLamports")) {
                                 validate25.errors = [{ instancePath: instancePath + "/account", schemaPath: "#/properties/account/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key0 }, message: "must NOT have additional properties" }];
                                 return false;
                                 break;
                               }
                             }
-                            if (_errs115 === errors) {
-                              if (data60.address !== void 0) {
-                                let data61 = data60.address;
-                                const _errs116 = errors;
-                                const _errs117 = errors;
-                                if (errors === _errs117) {
-                                  if (typeof data61 === "string") {
-                                    if (!pattern4.test(data61)) {
+                            if (_errs148 === errors) {
+                              if (data82.address !== void 0) {
+                                let data83 = data82.address;
+                                const _errs149 = errors;
+                                const _errs150 = errors;
+                                if (errors === _errs150) {
+                                  if (typeof data83 === "string") {
+                                    if (!pattern4.test(data83)) {
                                       validate25.errors = [{ instancePath: instancePath + "/account/address", schemaPath: "#/components/schemas/Base58/pattern", keyword: "pattern", params: { pattern: "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }, message: 'must match pattern "^[1-9A-HJ-NP-Za-km-z]{32,44}$"' }];
                                       return false;
                                     }
@@ -2394,34 +2775,34 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     return false;
                                   }
                                 }
-                                var valid48 = _errs116 === errors;
+                                var valid62 = _errs149 === errors;
                               } else {
-                                var valid48 = true;
+                                var valid62 = true;
                               }
-                              if (valid48) {
-                                if (data60.program !== void 0) {
-                                  let data62 = data60.program;
-                                  const _errs119 = errors;
-                                  if (typeof data62 !== "string") {
+                              if (valid62) {
+                                if (data82.program !== void 0) {
+                                  let data84 = data82.program;
+                                  const _errs152 = errors;
+                                  if (typeof data84 !== "string") {
                                     validate25.errors = [{ instancePath: instancePath + "/account/program", schemaPath: "#/properties/account/properties/program/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
                                   }
-                                  if (!(data62 === "spl_token" || data62 === "token_2022")) {
+                                  if (!(data84 === "spl_token" || data84 === "token_2022")) {
                                     validate25.errors = [{ instancePath: instancePath + "/account/program", schemaPath: "#/properties/account/properties/program/enum", keyword: "enum", params: { allowedValues: schema42.properties.account.properties.program.enum }, message: "must be equal to one of the allowed values" }];
                                     return false;
                                   }
-                                  var valid48 = _errs119 === errors;
+                                  var valid62 = _errs152 === errors;
                                 } else {
-                                  var valid48 = true;
+                                  var valid62 = true;
                                 }
-                                if (valid48) {
-                                  if (data60.balanceBaseUnits !== void 0) {
-                                    let data63 = data60.balanceBaseUnits;
-                                    const _errs121 = errors;
-                                    const _errs122 = errors;
-                                    if (errors === _errs122) {
-                                      if (typeof data63 === "string") {
-                                        if (!pattern9.test(data63)) {
+                                if (valid62) {
+                                  if (data82.balanceBaseUnits !== void 0) {
+                                    let data85 = data82.balanceBaseUnits;
+                                    const _errs154 = errors;
+                                    const _errs155 = errors;
+                                    if (errors === _errs155) {
+                                      if (typeof data85 === "string") {
+                                        if (!pattern9.test(data85)) {
                                           validate25.errors = [{ instancePath: instancePath + "/account/balanceBaseUnits", schemaPath: "#/components/schemas/IntegerString/pattern", keyword: "pattern", params: { pattern: "^[0-9]+$" }, message: 'must match pattern "^[0-9]+$"' }];
                                           return false;
                                         }
@@ -2430,18 +2811,18 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                         return false;
                                       }
                                     }
-                                    var valid48 = _errs121 === errors;
+                                    var valid62 = _errs154 === errors;
                                   } else {
-                                    var valid48 = true;
+                                    var valid62 = true;
                                   }
-                                  if (valid48) {
-                                    if (data60.rentLamports !== void 0) {
-                                      let data64 = data60.rentLamports;
-                                      const _errs124 = errors;
-                                      const _errs125 = errors;
-                                      if (errors === _errs125) {
-                                        if (typeof data64 === "string") {
-                                          if (!pattern9.test(data64)) {
+                                  if (valid62) {
+                                    if (data82.rentLamports !== void 0) {
+                                      let data86 = data82.rentLamports;
+                                      const _errs157 = errors;
+                                      const _errs158 = errors;
+                                      if (errors === _errs158) {
+                                        if (typeof data86 === "string") {
+                                          if (!pattern9.test(data86)) {
                                             validate25.errors = [{ instancePath: instancePath + "/account/rentLamports", schemaPath: "#/components/schemas/IntegerString/pattern", keyword: "pattern", params: { pattern: "^[0-9]+$" }, message: 'must match pattern "^[0-9]+$"' }];
                                             return false;
                                           }
@@ -2450,9 +2831,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                           return false;
                                         }
                                       }
-                                      var valid48 = _errs124 === errors;
+                                      var valid62 = _errs157 === errors;
                                     } else {
-                                      var valid48 = true;
+                                      var valid62 = true;
                                     }
                                   }
                                 }
@@ -2464,84 +2845,84 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                           return false;
                         }
                       }
-                      var valid44 = _errs113 === errors;
+                      var valid58 = _errs146 === errors;
                     } else {
-                      var valid44 = true;
+                      var valid58 = true;
                     }
-                    if (valid44) {
+                    if (valid58) {
                       if (data.classification !== void 0) {
-                        let data65 = data.classification;
-                        const _errs127 = errors;
-                        if (errors === _errs127) {
-                          if (data65 && typeof data65 == "object" && !Array.isArray(data65)) {
-                            let missing13;
-                            if (data65.disposition === void 0 && (missing13 = "disposition") || data65.confidence === void 0 && (missing13 = "confidence") || data65.reviewRequired === void 0 && (missing13 = "reviewRequired") || data65.reasons === void 0 && (missing13 = "reasons") || data65.protections === void 0 && (missing13 = "protections")) {
-                              validate25.errors = [{ instancePath: instancePath + "/classification", schemaPath: "#/properties/classification/required", keyword: "required", params: { missingProperty: missing13 }, message: "must have required property '" + missing13 + "'" }];
+                        let data87 = data.classification;
+                        const _errs160 = errors;
+                        if (errors === _errs160) {
+                          if (data87 && typeof data87 == "object" && !Array.isArray(data87)) {
+                            let missing14;
+                            if (data87.disposition === void 0 && (missing14 = "disposition") || data87.confidence === void 0 && (missing14 = "confidence") || data87.reviewRequired === void 0 && (missing14 = "reviewRequired") || data87.reasons === void 0 && (missing14 = "reasons") || data87.protections === void 0 && (missing14 = "protections")) {
+                              validate25.errors = [{ instancePath: instancePath + "/classification", schemaPath: "#/properties/classification/required", keyword: "required", params: { missingProperty: missing14 }, message: "must have required property '" + missing14 + "'" }];
                               return false;
                             } else {
-                              if (data65.disposition !== void 0) {
-                                let data66 = data65.disposition;
-                                const _errs129 = errors;
-                                if (typeof data66 !== "string") {
+                              if (data87.disposition !== void 0) {
+                                let data88 = data87.disposition;
+                                const _errs162 = errors;
+                                if (typeof data88 !== "string") {
                                   validate25.errors = [{ instancePath: instancePath + "/classification/disposition", schemaPath: "#/properties/classification/properties/disposition/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                   return false;
                                 }
-                                if (!(data66 === "closeable_empty" || data66 === "withdrawable" || data66 === "protected" || data66 === "review_only" || data66 === "no_op")) {
+                                if (!(data88 === "closeable_empty" || data88 === "withdrawable" || data88 === "protected" || data88 === "review_only" || data88 === "no_op")) {
                                   validate25.errors = [{ instancePath: instancePath + "/classification/disposition", schemaPath: "#/properties/classification/properties/disposition/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.disposition.enum }, message: "must be equal to one of the allowed values" }];
                                   return false;
                                 }
-                                var valid52 = _errs129 === errors;
+                                var valid66 = _errs162 === errors;
                               } else {
-                                var valid52 = true;
+                                var valid66 = true;
                               }
-                              if (valid52) {
-                                if (data65.confidence !== void 0) {
-                                  let data67 = data65.confidence;
-                                  const _errs131 = errors;
-                                  if (typeof data67 !== "string") {
+                              if (valid66) {
+                                if (data87.confidence !== void 0) {
+                                  let data89 = data87.confidence;
+                                  const _errs164 = errors;
+                                  if (typeof data89 !== "string") {
                                     validate25.errors = [{ instancePath: instancePath + "/classification/confidence", schemaPath: "#/properties/classification/properties/confidence/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
                                   }
-                                  if (!(data67 === "known" || data67 === "high" || data67 === "low")) {
+                                  if (!(data89 === "known" || data89 === "high" || data89 === "low")) {
                                     validate25.errors = [{ instancePath: instancePath + "/classification/confidence", schemaPath: "#/properties/classification/properties/confidence/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.confidence.enum }, message: "must be equal to one of the allowed values" }];
                                     return false;
                                   }
-                                  var valid52 = _errs131 === errors;
+                                  var valid66 = _errs164 === errors;
                                 } else {
-                                  var valid52 = true;
+                                  var valid66 = true;
                                 }
-                                if (valid52) {
-                                  if (data65.reviewRequired !== void 0) {
-                                    const _errs133 = errors;
-                                    if (typeof data65.reviewRequired !== "boolean") {
+                                if (valid66) {
+                                  if (data87.reviewRequired !== void 0) {
+                                    const _errs166 = errors;
+                                    if (typeof data87.reviewRequired !== "boolean") {
                                       validate25.errors = [{ instancePath: instancePath + "/classification/reviewRequired", schemaPath: "#/properties/classification/properties/reviewRequired/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" }];
                                       return false;
                                     }
-                                    var valid52 = _errs133 === errors;
+                                    var valid66 = _errs166 === errors;
                                   } else {
-                                    var valid52 = true;
+                                    var valid66 = true;
                                   }
-                                  if (valid52) {
-                                    if (data65.reasons !== void 0) {
-                                      let data69 = data65.reasons;
-                                      const _errs135 = errors;
-                                      if (errors === _errs135) {
-                                        if (Array.isArray(data69)) {
-                                          var valid53 = true;
-                                          const len3 = data69.length;
-                                          for (let i3 = 0; i3 < len3; i3++) {
-                                            let data70 = data69[i3];
-                                            const _errs137 = errors;
-                                            if (typeof data70 !== "string") {
-                                              validate25.errors = [{ instancePath: instancePath + "/classification/reasons/" + i3, schemaPath: "#/properties/classification/properties/reasons/items/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
+                                  if (valid66) {
+                                    if (data87.reasons !== void 0) {
+                                      let data91 = data87.reasons;
+                                      const _errs168 = errors;
+                                      if (errors === _errs168) {
+                                        if (Array.isArray(data91)) {
+                                          var valid67 = true;
+                                          const len5 = data91.length;
+                                          for (let i5 = 0; i5 < len5; i5++) {
+                                            let data92 = data91[i5];
+                                            const _errs170 = errors;
+                                            if (typeof data92 !== "string") {
+                                              validate25.errors = [{ instancePath: instancePath + "/classification/reasons/" + i5, schemaPath: "#/properties/classification/properties/reasons/items/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                               return false;
                                             }
-                                            if (!(data70 === "zero_balance" || data70 === "priced_dust_within_policy" || data70 === "sell_not_supported_in_preview" || data70 === "above_dust_threshold" || data70 === "above_net_rent" || data70 === "frozen" || data70 === "collectible" || data70 === "lp_or_position_shaped" || data70 === "receipt_token_policy" || data70 === "dangerous_token_2022_extension" || data70 === "account_missing" || data70 === "unsupported_account" || data70 === "positive_wsol" || data70 === "unpriced" || data70 === "completed_no_sell_route" || data70 === "unsupported_signer" || data70 === "non_positive_net" || data70 === "excess_above_rent_exempt_minimum")) {
-                                              validate25.errors = [{ instancePath: instancePath + "/classification/reasons/" + i3, schemaPath: "#/properties/classification/properties/reasons/items/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.reasons.items.enum }, message: "must be equal to one of the allowed values" }];
+                                            if (!(data92 === "zero_balance" || data92 === "priced_dust_within_policy" || data92 === "sell_not_supported_in_preview" || data92 === "above_dust_threshold" || data92 === "above_net_rent" || data92 === "frozen" || data92 === "collectible" || data92 === "lp_or_position_shaped" || data92 === "receipt_token_policy" || data92 === "dangerous_token_2022_extension" || data92 === "account_missing" || data92 === "unsupported_account" || data92 === "positive_wsol" || data92 === "unpriced" || data92 === "stale_price" || data92 === "completed_no_sell_route" || data92 === "unsupported_signer" || data92 === "non_positive_net" || data92 === "excess_above_rent_exempt_minimum")) {
+                                              validate25.errors = [{ instancePath: instancePath + "/classification/reasons/" + i5, schemaPath: "#/properties/classification/properties/reasons/items/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.reasons.items.enum }, message: "must be equal to one of the allowed values" }];
                                               return false;
                                             }
-                                            var valid53 = _errs137 === errors;
-                                            if (!valid53) {
+                                            var valid67 = _errs170 === errors;
+                                            if (!valid67) {
                                               break;
                                             }
                                           }
@@ -2550,31 +2931,31 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                           return false;
                                         }
                                       }
-                                      var valid52 = _errs135 === errors;
+                                      var valid66 = _errs168 === errors;
                                     } else {
-                                      var valid52 = true;
+                                      var valid66 = true;
                                     }
-                                    if (valid52) {
-                                      if (data65.protections !== void 0) {
-                                        let data71 = data65.protections;
-                                        const _errs139 = errors;
-                                        if (errors === _errs139) {
-                                          if (Array.isArray(data71)) {
-                                            var valid54 = true;
-                                            const len4 = data71.length;
-                                            for (let i4 = 0; i4 < len4; i4++) {
-                                              let data72 = data71[i4];
-                                              const _errs141 = errors;
-                                              if (typeof data72 !== "string") {
-                                                validate25.errors = [{ instancePath: instancePath + "/classification/protections/" + i4, schemaPath: "#/properties/classification/properties/protections/items/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
+                                    if (valid66) {
+                                      if (data87.protections !== void 0) {
+                                        let data93 = data87.protections;
+                                        const _errs172 = errors;
+                                        if (errors === _errs172) {
+                                          if (Array.isArray(data93)) {
+                                            var valid68 = true;
+                                            const len6 = data93.length;
+                                            for (let i6 = 0; i6 < len6; i6++) {
+                                              let data94 = data93[i6];
+                                              const _errs174 = errors;
+                                              if (typeof data94 !== "string") {
+                                                validate25.errors = [{ instancePath: instancePath + "/classification/protections/" + i6, schemaPath: "#/properties/classification/properties/protections/items/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                                 return false;
                                               }
-                                              if (!(data72 === "frozen" || data72 === "collectible" || data72 === "lp_position" || data72 === "receipt_token" || data72 === "token_2022_extension" || data72 === "unpriced" || data72 === "account_state")) {
-                                                validate25.errors = [{ instancePath: instancePath + "/classification/protections/" + i4, schemaPath: "#/properties/classification/properties/protections/items/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.protections.items.enum }, message: "must be equal to one of the allowed values" }];
+                                              if (!(data94 === "frozen" || data94 === "collectible" || data94 === "lp_position" || data94 === "receipt_token" || data94 === "token_2022_extension" || data94 === "unpriced" || data94 === "stale_price" || data94 === "account_state")) {
+                                                validate25.errors = [{ instancePath: instancePath + "/classification/protections/" + i6, schemaPath: "#/properties/classification/properties/protections/items/enum", keyword: "enum", params: { allowedValues: schema42.properties.classification.properties.protections.items.enum }, message: "must be equal to one of the allowed values" }];
                                                 return false;
                                               }
-                                              var valid54 = _errs141 === errors;
-                                              if (!valid54) {
+                                              var valid68 = _errs174 === errors;
+                                              if (!valid68) {
                                                 break;
                                               }
                                             }
@@ -2583,9 +2964,9 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                             return false;
                                           }
                                         }
-                                        var valid52 = _errs139 === errors;
+                                        var valid66 = _errs172 === errors;
                                       } else {
-                                        var valid52 = true;
+                                        var valid66 = true;
                                       }
                                     }
                                   }
@@ -2597,110 +2978,110 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                             return false;
                           }
                         }
-                        var valid44 = _errs127 === errors;
+                        var valid58 = _errs160 === errors;
                       } else {
-                        var valid44 = true;
+                        var valid58 = true;
                       }
-                      if (valid44) {
+                      if (valid58) {
                         if (data.market !== void 0) {
-                          let data73 = data.market;
-                          const _errs143 = errors;
-                          const _errs145 = errors;
-                          const _errs146 = errors;
-                          let valid56 = true;
-                          const _errs147 = errors;
-                          if (data73 && typeof data73 == "object" && !Array.isArray(data73)) {
-                            if (data73.quoteStatus !== void 0) {
-                              if ("unavailable" !== data73.quoteStatus) {
-                                const err23 = {};
+                          let data95 = data.market;
+                          const _errs176 = errors;
+                          const _errs178 = errors;
+                          const _errs179 = errors;
+                          let valid70 = true;
+                          const _errs180 = errors;
+                          if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
+                            if (data95.quoteStatus !== void 0) {
+                              if ("unavailable" !== data95.quoteStatus) {
+                                const err30 = {};
                                 if (vErrors === null) {
-                                  vErrors = [err23];
+                                  vErrors = [err30];
                                 } else {
-                                  vErrors.push(err23);
+                                  vErrors.push(err30);
                                 }
                                 errors++;
                               }
                             }
                           }
-                          var _valid7 = _errs147 === errors;
-                          errors = _errs146;
+                          var _valid9 = _errs180 === errors;
+                          errors = _errs179;
                           if (vErrors !== null) {
-                            if (_errs146) {
-                              vErrors.length = _errs146;
+                            if (_errs179) {
+                              vErrors.length = _errs179;
                             } else {
                               vErrors = null;
                             }
                           }
                           let ifClause1;
-                          if (_valid7) {
-                            const _errs149 = errors;
-                            if (data73 && typeof data73 == "object" && !Array.isArray(data73)) {
-                              if (data73.sellRouteAvailable !== void 0) {
-                                const _errs150 = errors;
-                                if (null !== data73.sellRouteAvailable) {
+                          if (_valid9) {
+                            const _errs182 = errors;
+                            if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
+                              if (data95.sellRouteAvailable !== void 0) {
+                                const _errs183 = errors;
+                                if (null !== data95.sellRouteAvailable) {
                                   validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/properties/market/allOf/0/then/properties/sellRouteAvailable/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[0].then.properties.sellRouteAvailable.const }, message: "must be equal to constant" }];
                                   return false;
                                 }
-                                var valid58 = _errs150 === errors;
+                                var valid72 = _errs183 === errors;
                               } else {
-                                var valid58 = true;
+                                var valid72 = true;
                               }
-                              if (valid58) {
-                                if (data73.executableQuoteUsd !== void 0) {
-                                  const _errs151 = errors;
-                                  if (null !== data73.executableQuoteUsd) {
+                              if (valid72) {
+                                if (data95.executableQuoteUsd !== void 0) {
+                                  const _errs184 = errors;
+                                  if (null !== data95.executableQuoteUsd) {
                                     validate25.errors = [{ instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/allOf/0/then/properties/executableQuoteUsd/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[0].then.properties.executableQuoteUsd.const }, message: "must be equal to constant" }];
                                     return false;
                                   }
-                                  var valid58 = _errs151 === errors;
+                                  var valid72 = _errs184 === errors;
                                 } else {
-                                  var valid58 = true;
+                                  var valid72 = true;
                                 }
-                                if (valid58) {
-                                  if (data73.quotedAt !== void 0) {
-                                    const _errs152 = errors;
-                                    if (null !== data73.quotedAt) {
+                                if (valid72) {
+                                  if (data95.quotedAt !== void 0) {
+                                    const _errs185 = errors;
+                                    if (null !== data95.quotedAt) {
                                       validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/allOf/0/then/properties/quotedAt/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[0].then.properties.quotedAt.const }, message: "must be equal to constant" }];
                                       return false;
                                     }
-                                    var valid58 = _errs152 === errors;
+                                    var valid72 = _errs185 === errors;
                                   } else {
-                                    var valid58 = true;
+                                    var valid72 = true;
                                   }
                                 }
                               }
                             }
-                            var _valid7 = _errs149 === errors;
-                            valid56 = _valid7;
-                            if (valid56) {
-                              var props7 = {};
-                              props7.sellRouteAvailable = true;
-                              props7.executableQuoteUsd = true;
-                              props7.quotedAt = true;
-                              props7.quoteStatus = true;
+                            var _valid9 = _errs182 === errors;
+                            valid70 = _valid9;
+                            if (valid70) {
+                              var props8 = {};
+                              props8.sellRouteAvailable = true;
+                              props8.executableQuoteUsd = true;
+                              props8.quotedAt = true;
+                              props8.quoteStatus = true;
                             }
                             ifClause1 = "then";
                           } else {
-                            const _errs153 = errors;
-                            if (data73 && typeof data73 == "object" && !Array.isArray(data73)) {
-                              if (data73.sellRouteAvailable !== void 0) {
-                                const _errs154 = errors;
-                                if (typeof data73.sellRouteAvailable !== "boolean") {
+                            const _errs186 = errors;
+                            if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
+                              if (data95.sellRouteAvailable !== void 0) {
+                                const _errs187 = errors;
+                                if (typeof data95.sellRouteAvailable !== "boolean") {
                                   validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/properties/market/allOf/0/else/properties/sellRouteAvailable/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" }];
                                   return false;
                                 }
-                                var valid59 = _errs154 === errors;
+                                var valid73 = _errs187 === errors;
                               } else {
-                                var valid59 = true;
+                                var valid73 = true;
                               }
-                              if (valid59) {
-                                if (data73.quotedAt !== void 0) {
-                                  let data79 = data73.quotedAt;
-                                  const _errs156 = errors;
-                                  if (errors === _errs156) {
-                                    if (errors === _errs156) {
-                                      if (typeof data79 === "string") {
-                                        if (!formats0.validate.test(data79)) {
+                              if (valid73) {
+                                if (data95.quotedAt !== void 0) {
+                                  let data101 = data95.quotedAt;
+                                  const _errs189 = errors;
+                                  if (errors === _errs189) {
+                                    if (errors === _errs189) {
+                                      if (typeof data101 === "string") {
+                                        if (!formats0.validate.test(data101)) {
                                           validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/allOf/0/else/properties/quotedAt/format", keyword: "format", params: { format: "date-time" }, message: 'must match format "date-time"' }];
                                           return false;
                                         }
@@ -2710,244 +3091,244 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                       }
                                     }
                                   }
-                                  var valid59 = _errs156 === errors;
+                                  var valid73 = _errs189 === errors;
                                 } else {
-                                  var valid59 = true;
+                                  var valid73 = true;
                                 }
                               }
                             }
-                            var _valid7 = _errs153 === errors;
-                            valid56 = _valid7;
-                            if (valid56) {
-                              if (props7 !== true) {
-                                props7 = props7 || {};
-                                props7.sellRouteAvailable = true;
-                                props7.quotedAt = true;
+                            var _valid9 = _errs186 === errors;
+                            valid70 = _valid9;
+                            if (valid70) {
+                              if (props8 !== true) {
+                                props8 = props8 || {};
+                                props8.sellRouteAvailable = true;
+                                props8.quotedAt = true;
                               }
                             }
                             ifClause1 = "else";
                           }
-                          if (!valid56) {
-                            const err24 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/0/if", keyword: "if", params: { failingKeyword: ifClause1 }, message: 'must match "' + ifClause1 + '" schema' };
+                          if (!valid70) {
+                            const err31 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/0/if", keyword: "if", params: { failingKeyword: ifClause1 }, message: 'must match "' + ifClause1 + '" schema' };
                             if (vErrors === null) {
-                              vErrors = [err24];
+                              vErrors = [err31];
                             } else {
-                              vErrors.push(err24);
+                              vErrors.push(err31);
                             }
                             errors++;
                             validate25.errors = vErrors;
                             return false;
                           }
-                          var valid55 = _errs145 === errors;
-                          if (valid55) {
-                            const _errs158 = errors;
-                            const _errs159 = errors;
-                            let valid60 = true;
-                            const _errs160 = errors;
-                            if (data73 && typeof data73 == "object" && !Array.isArray(data73)) {
-                              if (data73.sellRouteAvailable !== void 0) {
-                                if (false !== data73.sellRouteAvailable) {
-                                  const err25 = {};
+                          var valid69 = _errs178 === errors;
+                          if (valid69) {
+                            const _errs191 = errors;
+                            const _errs192 = errors;
+                            let valid74 = true;
+                            const _errs193 = errors;
+                            if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
+                              if (data95.sellRouteAvailable !== void 0) {
+                                if (false !== data95.sellRouteAvailable) {
+                                  const err32 = {};
                                   if (vErrors === null) {
-                                    vErrors = [err25];
+                                    vErrors = [err32];
                                   } else {
-                                    vErrors.push(err25);
+                                    vErrors.push(err32);
                                   }
                                   errors++;
                                 }
                               }
                             }
-                            var _valid8 = _errs160 === errors;
-                            errors = _errs159;
+                            var _valid10 = _errs193 === errors;
+                            errors = _errs192;
                             if (vErrors !== null) {
-                              if (_errs159) {
-                                vErrors.length = _errs159;
+                              if (_errs192) {
+                                vErrors.length = _errs192;
                               } else {
                                 vErrors = null;
                               }
                             }
-                            if (_valid8) {
-                              const _errs162 = errors;
-                              if (data73 && typeof data73 == "object" && !Array.isArray(data73)) {
-                                if (data73.executableQuoteUsd !== void 0) {
-                                  if (null !== data73.executableQuoteUsd) {
+                            if (_valid10) {
+                              const _errs195 = errors;
+                              if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
+                                if (data95.executableQuoteUsd !== void 0) {
+                                  if (null !== data95.executableQuoteUsd) {
                                     validate25.errors = [{ instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/allOf/1/then/properties/executableQuoteUsd/const", keyword: "const", params: { allowedValue: schema42.properties.market.allOf[1].then.properties.executableQuoteUsd.const }, message: "must be equal to constant" }];
                                     return false;
                                   }
                                 }
                               }
-                              var _valid8 = _errs162 === errors;
-                              valid60 = _valid8;
-                              if (valid60) {
-                                var props8 = {};
-                                props8.executableQuoteUsd = true;
-                                props8.sellRouteAvailable = true;
+                              var _valid10 = _errs195 === errors;
+                              valid74 = _valid10;
+                              if (valid74) {
+                                var props9 = {};
+                                props9.executableQuoteUsd = true;
+                                props9.sellRouteAvailable = true;
                               }
                             }
-                            if (!valid60) {
-                              const err26 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/1/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
+                            if (!valid74) {
+                              const err33 = { instancePath: instancePath + "/market", schemaPath: "#/properties/market/allOf/1/if", keyword: "if", params: { failingKeyword: "then" }, message: 'must match "then" schema' };
                               if (vErrors === null) {
-                                vErrors = [err26];
+                                vErrors = [err33];
                               } else {
-                                vErrors.push(err26);
+                                vErrors.push(err33);
                               }
                               errors++;
                               validate25.errors = vErrors;
                               return false;
                             }
-                            var valid55 = _errs158 === errors;
-                            if (valid55) {
-                              if (props7 !== true && props8 !== void 0) {
-                                if (props8 === true) {
-                                  props7 = true;
+                            var valid69 = _errs191 === errors;
+                            if (valid69) {
+                              if (props8 !== true && props9 !== void 0) {
+                                if (props9 === true) {
+                                  props8 = true;
                                 } else {
-                                  props7 = props7 || {};
-                                  Object.assign(props7, props8);
+                                  props8 = props8 || {};
+                                  Object.assign(props8, props9);
                                 }
                               }
                             }
                           }
-                          if (errors === _errs143) {
-                            if (data73 && typeof data73 == "object" && !Array.isArray(data73)) {
-                              let missing14;
-                              if (data73.quoteStatus === void 0 && (missing14 = "quoteStatus") || data73.sellRouteAvailable === void 0 && (missing14 = "sellRouteAvailable") || data73.executableQuoteUsd === void 0 && (missing14 = "executableQuoteUsd") || data73.quotedAt === void 0 && (missing14 = "quotedAt")) {
-                                validate25.errors = [{ instancePath: instancePath + "/market", schemaPath: "#/properties/market/required", keyword: "required", params: { missingProperty: missing14 }, message: "must have required property '" + missing14 + "'" }];
+                          if (errors === _errs176) {
+                            if (data95 && typeof data95 == "object" && !Array.isArray(data95)) {
+                              let missing15;
+                              if (data95.quoteStatus === void 0 && (missing15 = "quoteStatus") || data95.sellRouteAvailable === void 0 && (missing15 = "sellRouteAvailable") || data95.executableQuoteUsd === void 0 && (missing15 = "executableQuoteUsd") || data95.quotedAt === void 0 && (missing15 = "quotedAt")) {
+                                validate25.errors = [{ instancePath: instancePath + "/market", schemaPath: "#/properties/market/required", keyword: "required", params: { missingProperty: missing15 }, message: "must have required property '" + missing15 + "'" }];
                                 return false;
                               } else {
-                                if (props7 !== true) {
-                                  props7 = props7 || {};
-                                  props7.quoteStatus = true;
-                                  props7.sellRouteAvailable = true;
-                                  props7.executableQuoteUsd = true;
-                                  props7.quotedAt = true;
+                                if (props8 !== true) {
+                                  props8 = props8 || {};
+                                  props8.quoteStatus = true;
+                                  props8.sellRouteAvailable = true;
+                                  props8.executableQuoteUsd = true;
+                                  props8.quotedAt = true;
                                 }
-                                if (data73.quoteStatus !== void 0) {
-                                  let data82 = data73.quoteStatus;
-                                  const _errs164 = errors;
-                                  if (typeof data82 !== "string") {
+                                if (data95.quoteStatus !== void 0) {
+                                  let data104 = data95.quoteStatus;
+                                  const _errs197 = errors;
+                                  if (typeof data104 !== "string") {
                                     validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/properties/market/properties/quoteStatus/type", keyword: "type", params: { type: "string" }, message: "must be string" }];
                                     return false;
                                   }
-                                  if (!(data82 === "complete" || data82 === "unavailable")) {
+                                  if (!(data104 === "complete" || data104 === "unavailable")) {
                                     validate25.errors = [{ instancePath: instancePath + "/market/quoteStatus", schemaPath: "#/properties/market/properties/quoteStatus/enum", keyword: "enum", params: { allowedValues: schema42.properties.market.properties.quoteStatus.enum }, message: "must be equal to one of the allowed values" }];
                                     return false;
                                   }
-                                  var valid63 = _errs164 === errors;
+                                  var valid77 = _errs197 === errors;
                                 } else {
-                                  var valid63 = true;
+                                  var valid77 = true;
                                 }
-                                if (valid63) {
-                                  if (data73.sellRouteAvailable !== void 0) {
-                                    let data83 = data73.sellRouteAvailable;
-                                    const _errs166 = errors;
-                                    if (typeof data83 !== "boolean" && data83 !== null) {
+                                if (valid77) {
+                                  if (data95.sellRouteAvailable !== void 0) {
+                                    let data105 = data95.sellRouteAvailable;
+                                    const _errs199 = errors;
+                                    if (typeof data105 !== "boolean" && data105 !== null) {
                                       validate25.errors = [{ instancePath: instancePath + "/market/sellRouteAvailable", schemaPath: "#/properties/market/properties/sellRouteAvailable/type", keyword: "type", params: { type: schema42.properties.market.properties.sellRouteAvailable.type }, message: "must be boolean,null" }];
                                       return false;
                                     }
-                                    var valid63 = _errs166 === errors;
+                                    var valid77 = _errs199 === errors;
                                   } else {
-                                    var valid63 = true;
+                                    var valid77 = true;
                                   }
-                                  if (valid63) {
-                                    if (data73.executableQuoteUsd !== void 0) {
-                                      let data84 = data73.executableQuoteUsd;
-                                      const _errs168 = errors;
-                                      const _errs169 = errors;
-                                      let valid64 = false;
+                                  if (valid77) {
+                                    if (data95.executableQuoteUsd !== void 0) {
+                                      let data106 = data95.executableQuoteUsd;
+                                      const _errs201 = errors;
+                                      const _errs202 = errors;
+                                      let valid78 = false;
                                       let passing0 = null;
-                                      const _errs170 = errors;
-                                      if (data84 !== null) {
-                                        const err27 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf/0/type", keyword: "type", params: { type: "null" }, message: "must be null" };
+                                      const _errs203 = errors;
+                                      if (data106 !== null) {
+                                        const err34 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf/0/type", keyword: "type", params: { type: "null" }, message: "must be null" };
                                         if (vErrors === null) {
-                                          vErrors = [err27];
+                                          vErrors = [err34];
                                         } else {
-                                          vErrors.push(err27);
+                                          vErrors.push(err34);
                                         }
                                         errors++;
                                       }
-                                      var _valid9 = _errs170 === errors;
-                                      if (_valid9) {
-                                        valid64 = true;
+                                      var _valid11 = _errs203 === errors;
+                                      if (_valid11) {
+                                        valid78 = true;
                                         passing0 = 0;
                                       }
-                                      const _errs172 = errors;
-                                      const _errs173 = errors;
-                                      if (errors === _errs173) {
-                                        if (typeof data84 === "string") {
-                                          if (!pattern17.test(data84)) {
-                                            const err28 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' };
+                                      const _errs205 = errors;
+                                      const _errs206 = errors;
+                                      if (errors === _errs206) {
+                                        if (typeof data106 === "string") {
+                                          if (!pattern17.test(data106)) {
+                                            const err35 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/pattern", keyword: "pattern", params: { pattern: "^[0-9]+\\.[0-9]{6}$" }, message: 'must match pattern "^[0-9]+\\.[0-9]{6}$"' };
                                             if (vErrors === null) {
-                                              vErrors = [err28];
+                                              vErrors = [err35];
                                             } else {
-                                              vErrors.push(err28);
+                                              vErrors.push(err35);
                                             }
                                             errors++;
                                           }
                                         } else {
-                                          const err29 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                          const err36 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/components/schemas/DecimalUsd/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                           if (vErrors === null) {
-                                            vErrors = [err29];
+                                            vErrors = [err36];
                                           } else {
-                                            vErrors.push(err29);
+                                            vErrors.push(err36);
                                           }
                                           errors++;
                                         }
                                       }
-                                      var _valid9 = _errs172 === errors;
-                                      if (_valid9 && valid64) {
-                                        valid64 = false;
+                                      var _valid11 = _errs205 === errors;
+                                      if (_valid11 && valid78) {
+                                        valid78 = false;
                                         passing0 = [passing0, 1];
                                       } else {
-                                        if (_valid9) {
-                                          valid64 = true;
+                                        if (_valid11) {
+                                          valid78 = true;
                                           passing0 = 1;
                                         }
                                       }
-                                      if (!valid64) {
-                                        const err30 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf", keyword: "oneOf", params: { passingSchemas: passing0 }, message: "must match exactly one schema in oneOf" };
+                                      if (!valid78) {
+                                        const err37 = { instancePath: instancePath + "/market/executableQuoteUsd", schemaPath: "#/properties/market/properties/executableQuoteUsd/oneOf", keyword: "oneOf", params: { passingSchemas: passing0 }, message: "must match exactly one schema in oneOf" };
                                         if (vErrors === null) {
-                                          vErrors = [err30];
+                                          vErrors = [err37];
                                         } else {
-                                          vErrors.push(err30);
+                                          vErrors.push(err37);
                                         }
                                         errors++;
                                         validate25.errors = vErrors;
                                         return false;
                                       } else {
-                                        errors = _errs169;
+                                        errors = _errs202;
                                         if (vErrors !== null) {
-                                          if (_errs169) {
-                                            vErrors.length = _errs169;
+                                          if (_errs202) {
+                                            vErrors.length = _errs202;
                                           } else {
                                             vErrors = null;
                                           }
                                         }
                                       }
-                                      var valid63 = _errs168 === errors;
+                                      var valid77 = _errs201 === errors;
                                     } else {
-                                      var valid63 = true;
+                                      var valid77 = true;
                                     }
-                                    if (valid63) {
-                                      if (data73.quotedAt !== void 0) {
-                                        let data85 = data73.quotedAt;
-                                        const _errs175 = errors;
-                                        if (typeof data85 !== "string" && data85 !== null) {
+                                    if (valid77) {
+                                      if (data95.quotedAt !== void 0) {
+                                        let data107 = data95.quotedAt;
+                                        const _errs208 = errors;
+                                        if (typeof data107 !== "string" && data107 !== null) {
                                           validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/properties/quotedAt/type", keyword: "type", params: { type: schema42.properties.market.properties.quotedAt.type }, message: "must be string,null" }];
                                           return false;
                                         }
-                                        if (errors === _errs175) {
-                                          if (errors === _errs175) {
-                                            if (typeof data85 === "string") {
-                                              if (!formats0.validate.test(data85)) {
+                                        if (errors === _errs208) {
+                                          if (errors === _errs208) {
+                                            if (typeof data107 === "string") {
+                                              if (!formats0.validate.test(data107)) {
                                                 validate25.errors = [{ instancePath: instancePath + "/market/quotedAt", schemaPath: "#/properties/market/properties/quotedAt/format", keyword: "format", params: { format: "date-time" }, message: 'must match format "date-time"' }];
                                                 return false;
                                               }
                                             }
                                           }
                                         }
-                                        var valid63 = _errs175 === errors;
+                                        var valid77 = _errs208 === errors;
                                       } else {
-                                        var valid63 = true;
+                                        var valid77 = true;
                                       }
                                     }
                                   }
@@ -2958,206 +3339,206 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                               return false;
                             }
                           }
-                          var valid44 = _errs143 === errors;
+                          var valid58 = _errs176 === errors;
                         } else {
-                          var valid44 = true;
+                          var valid58 = true;
                         }
-                        if (valid44) {
+                        if (valid58) {
                           if (data.opportunity !== void 0) {
-                            let data86 = data.opportunity;
-                            const _errs177 = errors;
-                            const _errs178 = errors;
-                            let valid66 = false;
+                            let data108 = data.opportunity;
+                            const _errs210 = errors;
+                            const _errs211 = errors;
+                            let valid80 = false;
                             let passing1 = null;
-                            const _errs179 = errors;
-                            if (!validate26(data86, { instancePath: instancePath + "/opportunity", parentData: data, parentDataProperty: "opportunity", rootData, dynamicAnchors })) {
+                            const _errs212 = errors;
+                            if (!validate26(data108, { instancePath: instancePath + "/opportunity", parentData: data, parentDataProperty: "opportunity", rootData, dynamicAnchors })) {
                               vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
                               errors = vErrors.length;
                             }
-                            var _valid10 = _errs179 === errors;
-                            if (_valid10) {
-                              valid66 = true;
+                            var _valid12 = _errs212 === errors;
+                            if (_valid12) {
+                              valid80 = true;
                               passing1 = 0;
-                              var props9 = {};
-                              props9.action = true;
-                              props9.destructive = true;
-                              props9.executionSupported = true;
-                              props9.consent = true;
-                              props9.reviewedBalanceBaseUnits = true;
-                              props9.valueComponents = true;
-                              props9.costs = true;
-                              props9.estimatedNetValueUsd = true;
-                              props9.estimated = true;
+                              var props10 = {};
+                              props10.action = true;
+                              props10.destructive = true;
+                              props10.executionSupported = true;
+                              props10.consent = true;
+                              props10.reviewedBalanceBaseUnits = true;
+                              props10.valueComponents = true;
+                              props10.costs = true;
+                              props10.estimatedNetValueUsd = true;
+                              props10.estimated = true;
                             }
-                            const _errs180 = errors;
-                            if (!validate39(data86, { instancePath: instancePath + "/opportunity", parentData: data, parentDataProperty: "opportunity", rootData, dynamicAnchors })) {
+                            const _errs213 = errors;
+                            if (!validate39(data108, { instancePath: instancePath + "/opportunity", parentData: data, parentDataProperty: "opportunity", rootData, dynamicAnchors })) {
                               vErrors = vErrors === null ? validate39.errors : vErrors.concat(validate39.errors);
                               errors = vErrors.length;
                             }
-                            var _valid10 = _errs180 === errors;
-                            if (_valid10 && valid66) {
-                              valid66 = false;
+                            var _valid12 = _errs213 === errors;
+                            if (_valid12 && valid80) {
+                              valid80 = false;
                               passing1 = [passing1, 1];
                             } else {
-                              if (_valid10) {
-                                valid66 = true;
+                              if (_valid12) {
+                                valid80 = true;
                                 passing1 = 1;
-                                if (props9 !== true) {
-                                  props9 = props9 || {};
-                                  props9.action = true;
-                                  props9.destructive = true;
-                                  props9.executionSupported = true;
-                                  props9.valueComponents = true;
-                                  props9.costs = true;
-                                  props9.estimatedNetValueUsd = true;
-                                  props9.estimated = true;
+                                if (props10 !== true) {
+                                  props10 = props10 || {};
+                                  props10.action = true;
+                                  props10.destructive = true;
+                                  props10.executionSupported = true;
+                                  props10.valueComponents = true;
+                                  props10.costs = true;
+                                  props10.estimatedNetValueUsd = true;
+                                  props10.estimated = true;
                                 }
                               }
-                              const _errs181 = errors;
-                              const _errs182 = errors;
-                              if (errors === _errs182) {
-                                if (data86 && typeof data86 == "object" && !Array.isArray(data86)) {
-                                  let missing15;
-                                  if (data86.action === void 0 && (missing15 = "action") || data86.destructive === void 0 && (missing15 = "destructive") || data86.executionSupported === void 0 && (missing15 = "executionSupported") || data86.valueComponents === void 0 && (missing15 = "valueComponents") || data86.estimated === void 0 && (missing15 = "estimated")) {
-                                    const err31 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/required", keyword: "required", params: { missingProperty: missing15 }, message: "must have required property '" + missing15 + "'" };
+                              const _errs214 = errors;
+                              const _errs215 = errors;
+                              if (errors === _errs215) {
+                                if (data108 && typeof data108 == "object" && !Array.isArray(data108)) {
+                                  let missing16;
+                                  if (data108.action === void 0 && (missing16 = "action") || data108.destructive === void 0 && (missing16 = "destructive") || data108.executionSupported === void 0 && (missing16 = "executionSupported") || data108.valueComponents === void 0 && (missing16 = "valueComponents") || data108.estimated === void 0 && (missing16 = "estimated")) {
+                                    const err38 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/required", keyword: "required", params: { missingProperty: missing16 }, message: "must have required property '" + missing16 + "'" };
                                     if (vErrors === null) {
-                                      vErrors = [err31];
+                                      vErrors = [err38];
                                     } else {
-                                      vErrors.push(err31);
+                                      vErrors.push(err38);
                                     }
                                     errors++;
                                   } else {
-                                    if (data86.action !== void 0) {
-                                      let data87 = data86.action;
-                                      const _errs184 = errors;
-                                      if (typeof data87 !== "string") {
-                                        const err32 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    if (data108.action !== void 0) {
+                                      let data109 = data108.action;
+                                      const _errs217 = errors;
+                                      if (typeof data109 !== "string") {
+                                        const err39 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                         if (vErrors === null) {
-                                          vErrors = [err32];
+                                          vErrors = [err39];
                                         } else {
-                                          vErrors.push(err32);
+                                          vErrors.push(err39);
                                         }
                                         errors++;
                                       }
-                                      if (!(data87 === "none")) {
-                                        const err33 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/enum", keyword: "enum", params: { allowedValues: schema57.properties.action.enum }, message: "must be equal to one of the allowed values" };
+                                      if (!(data109 === "none")) {
+                                        const err40 = { instancePath: instancePath + "/opportunity/action", schemaPath: "#/components/schemas/NoActionOpportunity/properties/action/enum", keyword: "enum", params: { allowedValues: schema57.properties.action.enum }, message: "must be equal to one of the allowed values" };
                                         if (vErrors === null) {
-                                          vErrors = [err33];
+                                          vErrors = [err40];
                                         } else {
-                                          vErrors.push(err33);
+                                          vErrors.push(err40);
                                         }
                                         errors++;
                                       }
-                                      var valid68 = _errs184 === errors;
+                                      var valid82 = _errs217 === errors;
                                     } else {
-                                      var valid68 = true;
+                                      var valid82 = true;
                                     }
-                                    if (valid68) {
-                                      if (data86.destructive !== void 0) {
-                                        let data88 = data86.destructive;
-                                        const _errs186 = errors;
-                                        if (typeof data88 !== "boolean") {
-                                          const err34 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                    if (valid82) {
+                                      if (data108.destructive !== void 0) {
+                                        let data110 = data108.destructive;
+                                        const _errs219 = errors;
+                                        if (typeof data110 !== "boolean") {
+                                          const err41 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
                                           if (vErrors === null) {
-                                            vErrors = [err34];
+                                            vErrors = [err41];
                                           } else {
-                                            vErrors.push(err34);
+                                            vErrors.push(err41);
                                           }
                                           errors++;
                                         }
-                                        if (!(data88 === false)) {
-                                          const err35 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/enum", keyword: "enum", params: { allowedValues: schema57.properties.destructive.enum }, message: "must be equal to one of the allowed values" };
+                                        if (!(data110 === false)) {
+                                          const err42 = { instancePath: instancePath + "/opportunity/destructive", schemaPath: "#/components/schemas/NoActionOpportunity/properties/destructive/enum", keyword: "enum", params: { allowedValues: schema57.properties.destructive.enum }, message: "must be equal to one of the allowed values" };
                                           if (vErrors === null) {
-                                            vErrors = [err35];
+                                            vErrors = [err42];
                                           } else {
-                                            vErrors.push(err35);
+                                            vErrors.push(err42);
                                           }
                                           errors++;
                                         }
-                                        var valid68 = _errs186 === errors;
+                                        var valid82 = _errs219 === errors;
                                       } else {
-                                        var valid68 = true;
+                                        var valid82 = true;
                                       }
-                                      if (valid68) {
-                                        if (data86.executionSupported !== void 0) {
-                                          let data89 = data86.executionSupported;
-                                          const _errs188 = errors;
-                                          if (typeof data89 !== "boolean") {
-                                            const err36 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                      if (valid82) {
+                                        if (data108.executionSupported !== void 0) {
+                                          let data111 = data108.executionSupported;
+                                          const _errs221 = errors;
+                                          if (typeof data111 !== "boolean") {
+                                            const err43 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
                                             if (vErrors === null) {
-                                              vErrors = [err36];
+                                              vErrors = [err43];
                                             } else {
-                                              vErrors.push(err36);
+                                              vErrors.push(err43);
                                             }
                                             errors++;
                                           }
-                                          if (!(data89 === false)) {
-                                            const err37 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/enum", keyword: "enum", params: { allowedValues: schema57.properties.executionSupported.enum }, message: "must be equal to one of the allowed values" };
+                                          if (!(data111 === false)) {
+                                            const err44 = { instancePath: instancePath + "/opportunity/executionSupported", schemaPath: "#/components/schemas/NoActionOpportunity/properties/executionSupported/enum", keyword: "enum", params: { allowedValues: schema57.properties.executionSupported.enum }, message: "must be equal to one of the allowed values" };
                                             if (vErrors === null) {
-                                              vErrors = [err37];
+                                              vErrors = [err44];
                                             } else {
-                                              vErrors.push(err37);
+                                              vErrors.push(err44);
                                             }
                                             errors++;
                                           }
-                                          var valid68 = _errs188 === errors;
+                                          var valid82 = _errs221 === errors;
                                         } else {
-                                          var valid68 = true;
+                                          var valid82 = true;
                                         }
-                                        if (valid68) {
-                                          if (data86.valueComponents !== void 0) {
-                                            let data90 = data86.valueComponents;
-                                            const _errs190 = errors;
-                                            if (errors === _errs190) {
-                                              if (Array.isArray(data90)) {
-                                                if (data90.length > 0) {
-                                                  const err38 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/maxItems", keyword: "maxItems", params: { limit: 0 }, message: "must NOT have more than 0 items" };
+                                        if (valid82) {
+                                          if (data108.valueComponents !== void 0) {
+                                            let data112 = data108.valueComponents;
+                                            const _errs223 = errors;
+                                            if (errors === _errs223) {
+                                              if (Array.isArray(data112)) {
+                                                if (data112.length > 0) {
+                                                  const err45 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/maxItems", keyword: "maxItems", params: { limit: 0 }, message: "must NOT have more than 0 items" };
                                                   if (vErrors === null) {
-                                                    vErrors = [err38];
+                                                    vErrors = [err45];
                                                   } else {
-                                                    vErrors.push(err38);
+                                                    vErrors.push(err45);
                                                   }
                                                   errors++;
                                                 }
                                               } else {
-                                                const err39 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+                                                const err46 = { instancePath: instancePath + "/opportunity/valueComponents", schemaPath: "#/components/schemas/NoActionOpportunity/properties/valueComponents/type", keyword: "type", params: { type: "array" }, message: "must be array" };
                                                 if (vErrors === null) {
-                                                  vErrors = [err39];
+                                                  vErrors = [err46];
                                                 } else {
-                                                  vErrors.push(err39);
+                                                  vErrors.push(err46);
                                                 }
                                                 errors++;
                                               }
                                             }
-                                            var valid68 = _errs190 === errors;
+                                            var valid82 = _errs223 === errors;
                                           } else {
-                                            var valid68 = true;
+                                            var valid82 = true;
                                           }
-                                          if (valid68) {
-                                            if (data86.estimated !== void 0) {
-                                              let data91 = data86.estimated;
-                                              const _errs192 = errors;
-                                              if (typeof data91 !== "boolean") {
-                                                const err40 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                          if (valid82) {
+                                            if (data108.estimated !== void 0) {
+                                              let data113 = data108.estimated;
+                                              const _errs225 = errors;
+                                              if (typeof data113 !== "boolean") {
+                                                const err47 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
                                                 if (vErrors === null) {
-                                                  vErrors = [err40];
+                                                  vErrors = [err47];
                                                 } else {
-                                                  vErrors.push(err40);
+                                                  vErrors.push(err47);
                                                 }
                                                 errors++;
                                               }
-                                              if (!(data91 === true)) {
-                                                const err41 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/enum", keyword: "enum", params: { allowedValues: schema57.properties.estimated.enum }, message: "must be equal to one of the allowed values" };
+                                              if (!(data113 === true)) {
+                                                const err48 = { instancePath: instancePath + "/opportunity/estimated", schemaPath: "#/components/schemas/NoActionOpportunity/properties/estimated/enum", keyword: "enum", params: { allowedValues: schema57.properties.estimated.enum }, message: "must be equal to one of the allowed values" };
                                                 if (vErrors === null) {
-                                                  vErrors = [err41];
+                                                  vErrors = [err48];
                                                 } else {
-                                                  vErrors.push(err41);
+                                                  vErrors.push(err48);
                                                 }
                                                 errors++;
                                               }
-                                              var valid68 = _errs192 === errors;
+                                              var valid82 = _errs225 === errors;
                                             } else {
-                                              var valid68 = true;
+                                              var valid82 = true;
                                             }
                                           }
                                         }
@@ -3165,57 +3546,57 @@ function validate25(data, { instancePath = "", parentData, parentDataProperty, r
                                     }
                                   }
                                 } else {
-                                  const err42 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                                  const err49 = { instancePath: instancePath + "/opportunity", schemaPath: "#/components/schemas/NoActionOpportunity/type", keyword: "type", params: { type: "object" }, message: "must be object" };
                                   if (vErrors === null) {
-                                    vErrors = [err42];
+                                    vErrors = [err49];
                                   } else {
-                                    vErrors.push(err42);
+                                    vErrors.push(err49);
                                   }
                                   errors++;
                                 }
                               }
-                              var _valid10 = _errs181 === errors;
-                              if (_valid10 && valid66) {
-                                valid66 = false;
+                              var _valid12 = _errs214 === errors;
+                              if (_valid12 && valid80) {
+                                valid80 = false;
                                 passing1 = [passing1, 2];
                               } else {
-                                if (_valid10) {
-                                  valid66 = true;
+                                if (_valid12) {
+                                  valid80 = true;
                                   passing1 = 2;
-                                  if (props9 !== true) {
-                                    props9 = props9 || {};
-                                    props9.action = true;
-                                    props9.destructive = true;
-                                    props9.executionSupported = true;
-                                    props9.valueComponents = true;
-                                    props9.estimated = true;
+                                  if (props10 !== true) {
+                                    props10 = props10 || {};
+                                    props10.action = true;
+                                    props10.destructive = true;
+                                    props10.executionSupported = true;
+                                    props10.valueComponents = true;
+                                    props10.estimated = true;
                                   }
                                 }
                               }
                             }
-                            if (!valid66) {
-                              const err43 = { instancePath: instancePath + "/opportunity", schemaPath: "#/properties/opportunity/oneOf", keyword: "oneOf", params: { passingSchemas: passing1 }, message: "must match exactly one schema in oneOf" };
+                            if (!valid80) {
+                              const err50 = { instancePath: instancePath + "/opportunity", schemaPath: "#/properties/opportunity/oneOf", keyword: "oneOf", params: { passingSchemas: passing1 }, message: "must match exactly one schema in oneOf" };
                               if (vErrors === null) {
-                                vErrors = [err43];
+                                vErrors = [err50];
                               } else {
-                                vErrors.push(err43);
+                                vErrors.push(err50);
                               }
                               errors++;
                               validate25.errors = vErrors;
                               return false;
                             } else {
-                              errors = _errs178;
+                              errors = _errs211;
                               if (vErrors !== null) {
-                                if (_errs178) {
-                                  vErrors.length = _errs178;
+                                if (_errs211) {
+                                  vErrors.length = _errs211;
                                 } else {
                                   vErrors = null;
                                 }
                               }
                             }
-                            var valid44 = _errs177 === errors;
+                            var valid58 = _errs210 === errors;
                           } else {
-                            var valid44 = true;
+                            var valid58 = true;
                           }
                         }
                       }
@@ -4769,7 +5150,7 @@ function validate52(data, { instancePath = "", parentData, parentDataProperty, r
               const _errs5 = errors;
               if (errors === _errs5) {
                 if (typeof data2 === "string") {
-                  if (func2(data2) < 1) {
+                  if (func4(data2) < 1) {
                     validate52.errors = [{ instancePath: instancePath + "/consent", schemaPath: "#/properties/consent/minLength", keyword: "minLength", params: { limit: 1 }, message: "must NOT have fewer than 1 characters" }];
                     return false;
                   }

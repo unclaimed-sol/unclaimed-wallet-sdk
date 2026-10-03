@@ -1,4 +1,4 @@
-// Generated from openapi/analysis.yaml (SHA-256 98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256). Do not edit.
+// Generated from openapi/analysis.yaml (SHA-256 e6e29b0aed687f3770f1f5501d9f49bcd50c83ff820501dca567492d0c742f04). Do not edit.
 export interface paths {
     "/check-wallet": {
         parameters: {
@@ -215,8 +215,8 @@ export interface components {
                 /** @enum {string} */
                 confidence: "known" | "high" | "low";
                 reviewRequired: boolean;
-                reasons: ("zero_balance" | "priced_dust_within_policy" | "sell_not_supported_in_preview" | "above_dust_threshold" | "above_net_rent" | "frozen" | "collectible" | "lp_or_position_shaped" | "receipt_token_policy" | "dangerous_token_2022_extension" | "account_missing" | "unsupported_account" | "positive_wsol" | "unpriced" | "completed_no_sell_route" | "unsupported_signer" | "non_positive_net" | "excess_above_rent_exempt_minimum")[];
-                protections: ("frozen" | "collectible" | "lp_position" | "receipt_token" | "token_2022_extension" | "unpriced" | "account_state")[];
+                reasons: ("zero_balance" | "priced_dust_within_policy" | "sell_not_supported_in_preview" | "above_dust_threshold" | "above_net_rent" | "frozen" | "collectible" | "lp_or_position_shaped" | "receipt_token_policy" | "dangerous_token_2022_extension" | "account_missing" | "unsupported_account" | "positive_wsol" | "unpriced" | "stale_price" | "completed_no_sell_route" | "unsupported_signer" | "non_positive_net" | "excess_above_rent_exempt_minimum")[];
+                protections: ("frozen" | "collectible" | "lp_position" | "receipt_token" | "token_2022_extension" | "unpriced" | "stale_price" | "account_state")[];
             };
             /** @description Present on fungible token-account items. */
             market?: {
@@ -229,7 +229,7 @@ export interface components {
                 quotedAt: string | null;
             } & (unknown & unknown);
             opportunity: components["schemas"]["BurnAndCloseOpportunity"] | components["schemas"]["RecoverExcessLamportsOpportunity"] | components["schemas"]["NoActionOpportunity"];
-        } & (unknown & unknown & unknown & unknown & unknown & unknown & unknown);
+        } & (unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown);
         /** @description USD with six decimals, as a string. */
         DecimalUsd: string;
         /**

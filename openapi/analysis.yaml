@@ -711,6 +711,7 @@ components:
                   - unsupported_account
                   - positive_wsol
                   - unpriced
+                  - stale_price
                   - completed_no_sell_route
                   - unsupported_signer
                   - non_positive_net
@@ -726,6 +727,7 @@ components:
                   - receipt_token
                   - token_2022_extension
                   - unpriced
+                  - stale_price
                   - account_state
         market:
           type: object
@@ -964,6 +966,61 @@ components:
             not:
               required:
                 - market
+        - if:
+            anyOf:
+              - properties:
+                  classification:
+                    properties:
+                      reasons:
+                        contains:
+                          const: stale_price
+              - properties:
+                  classification:
+                    properties:
+                      protections:
+                        contains:
+                          const: stale_price
+          then:
+            required:
+              - account
+              - asset
+              - market
+            properties:
+              kind:
+                const: token_account
+              account:
+                properties:
+                  balanceBaseUnits:
+                    not:
+                      const: "0"
+              classification:
+                properties:
+                  disposition:
+                    const: protected
+                  confidence:
+                    const: low
+                  reviewRequired:
+                    const: true
+                  reasons:
+                    const:
+                      - stale_price
+                  protections:
+                    const:
+                      - stale_price
+              market:
+                properties:
+                  quoteStatus:
+                    const: unavailable
+                  sellRouteAvailable:
+                    const: null
+                  executableQuoteUsd:
+                    const: null
+                  quotedAt:
+                    const: null
+              opportunity:
+                properties:
+                  action:
+                    const: none
     DecimalUsd:
       type: string
       pattern: ^[0-9]+\.[0-9]{6}$

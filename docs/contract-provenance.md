@@ -1,7 +1,7 @@
 # Mounted contract provenance
 
 Current local execution schema SHA-256:
-`98c9f6dd1fb44b69c67996c3c0eaf0f06b1191abb70513c7c6f6132676873256`.
+`e6e29b0aed687f3770f1f5501d9f49bcd50c83ff820501dca567492d0c742f04`.
 It includes opt-in check-wallet sessions, build and execution recording.
 The platform revision is recorded in the private authoritative handoff.
 
@@ -76,3 +76,12 @@ The current mounted schema copy adds optional canonical v2 consent, immutable
 receipt attribution and separate recovery/partner-credit completion. Historical
 ordinary receipt responses remain valid. The candidate is unpublished; source
 readiness does not establish API deployment or execution activation.
+
+## October 3 stale-reference correction (unreleased)
+
+The mounted contract adds the `stale_price` reason and protection. Its conditional
+requires a protected positive account, no executable opportunity and unavailable
+market evidence with null quote value/time/availability. Both generated outputs
+and the schema digest above are synchronized. The published preview.4 package
+is unchanged; this candidate needs a separately authorized new package release
+and integration upgrade before the engine starts emitting the new state.
